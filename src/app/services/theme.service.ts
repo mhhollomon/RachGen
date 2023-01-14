@@ -4,7 +4,8 @@ import { DOCUMENT } from '@angular/common';
 
 export type ThemeType = 'dark' | 'light';
 
-const ls_key = 'theme';
+const ls_key = 'rg.theme';
+const old_key = 'theme';
 
 @Injectable({
   providedIn: 'root'
@@ -19,8 +20,11 @@ export class ThemeService {
 
     console.log('localStorage = ', savedValue);
     if (savedValue) {
-      if ( savedValue === 'dark') {
-        this.setTheme('dark');
+        this.setTheme(savedValue as ThemeType);
+    } else {
+      const old_value = localStorage.getItem(old_key);
+      if (old_value) {
+        this.setTheme(old_value as ThemeType);
       }
     }
   }

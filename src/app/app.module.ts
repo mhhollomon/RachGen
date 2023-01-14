@@ -9,7 +9,7 @@ import { RandomChordsComponent } from './random-chords/random-chords.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 import { HelpDialogComponent } from './help-dialog/help-dialog.component';
 
-import { HelpTextEmitterService } from './help-text-emitter.service';
+import { HelpTextEmitterService } from './services/help-text-emitter.service';
 import { ErrorDialogComponent } from './error-dialog/error-dialog.component'
 import { ThemeService } from './services/theme.service';
 @NgModule({

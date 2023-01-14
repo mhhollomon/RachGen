@@ -5,7 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { saveAs } from 'file-saver';
 import  * as Midiwriter  from 'midi-writer-js'
 
-import { HelpTextEmitterService } from '../help-text-emitter.service';
+import { HelpTextEmitterService } from '../services/help-text-emitter.service';
 import {ScaleService } from '../scale.service';
 import { RandomChordService, DuplicateControl } from '../random-chord.service';
 import { Chord, ChordType, ExtensionType, InversionType } from '../utils/music-theory/music-theory';
