@@ -1,7 +1,23 @@
-.chord-container {
+
+%chord-container-styles  {
     display : grid;
-    grid-template-columns: [lockbutton] 3rem [playbutton] 2rem [chordname] minmax(5rem, 15rem) [tones] minmax(8rem, 1fr) [info] 5rem;
+    grid-template-columns: [lockbutton] 3rem [playbutton] 2rem [chordname] minmax(5rem, 15rem) [tones] minmax(8rem, 1fr);
     column-gap: 0.5rem;
+    border-bottom : 1px #888888 solid;
+}
+
+.chord-container {
+    @extend %chord-container-styles;
+}
+
+:host-context(.darkMode) .chord-container.playing {
+    @extend %chord-container-styles;
+    background-color : #212121;
+}
+
+.chord-container.playing {
+    @extend %chord-container-styles;
+    background-color : #d1d1d1;
 }
 
 .chord-lock {
@@ -18,12 +34,6 @@
 .chord-name {
     grid-column-start: chordname;
     align-self: center;
-}
-
-.chord-info {
-    grid-column-start:  info;
-    align-self: center;
-    justify-self: start;
 }
 
 .chord-tones {

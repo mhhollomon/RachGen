@@ -5,14 +5,6 @@ import { HelpDialogComponent } from './help-dialog/help-dialog.component';
 import { HelpTextEmitterService } from './services/help-text-emitter.service';
 import { ThemeService } from './services/theme.service';
 
-
-interface nav_link_data {
-    label : string,
-    link  : string,
-    tooltip : string
-}
-
-
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -23,8 +15,6 @@ export class AppComponent implements OnInit {
 
   current_help_text = 'None';
   current_help_page = 'Unknown';
-
-  activeLinkIndex = -1; 
 
   darkMode = false;
 

@@ -8,10 +8,12 @@ import  * as Midiwriter  from 'midi-writer-js'
 import { HelpTextEmitterService } from '../services/help-text-emitter.service';
 import {ScaleService } from '../scale.service';
 import { RandomChordService, DuplicateControl } from '../random-chord.service';
-import { Chord, ChordType, ExtensionType, InversionType } from '../utils/music-theory/music-theory';
+import { Chord, ChordType, InversionType } from '../utils/music-theory/music-theory';
 import { Note, Scale, ScaleType } from '../utils/music-theory/music-theory';
 import { AudioService } from '../audio.service';
-import { sleep } from '../utils/util-library';
+import { DOCUMENT } from '@angular/common';
+import { ThemeService } from '../services/theme.service';
+
 
 const HELP_TEXT = `
 <p>This page will let you generate a series of random chords</p>
@@ -190,20 +192,20 @@ export class RandomChordsComponent implements OnInit {
   allow_triads = true;
   triad_weight = 3;
 
-  allow_sevenths = false;
-  sevenths_weight = 3;
-
   allow_sus2 = false;
   sus2_weight = 3;
 
   allow_sus4 = false;
   sus4_weight = 3;
 
+  allow_sevenths = false;
+  sevenths_weight = 50;
+
   allow_ninths = false;
-  ninths_weight = 3;
+  ninths_weight = 50;
 
   allow_elevenths = false;
-  elevenths_weight = 3;
+  elevenths_weight = 50;
 
   allow_root_inv = true;
   root_inv_weight = 5;
@@ -225,6 +227,8 @@ export class RandomChordsComponent implements OnInit {
     private audioService : AudioService,
     public error_dialog: MatDialog, 
     private help_text : HelpTextEmitterService,
+    @Inject(DOCUMENT) private document : Document,
+    private theme_service : ThemeService,
 
     ) {
 
@@ -463,11 +467,11 @@ export class RandomChordsComponent implements OnInit {
     this.sus4_weight = 3;
 
     this.allow_sevenths = false;
-    this.sevenths_weight = 3;
+    this.sevenths_weight = 50;
     this.allow_ninths = false;
-    this.ninths_weight = 3;
+    this.ninths_weight = 50;
     this.allow_elevenths = false;
-    this.elevenths_weight = 3;
+    this.elevenths_weight = 50;
 
     this.allow_root_inv = true;
     this.root_inv_weight = 5;
@@ -577,6 +581,8 @@ export class RandomChordsComponent implements OnInit {
 
   }
 
+  /************** AUDIO  **************/
+
   async play_chord(chord : Chord, seconds? : number) {
 
     const tones : string[] = [];
@@ -610,18 +616,49 @@ export class RandomChordsComponent implements OnInit {
   async play_all_chords() {
 
     this.all_play_active = true;
+    setTimeout(() => { this.highlight_next_chord(-99, 0)});
+  }
 
-    const beepLength = 0.5;
-    for (const c of this.chords) {
+  // These work as a team, switching off between each other to highlight,play,highlight, etc
 
-      this.play_chord(c, beepLength);
+  async highlight_next_chord(last : number, next : number) {
 
-      await sleep(1000 * 2 * beepLength);
+    const playClassName = 'playing';
+
+    if (last >=0 ) {
+      const ellist = this.document.querySelectorAll(`.chord-index-${last}`);
+
+      ellist.forEach((el) => {
+        (el as HTMLElement).classList.remove(playClassName);
+      });
     }
 
-    this.all_play_active = false;
+    if (next >=0 && next < this.chords.length) {
+      const ellist = this.document.querySelectorAll(`.chord-index-${next}`);
 
+      ellist.forEach((el) => {
+        (el as HTMLElement).classList.add(playClassName);
+      });
+      setTimeout(() => { this.play_next_chord(last, next)}, 10)        
+    } else {
+      this.all_play_active = false;
+    }
+    
   }
+
+  async  play_next_chord(last : number, next : number) {
+
+    const beepLength = 0.5;
+
+    if (next >= 0 && next < this.chords.length) {
+
+      this.play_chord(this.chords[next], beepLength);
+      last = next;
+      next += 1;
+      setTimeout(() => { this.highlight_next_chord(last, next)}, 1000 * 2 * beepLength)
+    }
+  }
+  
 
   generate_midi(evnt : Event) {
 

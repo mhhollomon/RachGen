@@ -84,7 +84,7 @@
 
 <!-- Action Buttons -->
 <div class="ma2">
-    <button mat-stroked-button color="darker" class="config-action-button" (click)="turn_on_all()" matTooltip="Turn on all selections">All the feels</button>
+    <button mat-stroked-button color="darker" class="config-action-button" (click)="turn_on_all()" matTooltip="Turn on all selections">All The Feels</button>
     <button mat-stroked-button color="darker" (click)="set_defaults()" matTooltip="Set selections and sliders to defaults">Reset</button>
 </div>
 <!-- Chord Type Selection -->
@@ -257,9 +257,9 @@
     </mat-expansion-panel>
 
     <!-- Chord Information -->
-    <div class="chord-container ml1 pb3">
 
-        <!-- Action Header -->
+    <!-- Action Header -->
+    <div class="chord-container ml1 pb3">
         <div class="chord-lock">
             <button mat-icon-button class="material-symbols-outlined" (click)="unlock_all_chords()"
                     *ngIf="show_chords" matTooltip="Unlock all chords">
@@ -272,29 +272,28 @@
                 <mat-icon>fast_forward</mat-icon>
             </button>
         </div>
+    </div>
 
-        <ng-template ngFor let-c [ngForOf]="chords" let-i="index">
-            <div class="chord-lock">
-                <button mat-icon-button class="chord-lock" [color]="chord_locked(i) ? 'accent' : ''" 
-                        class="material-symbols-outlined" matTooltip="Lock chord" (click)="lock_chord(i)">
-                    <mat-icon>{{chord_locked(i) ? 'lock' : 'lock_open'}}</mat-icon>
-                </button>
-            </div>
-            <div class="chord-play">
-                <button class="dif material-symbols-outlined"
-                            matTooltip="Play the chord through your speakers or headphones" (click)="play_chord(c)" mat-mini-fab>
-                    <mat-icon>
-                        play_arrow
-                    </mat-icon>
-                </button>
-            </div>
-            <div class="chord-name">
-                <span class="dif">{{c.computeNameDisplay()}}</span>
-            </div>
-            <div class="chord-tones" *ngIf="show_chord_tones">
-                <span class="dib mh2" *ngFor="let t of c.invertedChordTones()" >{{t.noteDisplay()}}</span>
-            </div>
-            <span class="chord-info mh2" *ngIf="show_chord_tones" >{{c.chordType}} {{c.inversionAbbrev()}}</span>
-        </ng-template>
+    <div class="chord-container chord-index-{{i}} ml1 pb3" *ngFor="let c of chords; let i=index">
+        <div class="chord-lock">
+            <button mat-icon-button class="chord-lock" [color]="chord_locked(i) ? 'accent' : ''" 
+                    class="material-symbols-outlined" matTooltip="Lock chord" (click)="lock_chord(i)">
+                <mat-icon>{{chord_locked(i) ? 'lock' : 'lock_open'}}</mat-icon>
+            </button>
+        </div>
+        <div class="chord-play">
+            <button class="dif material-symbols-outlined"
+                        matTooltip="Play the chord through your speakers or headphones" (click)="play_chord(c)" mat-mini-fab>
+                <mat-icon>
+                    play_arrow
+                </mat-icon>
+            </button>
+        </div>
+        <div class="chord-name">
+            <span class="dif">{{c.computeNameDisplay()}}</span>
+        </div>
+        <div class="chord-tones" *ngIf="show_chord_tones">
+            <span class="dib mh2" *ngFor="let t of c.invertedChordTones()" >{{t.noteDisplay()}}</span>
+        </div>
     </div>
 </div>
