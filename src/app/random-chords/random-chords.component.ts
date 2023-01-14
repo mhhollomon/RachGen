@@ -2,6 +2,8 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 
+import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
+
 import { saveAs } from 'file-saver';
 import  * as Midiwriter  from 'midi-writer-js'
 
@@ -293,6 +295,11 @@ export class RandomChordsComponent implements OnInit {
       }
 
     }
+  }
+
+  chord_drop(evnt : CdkDragDrop<string[]>) {
+    console.log(`Moving ${evnt.previousIndex} to ${evnt.currentIndex}`)
+    moveItemInArray(this.chords, evnt.previousIndex, evnt.currentIndex);
   }
 
   /********   CHORD LOCKING ***************/

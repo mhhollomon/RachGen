@@ -4,6 +4,7 @@
     grid-template-columns: [lockbutton] 3rem [playbutton] 2rem [chordname] minmax(5rem, 15rem) [tones] minmax(8rem, 1fr);
     column-gap: 0.5rem;
     border-bottom : 1px #888888 solid;
+    transition: background 0.75s;
 }
 
 .chord-container {

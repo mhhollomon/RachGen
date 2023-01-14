@@ -19,6 +19,7 @@ import {MatSidenavModule} from '@angular/material/sidenav';
 import {MatIconModule} from '@angular/material/icon';
 import {MatDialogModule} from '@angular/material/dialog';
 import {MatSliderModule} from '@angular/material/slider';
+import {DragDropModule} from '@angular/cdk/drag-drop';
 
 @NgModule({
     exports: [
@@ -42,6 +43,7 @@ import {MatSliderModule} from '@angular/material/slider';
         MatIconModule,
         MatDialogModule,
         MatSliderModule,
+        DragDropModule,
     ],
     providers: [
         {provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: {appearance: 'outline', floatLabel: 'always'}},

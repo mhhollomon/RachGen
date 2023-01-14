@@ -274,26 +274,30 @@
         </div>
     </div>
 
-    <div class="chord-container chord-index-{{i}} ml1 pb3" *ngFor="let c of chords; let i=index">
-        <div class="chord-lock">
-            <button mat-icon-button class="chord-lock" [color]="chord_locked(i) ? 'accent' : ''" 
-                    class="material-symbols-outlined" matTooltip="Lock chord" (click)="lock_chord(i)">
-                <mat-icon>{{chord_locked(i) ? 'lock' : 'lock_open'}}</mat-icon>
-            </button>
+    <div cdkDropList cdkDropListLockAxis="y" (cdkDropListDropped)="chord_drop($event)">
+
+        <div class="chord-container chord-index-{{i}} ml1 pb3" cdkDrag *ngFor="let c of chords; let i=index">
+            <div class="chord-lock">
+                <button mat-icon-button class="chord-lock" [color]="chord_locked(i) ? 'accent' : ''" 
+                        class="material-symbols-outlined" matTooltip="Lock chord" (click)="lock_chord(i)">
+                    <mat-icon>{{chord_locked(i) ? 'lock' : 'lock_open'}}</mat-icon>
+                </button>
+            </div>
+            <div class="chord-play">
+                <button class="dif material-symbols-outlined"
+                            matTooltip="Play the chord through your speakers or headphones" (click)="play_chord(c)" mat-mini-fab>
+                    <mat-icon>
+                        play_arrow
+                    </mat-icon>
+                </button>
+            </div>
+            <div class="chord-name">
+                <span class="dif">{{c.computeNameDisplay()}}</span>
+            </div>
+            <div class="chord-tones" *ngIf="show_chord_tones">
+                <span class="dib mh2" *ngFor="let t of c.invertedChordTones()" >{{t.noteDisplay()}}</span>
+            </div>
         </div>
-        <div class="chord-play">
-            <button class="dif material-symbols-outlined"
-                        matTooltip="Play the chord through your speakers or headphones" (click)="play_chord(c)" mat-mini-fab>
-                <mat-icon>
-                    play_arrow
-                </mat-icon>
-            </button>
-        </div>
-        <div class="chord-name">
-            <span class="dif">{{c.computeNameDisplay()}}</span>
-        </div>
-        <div class="chord-tones" *ngIf="show_chord_tones">
-            <span class="dib mh2" *ngFor="let t of c.invertedChordTones()" >{{t.noteDisplay()}}</span>
-        </div>
+
     </div>
 </div>
