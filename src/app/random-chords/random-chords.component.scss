@@ -1,0 +1,134 @@
+.chord-container {
+    display : grid;
+    grid-template-columns: [lockbutton] 3rem [playbutton] 2rem [chordname] minmax(5rem, 15rem) [tones] minmax(8rem, 1fr) [info] 5rem;
+    column-gap: 0.5rem;
+}
+
+.chord-lock {
+    grid-column-start: lockbutton;
+    align-self: center;
+}
+
+.chord-play {
+    grid-column-start: playbutton;
+    align-self: center;
+    justify-self: center;
+}
+
+.chord-name {
+    grid-column-start: chordname;
+    align-self: center;
+}
+
+.chord-info {
+    grid-column-start:  info;
+    align-self: center;
+    justify-self: start;
+}
+
+.chord-tones {
+    grid-column-start:  tones;
+    align-self: center;
+    justify-self: start;
+}
+
+.param-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap : 1rem;
+}
+
+.chord-panel-title-container {
+    display : grid;
+    grid-template-columns: [lockbutton] 3rem [key] 5rem [buttons] 1fr;
+    width : 100%;
+}
+
+// main point of this is the color attribute.
+// Force the title to be shown not "grayed-out"
+// even when the expansion panel is disabled.
+.chord-panel-title-key {
+    grid-column-start: key;
+    align-self: center;
+}
+
+// Force the action buttons to move to the
+// far right.
+.chord-panel-title-buttons {
+    grid-column-start:  buttons;
+    align-self: center;
+    justify-self: end;
+}
+
+.chord-type-container {
+    display : flex;
+    flex-direction: row;
+}
+
+.chord-type-checkbox-container {
+    display : flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap : 0.5rem;
+}
+
+
+.mdc-fab--mini {
+    transform : scale(0.5);
+}
+
+
+.small-input {
+    // This is tuned to make two of them 
+    // the same size as one "normal"
+    max-width: 106px;
+}
+
+.general-params-container {
+    display : flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    flex : 0 1 auto;
+
+    gap : 1rem;
+
+}
+
+.general-params-item {
+    flex: 0 1 auto;
+}
+
+.chord-count-container {
+    display : grid;
+    grid-template-columns: [controls] 1fr [switch] 2rem ;
+    gap : 1rem;
+    justify-items: center;
+}
+
+.chord-count-icon {
+    grid-column : switch;
+    grid-row-start: 1;
+}
+
+.chord-count-slider {
+    grid-column : controls;
+    justify-self:  stretch;
+    justify-content: center;
+}
+
+.chord-count-input {
+    grid-column : controls;
+    justify-self: center;
+}
+
+.chord-count-slider-width {
+    width : 90%;
+}
+
+.chord-count-icon-button-label {
+    font-size: .75rem;
+}
+
+.config-action-button {
+    margin-right : 0.5rem;
+}

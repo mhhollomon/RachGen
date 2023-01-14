@@ -1,0 +1,93 @@
+@use '@angular/material' as mat;
+
+/*
+
+*/
+$dark-sienna: #230903ff;
+$dartmouth-green: #07742dff;
+$pewter-blue: #82a6b1ff;
+
+
+$dartmouth-green-palette-data: (
+  50: #e5f4e8,
+  100: #c1e3c7,
+  200: #99d1a4,
+  300: #6fbf80,
+  400: #4fb266,
+  500: #2aa54c,
+  600: #219743,
+  700: #158538,
+  800: #07742d, // primary color
+  900: #00551a,
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: rgba(black, 0.87),
+    400: rgba(black, 0.87),
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+  )
+);
+
+$pewter-blue-palette-data: (
+  50: #e2f1f8,
+  100: #c3dae0,
+  200: #a3c0c9,
+  300: #82a6b1,  // pewter-blue
+  400: #69929e,
+  500: #4f7f8d,
+  600: #44707c,
+  700: #365c66,
+  800: #294852,
+  900: #18333b,
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: rgba(black, 0.87),
+    400: rgba(black, 0.87),
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+  )
+);
+
+$dartmouth-green-palette : mat.define_palette($dartmouth-green-palette-data, 700, 500, 900);
+
+$pewter-blue-palette : mat.define_palette($pewter-blue-palette-data, 300, 200, 700);
+
+
+/*
+ * The actual themes
+ *
+ */
+
+
+// Define a dark theme
+$dark-theme: mat.define-dark-theme((
+ color: (
+    primary: $pewter-blue-palette,
+    accent: $dartmouth-green-palette,
+   // warn: $light-theme-warn-palette-new,
+  ),
+));
+
+// Define a light theme
+
+$light-theme: mat.define-light-theme((
+ color: (
+  primary: $pewter-blue-palette,
+  accent: $dartmouth-green-palette,
+// warn: $light-theme-warn-palette-new,
+
+ ),
+  // Only include `typography` and `density` in the default theme.
+  typography: mat.define-typography-config(),
+  density: 0,
+));

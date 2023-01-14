@@ -1,0 +1,17 @@
+<mat-toolbar color="primary">
+    <a class="header-link" routerLink="./">Random Chord Generator</a>
+    <span class="flex-spacer"></span>
+    <button mat-icon-button  (click)="toggleDarkMode()" class="material-symbols-outlined" 
+                matTooltip="{{ (darkMode ? 'switch to light mode' : 'switch to dark mode')}}" 
+                aria-label="Switch theme between dark and light">
+        <mat-icon *ngIf="darkMode">brightness_5</mat-icon>
+        <mat-icon *ngIf="!darkMode">bedtime</mat-icon>
+      </button>
+      <button mat-icon-button  (click)="openHelpDialog()" class="material-symbols-outlined" aria-label="open help for current page">
+        <mat-icon>help</mat-icon>
+      </button>
+</mat-toolbar>
+<div class="mh3 mt4">
+       <router-outlet></router-outlet>
+</div>
+

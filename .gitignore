@@ -1,0 +1,13 @@
+.angular/
+
+node_modules/
+
+*.swp
+
+build*/
+
+__pycache__/
+
+dist/
+
+coverage/
