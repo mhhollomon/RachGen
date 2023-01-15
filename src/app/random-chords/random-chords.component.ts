@@ -14,7 +14,6 @@ import { Chord, ChordType, InversionType } from '../utils/music-theory/music-the
 import { Note, Scale, ScaleType } from '../utils/music-theory/music-theory';
 import { AudioService } from '../audio.service';
 import { DOCUMENT } from '@angular/common';
-import { ThemeService } from '../services/theme.service';
 
 
 const HELP_TEXT = `
@@ -163,6 +162,11 @@ const octavePlacement : { [ index : string ] : number } = {
   'C' : 0, 'D' : 1, 'E' : 2, 'F' : 3, 'G' : 4, 'A' : 5, 'B' : 6 
 }
 
+interface FlagWeight {
+  f : boolean;
+  w : number;
+}
+
 @Component({
   selector: 'app-random-chords',
   templateUrl: './random-chords.component.html',
@@ -191,32 +195,17 @@ export class RandomChordsComponent implements OnInit {
   mode  = 'Diatonic';
   scale_source  = "Random";
 
-  allow_triads = true;
-  triad_weight = 3;
+  triads : FlagWeight = { f: true,  w: 3 };
+  sus2   : FlagWeight = { f: false, w: 3 };
+  sus4   : FlagWeight = { f: false, w: 3 };
 
-  allow_sus2 = false;
-  sus2_weight = 3;
+  sevenths  : FlagWeight = { f: false, w: 50};
+  ninths    : FlagWeight = { f: false, w: 50};
+  elevenths : FlagWeight = { f: false, w: 50};
 
-  allow_sus4 = false;
-  sus4_weight = 3;
-
-  allow_sevenths = false;
-  sevenths_weight = 50;
-
-  allow_ninths = false;
-  ninths_weight = 50;
-
-  allow_elevenths = false;
-  elevenths_weight = 50;
-
-  allow_root_inv = true;
-  root_inv_weight = 5;
-
-  allow_first_inv = true;
-  first_inv_weight = 3;
-
-  allow_scnd_inv = true;
-  scnd_inv_weight = 2;
+  root_inv  : FlagWeight = { f: true,  w: 5 };
+  first_inv : FlagWeight = { f: true,  w: 3 };
+  scnd_inv  : FlagWeight = { f: true,  w: 2 };
 
   selected_sonority  = 'major';
   selected_key  = 'Random';
@@ -230,7 +219,6 @@ export class RandomChordsComponent implements OnInit {
     public error_dialog: MatDialog, 
     private help_text : HelpTextEmitterService,
     @Inject(DOCUMENT) private document : Document,
-    private theme_service : ThemeService,
 
     ) {
 
@@ -246,9 +234,9 @@ export class RandomChordsComponent implements OnInit {
     }
 
     let types = 0;
-    if (this.allow_triads) types += 1;
-    if (this.allow_sus2) types += 1;
-    if (this.allow_sus4) types += 1;
+    if (this.triads.f) types += 1;
+    if (this.sus2.f) types += 1;
+    if (this.sus4.f) types += 1;
 
     if (types > 1) {
       return 10;
@@ -273,10 +261,12 @@ export class RandomChordsComponent implements OnInit {
     return retval;
   }
 
+  /************* EVENT HANDLERS   *************************/
+
   stopPropagation(evnt : Event) {
     evnt.stopPropagation();
   }
-
+  
   chord_tone_change(evnt : Event) {
 
     this.stopPropagation(evnt);
@@ -345,22 +335,22 @@ export class RandomChordsComponent implements OnInit {
 
     if (slider === 'root') {
       total_weight += value;
-    } else if (this.allow_root_inv) {
-      total_weight += this.root_inv_weight;
+    } else if (this.root_inv.f) {
+      total_weight += this.root_inv.w;
     }
 
 
     if (slider === 'first') {
       total_weight += value;
-    } else if (this.allow_first_inv) {
-      total_weight += this.first_inv_weight;
+    } else if (this.first_inv.f) {
+      total_weight += this.first_inv.w;
     }
 
 
     if (slider === 'second') {
       total_weight += value;
-    } else if (this.allow_scnd_inv) {
-      total_weight += this.scnd_inv_weight;
+    } else if (this.scnd_inv.f) {
+      total_weight += this.scnd_inv.w;
     }
 
     const weight = Math.floor(100*value/total_weight);
@@ -382,14 +372,14 @@ export class RandomChordsComponent implements OnInit {
   // This basically artifically moves the slider by updating
   // the model.
   inv_checkbox_change() {
-    if (this.allow_root_inv) {
-      this.root_inv_weight += 0.0001;
+    if (this.root_inv.f) {
+      this.root_inv.w += 0.0001;
     }
-    if (this.allow_first_inv) {
-      this.first_inv_weight += 0.0001;
+    if (this.first_inv.f) {
+      this.first_inv.w += 0.0001;
     }
-    if (this.allow_scnd_inv) {
-      this.scnd_inv_weight += 0.0001;
+    if (this.scnd_inv.f) {
+      this.scnd_inv.w += 0.0001;
     }
   }
 
@@ -401,22 +391,22 @@ export class RandomChordsComponent implements OnInit {
 
     if (slider === 'triad') {
       total_weight += value;
-    } else if (this.allow_triads) {
-      total_weight += this.triad_weight;
+    } else if (this.triads.f) {
+      total_weight += this.triads.w;
     }
 
 
     if (slider === 'sus2') {
       total_weight += value;
-    } else if (this.allow_sus2) {
-      total_weight += this.sus2_weight;
+    } else if (this.sus2.f) {
+      total_weight += this.sus2.w;
     }
 
 
     if (slider === 'sus4') {
       total_weight += value;
-    } else if (this.allow_sus4) {
-      total_weight += this.sus4_weight;
+    } else if (this.sus4.f) {
+      total_weight += this.sus4.w;
     }
 
     const weight = Math.floor(100*value/total_weight);
@@ -438,54 +428,54 @@ export class RandomChordsComponent implements OnInit {
   // This basically artifically moves the slider by updating
   // the model.
   ct_checkbox_change() {
-    if (this.allow_triads) {
-      this.triad_weight += 0.0001;
+    if (this.triads.f) {
+      this.triads.w += 0.0001;
     }
-    if (this.allow_sus2) {
-      this.sus2_weight += 0.0001;
+    if (this.sus2.f) {
+      this.sus2.w += 0.0001;
     }
-    if (this.allow_sus4) {
-      this.sus4_weight += 0.0001;
+    if (this.sus4.f) {
+      this.sus4.w += 0.0001;
     }
   }
 
 
   turn_on_all() {
-    this.allow_triads = true;
-    this.allow_sus2 = true;
-    this.allow_sus4 = true;
+    this.triads.f = true;
+    this.sus2.f = true;
+    this.sus4.f = true;
 
-    this.allow_sevenths = true;
-    this.allow_ninths = true;
-    this.allow_elevenths = true;
+    this.sevenths.f = true;
+    this.ninths.f = true;
+    this.elevenths.f = true;
 
-    this.allow_root_inv = true;
-    this.allow_first_inv = true;
-    this.allow_scnd_inv = true;
+    this.root_inv.f = true;
+    this.first_inv.f = true;
+    this.scnd_inv.f = true;
     
   }
 
   set_defaults() {
-    this.allow_triads = true;
-    this.triad_weight = 3;
-    this.allow_sus2 = false;
-    this.sus2_weight = 3;
-    this.allow_sus4 = false;
-    this.sus4_weight = 3;
+    this.triads.f = true;
+    this.triads.w = 3;
+    this.sus2.f = false;
+    this.sus2.w = 3;
+    this.sus4.f = false;
+    this.sus4.w = 3;
 
-    this.allow_sevenths = false;
-    this.sevenths_weight = 50;
-    this.allow_ninths = false;
-    this.ninths_weight = 50;
-    this.allow_elevenths = false;
-    this.elevenths_weight = 50;
+    this.sevenths.f = false;
+    this.sevenths.w = 50;
+    this.ninths.f = false;
+    this.ninths.w = 50;
+    this.elevenths.f = false;
+    this.elevenths.w = 50;
 
-    this.allow_root_inv = true;
-    this.root_inv_weight = 5;
-    this.allow_first_inv = true;
-    this.first_inv_weight = 3;
-    this.allow_scnd_inv = true;
-    this.scnd_inv_weight = 2;
+    this.root_inv.f = true;
+    this.root_inv.w = 5;
+    this.first_inv.f = true;
+    this.first_inv.w = 3;
+    this.scnd_inv.f = true;
+    this.scnd_inv.w = 2;
 
   }
 
@@ -540,17 +530,17 @@ export class RandomChordsComponent implements OnInit {
     try {
       const builder = this.randomChordService.builder();
 
-      if (this.allow_triads) builder.addChordType('triad', this.triad_weight);
-      if (this.allow_sus2) builder.addChordType('sus2', this.sus2_weight);
-      if (this.allow_sus4) builder.addChordType('sus4', this.sus4_weight);
+      if (this.triads.f) builder.addChordType('triad', this.triads.w);
+      if (this.sus2.f) builder.addChordType('sus2', this.sus2.w);
+      if (this.sus4.f) builder.addChordType('sus4', this.sus4.w);
 
-      if (this.allow_sevenths) builder.addExtension('7th', this.sevenths_weight);
-      if (this.allow_ninths) builder.addExtension('9th', this.ninths_weight);
-      if (this.allow_elevenths) builder.addExtension('11th', this.elevenths_weight);
+      if (this.sevenths.f) builder.addExtension('7th', this.sevenths.w);
+      if (this.ninths.f) builder.addExtension('9th', this.ninths.w);
+      if (this.elevenths.f) builder.addExtension('11th', this.elevenths.w);
 
-      if (this.allow_root_inv) builder.addInversion('root', this.root_inv_weight);
-      if (this.allow_first_inv) builder.addInversion('first', this.first_inv_weight);
-      if (this.allow_scnd_inv) builder.addInversion('second', this.scnd_inv_weight);
+      if (this.root_inv.f) builder.addInversion('root', this.root_inv.w);
+      if (this.first_inv.f) builder.addInversion('first', this.first_inv.w);
+      if (this.scnd_inv.f) builder.addInversion('second', this.scnd_inv.w);
 
       builder.setCount(this.min_chord_count, this.count_range_mode ? this.max_chord_count : this.min_chord_count);
 
@@ -675,6 +665,16 @@ export class RandomChordsComponent implements OnInit {
 
     if (!this.show_chords || this.chords.length < 1) return;
 
+    let trackName = '';
+
+    for (const c of this.chords) {
+      trackName += c.name() + ' ';
+    }
+
+    trackName += this.key.fullName();
+
+    track.addTrackName(trackName);
+
     for (const c of this.chords) {
 
       // Want to place the bass note "down an octave"
@@ -700,6 +700,7 @@ export class RandomChordsComponent implements OnInit {
   
       }
 
+      track.addMarker(c.name());
       track.addEvent(new Midiwriter.NoteEvent(options))
     }
 
@@ -720,6 +721,7 @@ export class RandomChordsComponent implements OnInit {
         last = octavePlacement[simpleNote.noteClass];
       }
 
+      track.addMarker(this.key.fullName() + " Scale")
       track.addEvent(new Midiwriter.NoteEvent(scale_options))
 
     }
