@@ -12,13 +12,18 @@ import { HelpDialogComponent } from './help-dialog/help-dialog.component';
 import { HelpTextEmitterService } from './services/help-text-emitter.service';
 import { ErrorDialogComponent } from './error-dialog/error-dialog.component'
 import { ThemeService } from './services/theme.service';
+import { LongPressDirective } from './long-press.directive';
+import { MidiDialogComponent } from './midi-dialog/midi-dialog.component';
+
 @NgModule({
   declarations: [
     AppComponent,
     RandomChordsComponent,
     PageNotFoundComponent,
     HelpDialogComponent,
-    ErrorDialogComponent
+    ErrorDialogComponent,
+    LongPressDirective,
+    MidiDialogComponent
   ],
   imports: [
     BrowserModule, 

@@ -15,6 +15,7 @@ import { Note, Scale, ScaleType } from '../utils/music-theory/music-theory';
 import { AudioService } from '../audio.service';
 import { DOCUMENT } from '@angular/common';
 import { ThemeService } from '../services/theme.service';
+import { MidiDialogComponent, MidiConfig } from '../midi-dialog/midi-dialog.component';
 
 
 const HELP_TEXT = `
@@ -212,12 +213,18 @@ export class RandomChordsComponent implements OnInit {
   selected_key  = 'Random';
 
   all_play_active = false;
+
+  midi_config : MidiConfig = {
+    separateBass : false,
+    includeScale : true,
+    includeMarkers : false,
+  }
   
 
   constructor(private scaleService : ScaleService,
     private randomChordService : RandomChordService,
     private audioService : AudioService,
-    public error_dialog: MatDialog, 
+    public dialog: MatDialog, 
     private help_text : HelpTextEmitterService,
     @Inject(DOCUMENT) private document : Document,
 
@@ -492,7 +499,7 @@ export class RandomChordsComponent implements OnInit {
     }
 
     if (this.count_range_mode && this.min_chord_count > this.max_chord_count) {
-      this.error_dialog.open(ErrorDialogComponent, {
+      this.dialog.open(ErrorDialogComponent, {
         data: "min count must be less than or equal to max chord count",
       });
 
@@ -567,7 +574,7 @@ export class RandomChordsComponent implements OnInit {
             error_msg += "\n" + e.stack;
           }
 
-        this.error_dialog.open(ErrorDialogComponent, {
+        this.dialog.open(ErrorDialogComponent, {
           data: error_msg,
         });
 
@@ -662,15 +669,73 @@ export class RandomChordsComponent implements OnInit {
       setTimeout(() => { this.highlight_next_chord(last, next)}, 1000 * 2 * beepLength)
     }
   }
+
+
+/******************************* MIDI  *******************************************/
+
+  private midi_state = 'off';
+
+  get midi_disabled():boolean {
+    return (! this.show_chords) || this.chords.length < 1;
+  }
+
+  wait_for_midi(source : string, event : Event) {
+    this.stopPropagation(event);
+
+    console.log(`source = ${source}, midi_state = ${this.midi_state}`, event);
+ 
+    if (this.midi_state === 'off' ) {
+      if (source === 'click') {
+        this.midi_state = 'debounce';
+        // wait 20 ms to see if the Long press arrives. If it does,
+        // do nothing, it will handle the dialog.
+        // We will know if it arrives becasue the event will set the midi_state
+        // to 'generating' rather than 'debounce'.
+        setTimeout(() => {
+          if (this.midi_state === 'debounce') {
+            this.midi_state = 'generating';
+            this.generate_midi(this.midi_config);
+          }
+        }, 20);
+      } else if (source === 'lp') {
+        this.midi_state = 'generating';
+        this.show_midi_dialog();
+      }
+    } else if (this.midi_state == 'debounce') {
+      if (source === 'lp') {
+        this.midi_state = 'generating';
+        this.show_midi_dialog();
+      }
+    }
+  }
   
+  show_midi_dialog() {
+    console.log("Showing midi dialog");
 
-  generate_midi(evnt : Event) {
+    const dialogRef = this.dialog.open(MidiDialogComponent, {data : Object.assign({}, this.midi_config)});
 
-    this.stopPropagation(evnt);
+    dialogRef.afterClosed().subscribe(result => {
+      console.log(`dialog = ${result}`);
 
-    const track = new Midiwriter.Track();
+      if (result) {
+        this.generate_midi(result);
+      } else {
+        this.midi_state = 'off';
+      }
+    });
+
+  }
+
+  generate_midi(config : MidiConfig) {
+    console.log("generating midi data");
 
     if (!this.show_chords || this.chords.length < 1) return;
+
+    const mainTrack = new Midiwriter.Track();
+    let bassTrack;
+    if (config.separateBass) {
+      bassTrack = new Midiwriter.Track();
+    }
 
     let trackName = '';
 
@@ -678,9 +743,14 @@ export class RandomChordsComponent implements OnInit {
       trackName += c.name() + ' ';
     }
 
-    trackName += this.key.fullName();
+    if (config.includeScale) {
+      trackName += this.key.fullName();
+    }
 
-    track.addTrackName(trackName);
+    mainTrack.addTrackName(trackName);
+    if (bassTrack) {
+      bassTrack.addTrackName(trackName);
+    }
 
     for (const c of this.chords) {
 
@@ -689,7 +759,8 @@ export class RandomChordsComponent implements OnInit {
       let last  = -1;
       let isBassNote = true;
   
-      const options : Midiwriter.Options = {sequential: false, duration : '1', pitch : []}
+      const mainOptions : Midiwriter.Options = {sequential: false, duration : '1', pitch : []}
+      const bassOptions : Midiwriter.Options = {sequential: false, duration : '1', pitch : []}
 
       for (const n of c.invertedChordTones()) {
 
@@ -697,7 +768,13 @@ export class RandomChordsComponent implements OnInit {
         if (octavePlacement[simpleNote.noteClass] < last) {
           octave += 1;
         }
-        (options.pitch as unknown as string[]).push(simpleNote.note() + octave );
+
+        if (isBassNote && bassTrack) {
+          (bassOptions.pitch as unknown as string[]).push(simpleNote.note() + octave );
+        } else {
+          (mainOptions.pitch as unknown as string[]).push(simpleNote.note() + octave );
+        }
+
         if (isBassNote) {
           octave += 1;
           isBassNote = false;
@@ -707,13 +784,19 @@ export class RandomChordsComponent implements OnInit {
   
       }
 
-      track.addMarker(c.name());
-      track.addEvent(new Midiwriter.NoteEvent(options))
+      if (config.includeMarkers) {
+        mainTrack.addMarker(c.name());
+      }
+      mainTrack.addEvent(new Midiwriter.NoteEvent(mainOptions))
+      if (bassTrack) {
+        bassTrack.addEvent(new Midiwriter.NoteEvent(bassOptions))
+      }
     }
 
-    if (this.mode === 'Diatonic' ) {
-
-      track.addMarker(this.key.fullName() + " Scale")
+    if (this.mode === 'Diatonic' && config.includeScale) {
+      if (config.includeMarkers) {
+        mainTrack.addMarker(this.key.fullName() + " Scale")
+      }
 
       let octave = ['G', 'A', 'B'].includes(this.scale_notes[0].toSharp().noteClass) ? 3 : 4;
       let last  = -1;
@@ -725,7 +808,7 @@ export class RandomChordsComponent implements OnInit {
 
         if (octavePlacement[simpleNote.noteClass] < last) {
           // write what we have and start a new sequence
-          track.addEvent(new Midiwriter.NoteEvent(scale_options))
+          mainTrack.addEvent(new Midiwriter.NoteEvent(scale_options))
           scale_options = {sequential: true, duration : '4', pitch : []}
           octave += 1;
         }
@@ -733,15 +816,21 @@ export class RandomChordsComponent implements OnInit {
         last = octavePlacement[simpleNote.noteClass];
       }
 
-      track.addEvent(new Midiwriter.NoteEvent(scale_options))
+      mainTrack.addEvent(new Midiwriter.NoteEvent(scale_options))
 
     }
 
+    let tracks = [ mainTrack];
+    if (bassTrack) {
+      tracks.push(bassTrack);
+    }
 
-    const midi_writer = new Midiwriter.Writer(track);
+    const midi_writer = new Midiwriter.Writer(tracks);
 
     const  blob = new Blob([midi_writer.buildFile()], {type: "audio/midi"});
     saveAs(blob, "random-chords.mid");
+
+    this.midi_state = 'off';
 
   }
 

@@ -244,7 +244,9 @@
                         <mat-icon>{{ show_chord_tones ? 'visibility_off' : 'visibility' }} </mat-icon>
                     </button>
                     <button class="ml4 ba br2" mat-icon-button class="material-symbols-outlined" 
-                            matTooltip="Download midi file for the chords" (click)="generate_midi($event)" >
+                            matTooltip="Download midi file for the chords" [disabled]="midi_disabled"
+                            (click)="wait_for_midi('click', $event)" 
+                            longPress (onLPRelease)="wait_for_midi('lp', $event)" >
                         <mat-icon>download</mat-icon>
                     </button>
                 </div>
