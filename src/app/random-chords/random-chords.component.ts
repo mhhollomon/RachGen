@@ -14,6 +14,7 @@ import { Chord, ChordType, InversionType } from '../utils/music-theory/music-the
 import { Note, Scale, ScaleType } from '../utils/music-theory/music-theory';
 import { AudioService } from '../audio.service';
 import { DOCUMENT } from '@angular/common';
+import { ThemeService } from '../services/theme.service';
 
 
 const HELP_TEXT = `
@@ -244,11 +245,6 @@ export class RandomChordsComponent implements OnInit {
     
     return 6;
   }
-
-  get all_play_disabled():boolean {
-    return this.all_play_active;
-  }
-
 
   getPanelTitle() : string {
 
@@ -482,6 +478,8 @@ export class RandomChordsComponent implements OnInit {
 
   generate() {
 
+    this.all_play_active = false;
+
     if (this.count_range_mode) {
       if (this.max_chord_count > this.chord_count_max || this.min_chord_count < 1) {
         return;
@@ -612,8 +610,11 @@ export class RandomChordsComponent implements OnInit {
 
   async play_all_chords() {
 
-    this.all_play_active = true;
-    setTimeout(() => { this.highlight_next_chord(-99, 0)});
+    this.all_play_active = ! this.all_play_active;
+
+    if (this.all_play_active) {
+      setTimeout(() => { this.highlight_next_chord(-99, 0)});
+    }
   }
 
   // These work as a team, switching off between each other to highlight,play,highlight, etc
@@ -622,6 +623,7 @@ export class RandomChordsComponent implements OnInit {
 
     const playClassName = 'playing';
 
+
     if (last >=0 ) {
       const ellist = this.document.querySelectorAll(`.chord-index-${last}`);
 
@@ -629,6 +631,9 @@ export class RandomChordsComponent implements OnInit {
         (el as HTMLElement).classList.remove(playClassName);
       });
     }
+
+    // If asked to stop, simply stop.
+    if (!this.all_play_active) return;
 
     if (next >=0 && next < this.chords.length) {
       const ellist = this.document.querySelectorAll(`.chord-index-${next}`);
@@ -652,6 +657,8 @@ export class RandomChordsComponent implements OnInit {
       this.play_chord(this.chords[next], beepLength);
       last = next;
       next += 1;
+
+      // Note, we don't check all_play_active because we would still need to unhighlight
       setTimeout(() => { this.highlight_next_chord(last, next)}, 1000 * 2 * beepLength)
     }
   }
@@ -706,22 +713,26 @@ export class RandomChordsComponent implements OnInit {
 
     if (this.mode === 'Diatonic' ) {
 
+      track.addMarker(this.key.fullName() + " Scale")
+
       let octave = ['G', 'A', 'B'].includes(this.scale_notes[0].toSharp().noteClass) ? 3 : 4;
       let last  = -1;
-      const scale_options : Midiwriter.Options = {sequential: true, duration : '4', pitch : []}
+      let scale_options : Midiwriter.Options = {sequential: true, duration : '4', pitch : []}
       for (const n of this.scale_notes) {
 
         const simpleNote = n.toSharp();
 
 
         if (octavePlacement[simpleNote.noteClass] < last) {
+          // write what we have and start a new sequence
+          track.addEvent(new Midiwriter.NoteEvent(scale_options))
+          scale_options = {sequential: true, duration : '4', pitch : []}
           octave += 1;
         }
         (scale_options.pitch as unknown as string[]).push(simpleNote.note() + octave );
         last = octavePlacement[simpleNote.noteClass];
       }
 
-      track.addMarker(this.key.fullName() + " Scale")
       track.addEvent(new Midiwriter.NoteEvent(scale_options))
 
     }

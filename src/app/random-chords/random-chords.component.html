@@ -267,9 +267,9 @@
             </button>
         </div>
         <div class="chord-play">
-            <button mat-icon-button class="material-symbols-outlined" (click)="play_all_chords()" [disabled]="all_play_disabled"
+            <button mat-icon-button class="material-symbols-outlined" (click)="play_all_chords()"
                     *ngIf="show_chords" matTooltip="play all chords">
-                <mat-icon>fast_forward</mat-icon>
+                <mat-icon>{{all_play_active ? 'stop' : 'fast_forward'}}</mat-icon>
             </button>
         </div>
     </div>
