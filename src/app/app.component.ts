@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
+
 import { HelpDialogComponent } from './help-dialog/help-dialog.component';
 import { HelpTextEmitterService } from './services/help-text-emitter.service';
 import { ThemeService } from './services/theme.service';
