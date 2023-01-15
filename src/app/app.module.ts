@@ -14,6 +14,8 @@ import { ErrorDialogComponent } from './error-dialog/error-dialog.component'
 import { ThemeService } from './services/theme.service';
 import { LongPressDirective } from './long-press.directive';
 import { MidiDialogComponent } from './midi-dialog/midi-dialog.component';
+import { PreferencesService } from './services/preferences.service';
+import { PreferenceDialogComponent } from './preference-dialog/preference-dialog.component';
 
 @NgModule({
   declarations: [
@@ -23,7 +25,8 @@ import { MidiDialogComponent } from './midi-dialog/midi-dialog.component';
     HelpDialogComponent,
     ErrorDialogComponent,
     LongPressDirective,
-    MidiDialogComponent
+    MidiDialogComponent,
+    PreferenceDialogComponent
   ],
   imports: [
     BrowserModule, 
@@ -34,6 +37,7 @@ import { MidiDialogComponent } from './midi-dialog/midi-dialog.component';
   ],
   providers: [
     HelpTextEmitterService,
+    PreferencesService,
     { provide: AudioContext, useClass: AudioContext },
     ThemeService
   ],

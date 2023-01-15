@@ -1,0 +1,11 @@
+<h1 mat-dialog-title>Global Preferences</h1>
+<div mat-dialog-content>
+    <h3 mat-dialog-title>MIDI Download Configuration</h3>
+    <div><mat-checkbox [(ngModel)]="midi_config.includeScale" (click)="midi_change()">Include Scale in File</mat-checkbox></div>
+    <div><mat-checkbox [(ngModel)]="midi_config.separateBass" (click)="midi_change()">Put Bass Note in Separate Track</mat-checkbox></div>
+    <div><mat-checkbox [(ngModel)]="midi_config.includeMarkers" (click)="midi_change()">Include Timing Markers</mat-checkbox></div>
+</div>
+<div mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close><span class="material-symbols-outlined">cancel</span></button>
+    <button mat-button mat-dialog-close (click)="do_it()"><span class="material-symbols-outlined" >check</span></button>
+</div>

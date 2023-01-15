@@ -5,6 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { HelpDialogComponent } from './help-dialog/help-dialog.component';
 import { HelpTextEmitterService } from './services/help-text-emitter.service';
 import { ThemeService } from './services/theme.service';
+import { PreferenceDialogComponent } from './preference-dialog/preference-dialog.component';
 
 @Component({
   selector: 'app-root',
@@ -46,6 +47,10 @@ export class AppComponent implements OnInit {
                 page_name : this.current_help_page,
             },
         });
+    }
+
+    openPreferenceDialog() {
+        this.dialog.open(PreferenceDialogComponent, {});
     }
 
     toggleDarkMode() {

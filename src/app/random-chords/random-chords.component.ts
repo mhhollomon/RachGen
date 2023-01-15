@@ -16,6 +16,8 @@ import { AudioService } from '../audio.service';
 import { DOCUMENT } from '@angular/common';
 import { ThemeService } from '../services/theme.service';
 import { MidiDialogComponent, MidiConfig } from '../midi-dialog/midi-dialog.component';
+import { PreferencesService } from '../services/preferences.service';
+import { filter } from 'rxjs';
 
 
 const HELP_TEXT = `
@@ -227,6 +229,7 @@ export class RandomChordsComponent implements OnInit {
     public dialog: MatDialog, 
     private help_text : HelpTextEmitterService,
     @Inject(DOCUMENT) private document : Document,
+    private preferences : PreferencesService,
 
     ) {
 
@@ -234,6 +237,13 @@ export class RandomChordsComponent implements OnInit {
 
   ngOnInit(): void {
     this.help_text.setHelp({ help_text : HELP_TEXT, page_name : HELP_PAGE_NAME });
+
+    // Snag any changes to the midi preferences.
+    Object.assign(this.midi_config, this.preferences.read('midi', this.midi_config));
+
+    this.preferences.onChange.pipe(filter((k)=> k === 'midi')).subscribe(() => {
+      Object.assign(this.midi_config, this.preferences.read('midi', this.midi_config));
+    });
   }
 
   get chord_count_max() : number {
