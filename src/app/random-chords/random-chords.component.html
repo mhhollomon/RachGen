@@ -246,7 +246,7 @@
                     <button class="ml4 ba br2" mat-icon-button class="material-symbols-outlined" 
                             matTooltip="Download midi file for the chords" [disabled]="midi_disabled"
                             (click)="wait_for_midi('click', $event)" 
-                            longPress (onLPRelease)="wait_for_midi('lp', $event)" >
+                            longPress (LPRelease)="wait_for_midi('lp', $event)" >
                         <mat-icon>download</mat-icon>
                     </button>
                 </div>
@@ -299,7 +299,14 @@
             <div class="chord-tones" *ngIf="show_chord_tones">
                 <span class="dib mh2" *ngFor="let t of c.invertedChordTones()" >{{t.noteDisplay()}}</span>
             </div>
-        </div>
+            
+            <div class="chord-edit">
+                <button class="dif material-symbols-outlined"
+                            matTooltip="Edit parts of the chord" (click)="edit_chord_modal(i)" mat-icon-button>
+                    <mat-icon>edit</mat-icon>
+                </button>
+            </div>
 
+        </div>
     </div>
 </div>

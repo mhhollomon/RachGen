@@ -16,6 +16,7 @@ import { LongPressDirective } from './long-press.directive';
 import { MidiDialogComponent } from './midi-dialog/midi-dialog.component';
 import { PreferencesService } from './services/preferences.service';
 import { PreferenceDialogComponent } from './preference-dialog/preference-dialog.component';
+import { ChordEditDialogComponent } from './chord-edit-dialog/chord-edit-dialog.component';
 
 @NgModule({
   declarations: [
@@ -26,7 +27,8 @@ import { PreferenceDialogComponent } from './preference-dialog/preference-dialog
     ErrorDialogComponent,
     LongPressDirective,
     MidiDialogComponent,
-    PreferenceDialogComponent
+    PreferenceDialogComponent,
+    ChordEditDialogComponent
   ],
   imports: [
     BrowserModule, 

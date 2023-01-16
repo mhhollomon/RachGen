@@ -7,8 +7,9 @@ const prefix = 'rg';
 })
 export class PreferencesService {
 
-  @Output() public onChange: EventEmitter<string> = new EventEmitter();
+  @Output() public prefChange: EventEmitter<string> = new EventEmitter();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   write(key : string, data : any) {
 
     const realkey = prefix + '.' + key;
@@ -17,10 +18,11 @@ export class PreferencesService {
 
     localStorage.setItem(realkey, realdata);
 
-    this.onChange.emit(key);
+    this.prefChange.emit(key);
 
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   read(key : string, fallback : any) : any {
     const realkey = prefix + '.' + key;
 

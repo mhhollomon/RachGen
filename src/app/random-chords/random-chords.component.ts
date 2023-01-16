@@ -14,10 +14,10 @@ import { Chord, ChordType, InversionType } from '../utils/music-theory/music-the
 import { Note, Scale, ScaleType } from '../utils/music-theory/music-theory';
 import { AudioService } from '../audio.service';
 import { DOCUMENT } from '@angular/common';
-import { ThemeService } from '../services/theme.service';
 import { MidiDialogComponent, MidiConfig } from '../midi-dialog/midi-dialog.component';
 import { PreferencesService } from '../services/preferences.service';
 import { filter } from 'rxjs';
+import { ChordEditDialogComponent } from '../chord-edit-dialog/chord-edit-dialog.component';
 
 
 const HELP_TEXT = `
@@ -241,7 +241,7 @@ export class RandomChordsComponent implements OnInit {
     // Snag any changes to the midi preferences.
     Object.assign(this.midi_config, this.preferences.read('midi', this.midi_config));
 
-    this.preferences.onChange.pipe(filter((k)=> k === 'midi')).subscribe(() => {
+    this.preferences.prefChange.pipe(filter((k)=> k === 'midi')).subscribe(() => {
       Object.assign(this.midi_config, this.preferences.read('midi', this.midi_config));
     });
   }
@@ -303,6 +303,17 @@ export class RandomChordsComponent implements OnInit {
   chord_drop(evnt : CdkDragDrop<string[]>) {
     console.log(`Moving ${evnt.previousIndex} to ${evnt.currentIndex}`)
     moveItemInArray(this.chords, evnt.previousIndex, evnt.currentIndex);
+  }
+
+  edit_chord_modal(chord_index : number) {
+    const dia = this.dialog.open(ChordEditDialogComponent, { data : this.chords[chord_index].clone() });
+    
+    dia.afterClosed().subscribe((newChord) => {
+      if (newChord) {
+        this.chords[chord_index] = Object.assign(this.chords[chord_index], newChord);
+      }
+
+    })
   }
 
   /********   CHORD LOCKING ***************/
@@ -396,7 +407,7 @@ export class RandomChordsComponent implements OnInit {
     }
   }
 
-  /************** CHORRD TYPE  SLIDER FUNCTIONS  **************/
+  /************** CHORD TYPE SLIDER FUNCTIONS  **************/
 
   chord_type_slider_ticks(slider : ChordType, value : number) : string {
 
@@ -597,27 +608,7 @@ export class RandomChordsComponent implements OnInit {
 
   async play_chord(chord : Chord, seconds? : number) {
 
-    const tones : string[] = [];
-    let octave = 3;
-    let last  = -1;
-    let isBassNote = true;
-
-    for (const c of chord.invertedChordTones()) {
-
-      const simpleNote = c.toSharp();
-
-      if (octavePlacement[simpleNote.noteClass] < last) {
-        octave += 1;
-      }
-      tones.push(simpleNote.note() + octave);
-      if (isBassNote) {
-        octave += 1;
-        isBassNote = false;
-      } else {
-        last = octavePlacement[simpleNote.noteClass];
-      }
-
-    }
+    const tones = chord.voiceChord();
   
     await this.audioService.play_chord(tones, seconds);
 
@@ -764,34 +755,23 @@ export class RandomChordsComponent implements OnInit {
 
     for (const c of this.chords) {
 
-      // Want to place the bass note "down an octave"
-      let octave = 3;
-      let last  = -1;
       let isBassNote = true;
   
       const mainOptions : Midiwriter.Options = {sequential: false, duration : '1', pitch : []}
       const bassOptions : Midiwriter.Options = {sequential: false, duration : '1', pitch : []}
 
-      for (const n of c.invertedChordTones()) {
-
-        const simpleNote = n.toSharp();
-        if (octavePlacement[simpleNote.noteClass] < last) {
-          octave += 1;
-        }
-
-        if (isBassNote && bassTrack) {
-          (bassOptions.pitch as unknown as string[]).push(simpleNote.note() + octave );
-        } else {
-          (mainOptions.pitch as unknown as string[]).push(simpleNote.note() + octave );
-        }
+      for (const n of c.voiceChord()) {
 
         if (isBassNote) {
-          octave += 1;
+          if (bassTrack) {
+            (bassOptions.pitch as unknown as string[]).push(n);
+          } else {
+            (mainOptions.pitch as unknown as string[]).push(n);
+          }
           isBassNote = false;
         } else {
-          last = octavePlacement[simpleNote.noteClass];
-        }
-  
+          (mainOptions.pitch as unknown as string[]).push(n);
+        }  
       }
 
       if (config.includeMarkers) {
@@ -830,7 +810,7 @@ export class RandomChordsComponent implements OnInit {
 
     }
 
-    let tracks = [ mainTrack];
+    const tracks = [ mainTrack];
     if (bassTrack) {
       tracks.push(bassTrack);
     }

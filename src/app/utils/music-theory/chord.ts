@@ -1,4 +1,9 @@
 import { Note } from "./note";
+import { Scale } from "./scale";
+
+const octavePlacement : { [ index : string ] : number } = {
+  'C' : 0, 'D' : 1, 'E' : 2, 'F' : 3, 'G' : 4, 'A' : 5, 'B' : 6 
+}
 
 export type ChordType = 'triad' | 'sus2' | 'sus4';
 
@@ -14,12 +19,23 @@ export interface ExtensionFlags {
 
 type ChordToneList = { [key : string] : Note };
 
+function degreeToScale(rootDegree : number, chordal : number) {
+  return (chordal-1 + rootDegree-1)%7
+}
+
+
 export class Chord {
-    root : Note;
+    private root : Note;
+    private rootDegree  = 1;
     inversion : InversionType;
     chordType : ChordType;
-    chordTones : ChordToneList = {};
+    private chordTonesCache : ChordToneList = {};
+    private needChordTones  = true;
+
     extensions : ExtensionFlags = {'7th' : false, '9th' : false, '11th' : false};
+
+    // used for SCALE property;
+    private scaleCache : Scale = new Scale("C", 'major')
 
     // not used interally by the class. up to the UI to handle
     keep = false;
@@ -31,8 +47,78 @@ export class Chord {
 
     }
 
-    addChordTone(chordalPosition : number, note : Note) : Chord {
-      this.chordTones[chordalPosition] = note;
+    get chordTones() : ChordToneList {
+      if (this.needChordTones) {
+        this.generate_chord_tones();
+      }
+      return this.chordTonesCache;
+    }
+
+    get scale() : Scale {
+      return this.scaleCache;
+    }
+
+    set scale(s : Scale) {
+      this.scaleCache = s;
+      this.needChordTones = true;
+    }
+
+    setScale(s : Scale ) : Chord {
+      this.scale = s;
+
+      return this;
+    }
+
+    setRoot(root : Note, degree : number) {
+      if (degree <= 0 || degree > 7 )
+        throw Error('Note.setRoot : degree is out of range (1-7)');
+
+      this.root = root;
+      this.rootDegree = degree;
+      this.needChordTones = true;
+    }
+
+    setInversion(inv : InversionType) : Chord {
+      this.inversion = inv;
+
+      return this;
+    }
+
+    setExtension(ext : ExtensionType, value : boolean) : Chord {
+      if (value !== this.extensions[ext]) {
+        this.extensions[ext] = value;
+        this.needChordTones = true;
+      }
+
+      return this;
+    }
+
+    isDim() : boolean {
+      return (this.chordTones[1].interval(this.chordTones[5]) !== 7);
+    }
+
+    deepEqual(o : Chord) {
+      return (this.root === o.root) 
+          && (this.rootDegree === o.rootDegree)
+          && (this.inversion === o.inversion)
+          && (this.chordType === o.chordType)
+          && (this.extensions["7th"] = o.extensions["7th"])
+          && (this.extensions["9th"] = o.extensions["9th"])
+          && (this.extensions["11th"] = o.extensions["11th"])
+    }
+
+    clone() : Chord {
+      const clone = new Chord(this.root, this.chordType, this.inversion);
+      clone.scaleCache = this.scaleCache;
+      clone.rootDegree = this.rootDegree;
+      Object.assign(clone.extensions, this.extensions);
+      clone.keep = this.keep;
+
+      return clone;
+    }
+
+    private addChordTone(chordalPosition : number, note : Note) : Chord {
+      this.chordTonesCache[chordalPosition] = note;
 
       return this;
     }
@@ -48,6 +134,37 @@ export class Chord {
         case 'first' : return '(1)';
         case 'second' : return '(2)';
       }
+    }
+
+    private generate_chord_tones() {
+      this.chordTonesCache = {};
+
+      const scaleNotes = this.scale.notesOfScale();
+
+      this.addChordTone(1, scaleNotes[degreeToScale(this.rootDegree, 1)]);
+      this.addChordTone(5, scaleNotes[degreeToScale(this.rootDegree, 5)]);
+  
+      if (this.chordType === 'sus2') {
+        this.addChordTone(2, scaleNotes[degreeToScale(this.rootDegree, 2)]);
+      } else if (this.chordType === 'sus4') {
+        this.addChordTone(4, scaleNotes[degreeToScale(this.rootDegree, 4)]);
+      } else {
+        this.addChordTone(3, scaleNotes[degreeToScale(this.rootDegree, 3)]);
+      }
+
+      if (this.extensions['7th']) {
+        this.addChordTone(7, scaleNotes[degreeToScale(this.rootDegree, 7)]);
+      }
+      
+      if (this.extensions['9th']) {
+        this.addChordTone(9, scaleNotes[degreeToScale(this.rootDegree, 9)]);
+      }
+  
+      if (this.extensions['11th']) {
+        this.addChordTone(11, scaleNotes[degreeToScale(this.rootDegree, 11)]);
+      }
+  
+      this.needChordTones = false;
     }
 
     name() : string {
@@ -144,7 +261,7 @@ export class Chord {
         if (int1to9 == 1 ) {
             add.push('b9');
         } else if (int1to9 === 2) { // this assumes not phrygian or locrian
-          if (quality === '' && ext === '7') {
+          if (ext === '7') {
             ext = '9';
           } else if (ext !== '7') {
             add.push('9');
@@ -167,11 +284,15 @@ export class Chord {
         const int1to11 = ct[1].interval(ct[11]);
 
         if (int1to11 === 5 ) {
-          if (quality === '' && ext === '9') {
+          if (ext === '9') {
             ext = '11';
           } else if (ext !== '9') {
             add.push('11');
           }
+        } else if (int1to11 === 6 ) {
+          add.push("#11");
+        } else {
+          throw Error("Invalid interval to 11th")
         }
 
 
@@ -224,12 +345,41 @@ export class Chord {
     computeNameDisplay() {
       let n = this.name();
 
-      n = n?.replaceAll('bb', '\uD834\uDD2B' );
-      n = n?.replaceAll('#', '\u266F' );
-      n = n?.replaceAll('b', '\u266D' );
-      n = n?.replaceAll('x', '\uD834\uDD2A' );
+      n = n.replaceAll('bb', '\uD834\uDD2B' );
+      n = n.replaceAll('#', '\u266F' );
+      n = n.replaceAll('b', '\u266D' );
+      n = n.replaceAll('x', '\uD834\uDD2A' );
 
       return n;
+    }
+
+
+    voiceChord() : string[] {
+      const tones : string[] = [];
+      let octave = 3;
+      let last  = -1;
+      let isBassNote = true;
+  
+      for (const c of this.invertedChordTones()) {
+
+        const simpleNote = c.toSharp();
+  
+        if (octavePlacement[simpleNote.noteClass] < last) {
+          octave += 1;
+        }
+        tones.push(simpleNote.note() + octave);
+
+        if (isBassNote) {
+          octave += 1;
+          isBassNote = false;
+        } else {
+          last = octavePlacement[simpleNote.noteClass];
+        }
+  
+      }
+
+      return tones;
+  
     }
 
     invertedChordTones() : Note[] {

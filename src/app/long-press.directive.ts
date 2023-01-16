@@ -2,18 +2,18 @@
 // But modernized
 
 
-import { Directive, EventEmitter, HostListener, Input, Output } from '@angular/core';
+import { Directive, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output } from '@angular/core';
 
 import { Observable, Subject, interval } from 'rxjs';
 
-import { takeUntil,combineLatestWith, map, switchAll, filter, repeat, tap } from 'rxjs/operators';
+import { takeUntil,combineLatestWith, map, switchAll, filter, repeat } from 'rxjs/operators';
 
 @Directive({
     selector: '[longPress]'
 })
-export class LongPressDirective {
-    @Input() public longPress: string = "500";
-    @Output() public onLPRelease: EventEmitter<MouseEvent> = new EventEmitter();
+export class LongPressDirective implements OnInit, OnDestroy {
+    @Input() public longPress = "500";
+    @Output() public LPRelease: EventEmitter<MouseEvent> = new EventEmitter();
 
     private press_timing = 500;
 
@@ -39,7 +39,7 @@ export class LongPressDirective {
           .pipe(map(items => items[1]))
           .pipe(takeUntil(this.destroys$))
           .subscribe((event) => {
-              this.onLPRelease.emit(event as MouseEvent);
+              this.LPRelease.emit(event as MouseEvent);
           });
     }
 

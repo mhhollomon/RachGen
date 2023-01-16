@@ -51,7 +51,7 @@ export class AudioService {
     this.topgain.connect(this.audioContext.destination);
     this.topgain.gain.value = 0;
 
-    for (let i = 0; i < 4; ++i) {
+    for (let i = 0; i < 6; ++i) {
       this.createOsc();
     }
   }
@@ -64,7 +64,7 @@ export class AudioService {
 
     seconds = seconds ? seconds : beepLengthInSeconds;
 
-    for (let i = 0; i < 4; ++i) {
+    for (let i = 0; i < 6; ++i) {
 
       if (i >= notes.length) {
         this.gains[i].gain.value = 0;

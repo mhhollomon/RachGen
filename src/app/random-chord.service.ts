@@ -216,12 +216,12 @@ export class ChordSequenceBuilder {
     const rootDegree = this.noteChooser.choose();
     const note = scale[rootDegree-1];
 
-    chord.root = note;
+    chord.setRoot(note, rootDegree);
 
     chord.chordType = this.chordTypeChooser.choose();
 
 
-    return this.mkchord(this.key, chord, rootDegree);
+    return this.mkchord(this.key, chord);
 
   }
 
@@ -235,9 +235,9 @@ export class ChordSequenceBuilder {
     chord.chordType = this.chordTypeChooser.choose();
 
     const scale = new Scale(note, qualityToScaleType[chQual]);
-    chord.root = note;
+    chord.setRoot(note, 1);
 
-    return this.mkchord(scale, chord, 1);
+    return this.mkchord(scale, chord);
   }
 
   gen_one_chord() : Chord {
@@ -250,49 +250,33 @@ export class ChordSequenceBuilder {
 
   }
 
-  private mkchord(key : Scale, chord : Chord, rootDegree : number) : Chord {
+  private mkchord(key : Scale, chord : Chord) : Chord {
 
+    chord.setScale(key)
+        .setInversion(this.invertChooser.choose())
 
-    const scale = this.scaleService.getScaleNotes(key);
-
-    chord.inversion = this.invertChooser.choose();
-
-    chord.addChordTone(1, scale[degreeToScale(rootDegree, 1)]);
-    chord.addChordTone(5, scale[degreeToScale(rootDegree, 5)]);
 
     // The chord quality is a diminished - can't have a sus chord.
     if ((chord.chordType === 'sus2' || chord.chordType === 'sus4') && 
-            chord.chordTones[1].interval(chord.chordTones[5]) !== 7 ) {
+            chord.isDim()) {
       chord.chordType = 'triad';
     }
 
-    if (chord.chordType === 'sus2') {
-      chord.addChordTone(2, scale[degreeToScale(rootDegree, 2)]);
-    } else if (chord.chordType === 'sus4') {
-      chord.addChordTone(4, scale[degreeToScale(rootDegree, 4)]);
-    } else {
-      chord.addChordTone(3, scale[degreeToScale(rootDegree, 3)]);
-    }
-
-
     if (this.extensions['7th']) {
       if (yesno100(this.extensions['7th'])) {
-        chord.addChordTone(7, scale[degreeToScale(rootDegree, 7)]);
-        chord.extensions['7th'] = true;
+        chord.setExtension('7th', true);
       }
     }
     
     if (this.extensions['9th']) {
       if (yesno100(this.extensions['9th'])) {
-        chord.addChordTone(9, scale[degreeToScale(rootDegree, 9)]);
-        chord.extensions['9th'] = true;
+        chord.setExtension('9th', true);
       }
     }
 
     if (this.extensions['11th']) {
       if (yesno100(this.extensions['11th'])) {
-        chord.addChordTone(11, scale[degreeToScale(rootDegree, 11)]);
-        chord.extensions['11th'] = true;
+        chord.setExtension('11th', true);
       }
     }
 
@@ -301,10 +285,6 @@ export class ChordSequenceBuilder {
 
   }
 
-}
-
-function degreeToScale(rootDegree : number, chordal : number) {
-  return (chordal-1 + rootDegree-1)%7
 }
 
 /********************************************************
