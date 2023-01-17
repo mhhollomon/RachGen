@@ -3,6 +3,7 @@ import { Choice, Chooser, equalWeightedChooser, mkch, yesno } from './utils/choo
 import { Scale, Note, Chord, ScaleType, ChordType, ExtensionType, InversionType } from './utils/music-theory/music-theory';
 import { ScaleService } from './scale.service';
 import { range } from './utils/util-library';
+import { ObjectUnsubscribedError } from 'rxjs';
 
 
 const qualityToScaleType : { [key : string] : ScaleType } = {
@@ -38,7 +39,7 @@ export interface WeightedFlag {
 
 export interface RandomChordCountConfig {
   min : number;
-  max : number | null;
+  max : number;
 }
 
 export interface ExtensionConfg {
@@ -229,6 +230,18 @@ export class ChordSequenceBuilder {
     return this;
   }
 
+  setExtensions(cfg: ExtensionConfg) :  ChordSequenceBuilder  {
+
+    for (const k of Object.keys(this.options.extensions)) {
+      const key = k as ExtensionType;
+
+      this.setExtension(key, cfg[key]);
+    }
+
+    return this;
+
+  }
+
   setExtension(ext : ExtensionType, cfg : WeightedFlag) : ChordSequenceBuilder {
 
     let weight = 0;
@@ -265,6 +278,18 @@ export class ChordSequenceBuilder {
     return this;
   }
 
+  setInversions(cfg: InversionConfg) :  ChordSequenceBuilder  {
+
+    for (const k of Object.keys(this.options.inversions)) {
+      const key = k as InversionType;
+
+      this.setInversion(key, cfg[key]);
+    }
+
+    return this;
+
+  }
+ 
   private anyInversion() : boolean {
     let retval = false;
 
