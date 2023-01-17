@@ -19,6 +19,7 @@ import { PreferencesService } from '../services/preferences.service';
 import { filter } from 'rxjs';
 import { ChordEditDialogComponent } from '../chord-edit-dialog/chord-edit-dialog.component';
 import { GeneratorOptions, ScaleInfo } from '../generator-options/generator-options.component';
+import { DEFAULT_INTERPOLATION_CONFIG } from '@angular/compiler';
 
 
 const HELP_TEXT = `
@@ -176,6 +177,7 @@ const octavePlacement : { [ index : string ] : number } = {
 export class RandomChordsComponent implements OnInit {
 
   generateOptions : GeneratorOptions = {
+    scale_mode : 'Diatonic',
     scale : null,
     count_range_mode : false,
     count : { min : 4, max : 6}, 
@@ -207,8 +209,6 @@ export class RandomChordsComponent implements OnInit {
   show_scale = false;
   show_chord_tones = true;
   scale_notes : Note[] = [];
-
-  mode  = 'Diatonic';
 
   all_play_active = false;
 
@@ -271,9 +271,9 @@ export class RandomChordsComponent implements OnInit {
 
   get panelTitle() : string {
 
-    let retval = this.mode;
+    let retval = this.generateOptions.scale_mode;
     
-    if (this.mode === 'Diatonic' && this.show_chords) {
+    if (this.generateOptions.scale_mode === 'Diatonic' && this.show_chords) {
       if (this.generateOptions.scale) {
         retval = this.generateOptions.scale.fullDisplay();    
       }
@@ -379,7 +379,7 @@ export class RandomChordsComponent implements OnInit {
 
     let picked_key : Scale | null = null;
 
-    if (this.mode === 'Diatonic') {
+    if (this.generateOptions.scale_mode === 'Diatonic') {
 
       if (this.scaleData.source === "Selected") {
         if (this.scaleData.center === 'Random') {
@@ -619,7 +619,7 @@ export class RandomChordsComponent implements OnInit {
       }
     }
 
-    if (this.mode === 'Diatonic' && config.includeScale) {
+    if (this.generateOptions.scale_mode === 'Diatonic' && config.includeScale) {
       if (config.includeMarkers) {
         mainTrack.addMarker(this.generateOptions.scale?.fullName() + " Scale")
       }

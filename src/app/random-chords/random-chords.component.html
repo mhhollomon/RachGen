@@ -20,7 +20,7 @@
 <div class="ba bw1 br3 ph2 min-h-2">
     <div class="mt2"></div>
     <!-- Key Information -->
-    <mat-expansion-panel [disabled]="mode === 'Chromatic' || !show_chords">
+    <mat-expansion-panel [disabled]="generateOptions.scale_mode === 'Chromatic' || !show_chords">
         <mat-expansion-panel-header>
           <mat-panel-title>
             <div class="chord-panel-title-container mt1">

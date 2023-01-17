@@ -4,7 +4,7 @@
         <div class="general-params-item">
             <mat-form-field>
                 <mat-label>Mode</mat-label>
-                <mat-select [(ngModel)]="mode" [disabled]="any_chords_locked()" 
+                <mat-select [(ngModel)]="options.scale_mode" [disabled]="any_chords_locked()" 
                         [matTooltip]="any_chords_locked() ? 'Disabled due chords being locked' : 'Set the key mode'"
                          >
                     <mat-option value="Diatonic">Diatonic</mat-option>

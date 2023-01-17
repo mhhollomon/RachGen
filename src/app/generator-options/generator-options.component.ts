@@ -7,6 +7,7 @@ import { ChordType, InversionType } from '../utils/music-theory/chord';
 import { ScaleType } from '../utils/music-theory/scale';
 
 export interface GeneratorOptions extends RandomChordOptions {
+  scale_mode : string;
   count_range_mode : boolean;
 }
 
@@ -25,6 +26,7 @@ export class GeneratorOptionsComponent {
 
 
   @Input() options : GeneratorOptions = {
+    scale_mode : 'Diatonic',
     scale : null, 
     count_range_mode : false,
     count : { min : 4, max : 6}, 
@@ -54,10 +56,8 @@ export class GeneratorOptionsComponent {
 
   count_range_mode = false;
 
-  mode  = 'Diatonic';
-
   get scale_disabled() : boolean {
-    return this.mode !== 'Diatonic';
+    return this.options.scale_mode !== 'Diatonic';
   };
 
 
