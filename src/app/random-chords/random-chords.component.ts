@@ -9,8 +9,8 @@ import  * as Midiwriter  from 'midi-writer-js'
 
 import { HelpTextEmitterService } from '../services/help-text-emitter.service';
 import {ScaleService } from '../scale.service';
-import { RandomChordService, DuplicateControl, RandomChordError, RandomChordOptions } from '../random-chord.service';
-import { Chord, ChordType, InversionType } from '../utils/music-theory/music-theory';
+import { RandomChordService, RandomChordError, RandomChordOptions } from '../random-chord.service';
+import { Chord } from '../utils/music-theory/music-theory';
 import { Note, Scale, ScaleType } from '../utils/music-theory/music-theory';
 import { AudioService } from '../audio.service';
 import { DOCUMENT } from '@angular/common';
@@ -18,6 +18,7 @@ import { MidiDialogComponent, MidiConfig } from '../midi-dialog/midi-dialog.comp
 import { PreferencesService } from '../services/preferences.service';
 import { filter } from 'rxjs';
 import { ChordEditDialogComponent } from '../chord-edit-dialog/chord-edit-dialog.component';
+import { ScaleInfo } from '../generator-options/generator-options.component';
 
 
 const HELP_TEXT = `
@@ -195,6 +196,8 @@ export class RandomChordsComponent implements OnInit {
     }  
   }
 
+  scaleData : ScaleInfo = {source : 'Random', tonality : 'Major', center : 'C' }
+
 
   chords : Chord[] = [];
 
@@ -202,16 +205,11 @@ export class RandomChordsComponent implements OnInit {
   show_key = true;
   show_scale = false;
   show_chord_tones = true;
-  scale_disabled = false;
   scale_notes : Note[] = [];
 
   count_range_mode = false;
 
   mode  = 'Diatonic';
-  scale_source  = "Random";
-
-  selected_sonority  = 'major';
-  selected_key  = 'Random';
 
   all_play_active = false;
 
@@ -275,6 +273,10 @@ export class RandomChordsComponent implements OnInit {
     return retval;
   }
 
+  scale_info_change(event : ScaleInfo) {
+    this.scaleData = Object.assign({}, event);
+  }
+
   /************* EVENT HANDLERS   *************************/
 
   stopPropagation(evnt : Event) {
@@ -288,18 +290,6 @@ export class RandomChordsComponent implements OnInit {
     this.show_chord_tones = ! this.show_chord_tones;
   }
 
-  range_mode_change() {
-    this.count_range_mode = ! this.count_range_mode;
-
-    if (this.count_range_mode) {
-      if (this.generateOptions.count.min > this.generateOptions.count.max) {
-        const temp = this.generateOptions.count.min;
-        this.generateOptions.count.min = this.generateOptions.count.max;
-        this.generateOptions.count.max = temp;
-      }
-
-    }
-  }
 
   chord_drop(evnt : CdkDragDrop<string[]>) {
     console.log(`Moving ${evnt.previousIndex} to ${evnt.currentIndex}`)
@@ -347,155 +337,6 @@ export class RandomChordsComponent implements OnInit {
   }
 
 
-  yesno_slider_ticks(value : number) : string {
-    return '' + value + '%';
-  }
-
-
-  /************** INVERSION SLIDER FUNCTIONS  **************/
-
-  inversion_slider_ticks(slider : InversionType, value : number) : string {
-
-    let total_weight = 0;
-
-    if (slider === 'root') {
-      total_weight += value;
-    } else if (this.generateOptions.inversions['root'].flag) {
-      total_weight += this.generateOptions.inversions['root'].weight;
-    }
-
-
-    if (slider === 'first') {
-      total_weight += value;
-    } else if (this.generateOptions.inversions['first'].flag) {
-      total_weight += this.generateOptions.inversions['first'].weight;
-    }
-
-
-    if (slider === 'second') {
-      total_weight += value;
-    } else if (this.generateOptions.inversions['second'].flag) {
-      total_weight += this.generateOptions.inversions['second'].weight;
-    }
-
-    const weight = Math.floor(100*value/total_weight);
-
-    return '' + weight + '%';
-
-  }
-
-  mk_inv_slider_func(inv : InversionType) {
-    return (value : number)  => { return this.inversion_slider_ticks(inv, value); }
-  }
-
-
-  // This is to get around a problem that the value
-  // labels (produced by chord_type_slider_ticks)
-  // is cached by the slider itself. So when turn on
-  // (or off) an option, it doesn't update the label until
-  // you move the slider.
-  // This basically artifically moves the slider by updating
-  // the model.
-  inv_checkbox_change() {
-    if (this.generateOptions.inversions['root'].flag) {
-      this.generateOptions.inversions['root'].weight += 0.0001;
-    }
-    if (this.generateOptions.inversions['first'].flag) {
-      this.generateOptions.inversions['first'].weight += 0.0001;
-    }
-    if (this.generateOptions.inversions['second'].flag) {
-      this.generateOptions.inversions['second'].weight += 0.0001;
-    }
-  }
-
-  /************** CHORD TYPE SLIDER FUNCTIONS  **************/
-
-  chord_type_slider_ticks(slider : ChordType, value : number) : string {
-
-    let total_weight = 0;
-
-    if (slider === 'triad') {
-      total_weight += value;
-    } else if (this.generateOptions.chordTypes['triad'].flag) {
-      total_weight += this.generateOptions.chordTypes['triad'].weight;
-    }
-
-
-    if (slider === 'sus2') {
-      total_weight += value;
-    } else if (this.generateOptions.chordTypes['sus2'].flag) {
-      total_weight += this.generateOptions.chordTypes['sus2'].weight;
-    }
-
-
-    if (slider === 'sus4') {
-      total_weight += value;
-    } else if (this.generateOptions.chordTypes['sus4'].flag) {
-      total_weight += this.generateOptions.chordTypes['sus4'].weight;
-    }
-
-    const weight = Math.floor(100*value/total_weight);
-
-    return '' + weight + '%';
-
-  }
-
-  mk_ct_slider_func(ct : ChordType) {
-    return (value : number)  => { return this.chord_type_slider_ticks(ct, value); }
-  }
-
-
-  // This is to get around a problem that the value
-  // labels (produced by chord_type_slider_ticks)
-  // is cached by the slider itself. So when turn on
-  // (or off) an option, it doesn't update the label until
-  // you move the slider.
-  // This basically artifically moves the slider by updating
-  // the model.
-  ct_checkbox_change() {
-    if (this.generateOptions.chordTypes['triad'].flag) {
-      this.generateOptions.chordTypes['triad'].weight += 0.0001;
-    }
-    if (this.generateOptions.chordTypes['sus2'].flag) {
-      this.generateOptions.chordTypes['sus2'].weight += 0.0001;
-    }
-    if (this.generateOptions.chordTypes['sus4'].flag) {
-      this.generateOptions.chordTypes['triad'].weight += 0.0001;
-    }
-  }
-
-
-  turn_on_all() {
-    this.generateOptions.chordTypes['triad'].flag = true;
-    this.generateOptions.chordTypes['sus2'].flag = true;
-    this.generateOptions.chordTypes['sus4'].flag = true;
-
-    this.generateOptions.extensions['7th'].flag = true;
-    this.generateOptions.extensions['9th'].flag = true;
-    this.generateOptions.extensions['11th'].flag = true;
-
-    this.generateOptions.inversions['root'].flag = true;
-    this.generateOptions.inversions['first'].flag = true;
-    this.generateOptions.inversions['second'].flag = true;
-    
-  }
-
-  set_defaults() {
-    this.generateOptions.chordTypes['triad'] = { flag : true, weight : 3};
-    this.generateOptions.chordTypes['sus2'] = { flag : false, weight : 3};;
-    this.generateOptions.chordTypes['sus4'] = { flag : false, weight : 3};;
-
-    this.generateOptions.extensions['7th'] = { flag : true, weight : 25};
-    this.generateOptions.extensions['9th'] = { flag : false, weight : 25};
-    this.generateOptions.extensions['11th'] = { flag : false, weight : 25};
-
-    this.generateOptions.inversions['root'] = { flag : true, weight : 5 };
-    this.generateOptions.inversions['first'] = { flag : false, weight : 3 };
-    this.generateOptions.inversions['second'] = { flag : false, weight : 2 };
-
-  }
-
-
   generate() {
 
     this.all_play_active = false;
@@ -524,15 +365,15 @@ export class RandomChordsComponent implements OnInit {
 
     if (this.mode === 'Diatonic') {
 
-      if (this.scale_source === "Selected") {
-        if (this.selected_key === 'Random') {
-          this.generateOptions.scale = this.scaleService.choose(this.selected_sonority as ScaleType);
+      if (this.scaleData.source === "Selected") {
+        if (this.scaleData.center === 'Random') {
+          this.generateOptions.scale = this.scaleService.choose(this.scaleData.tonality as ScaleType);
         } else {
-          this.generateOptions.scale = new Scale(this.selected_key, this.selected_sonority as ScaleType);
+          this.generateOptions.scale = new Scale(this.scaleData.center, this.scaleData.tonality as ScaleType);
         }
-        } else {
-          this.generateOptions.scale = this.scaleService.choose();
-        }
+      } else {
+        this.generateOptions.scale = this.scaleService.choose();
+      }
       this.scale_notes = this.scaleService.getScaleNotes(this.generateOptions.scale);
       picked_key = this.generateOptions.scale;
       this.show_key = true;
@@ -803,20 +644,5 @@ export class RandomChordsComponent implements OnInit {
 
   }
 
-  mode_change() {
-    this.show_chords = false;
-    this.chords = [];
-    if (this.mode == "Diatonic" ) {
-      this.show_key = true;
-      this.scale_disabled = false;
-    } else {
-      this.show_key = false;
-      this.scale_disabled = true;
-    }
-  }
-
-  getKeyList() : string[] {
-    return this.scaleService.getKeyList(this.selected_sonority as ScaleType);
-  }
 
 }

@@ -1,0 +1,78 @@
+.mdc-fab--mini {
+    transform : scale(0.5);
+}
+
+
+.small-input {
+    // This is tuned to make two of them 
+    // the same size as one "normal"
+    max-width: 106px;
+}
+
+
+.param-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap : 1rem;
+}
+
+.chord-type-container {
+    display : flex;
+    flex-direction: row;
+}
+
+.chord-type-checkbox-container {
+    display : flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap : 0.5rem;
+}
+
+.general-params-container {
+    display : flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    flex : 0 1 auto;
+
+    gap : 1rem;
+
+}
+
+.general-params-item {
+    flex: 0 1 auto;
+}
+
+.chord-count-container {
+    display : grid;
+    grid-template-columns: [controls] 1fr [switch] 2rem ;
+    gap : 1rem;
+    justify-items: center;
+}
+
+.chord-count-icon {
+    grid-column : switch;
+    grid-row-start: 1;
+}
+
+.chord-count-slider {
+    grid-column : controls;
+    justify-self:  stretch;
+    justify-content: center;
+}
+
+.chord-count-input {
+    grid-column : controls;
+    justify-self: center;
+}
+
+.chord-count-slider-width {
+    width : 90%;
+}
+
+.chord-count-icon-button-label {
+    font-size: .75rem;
+}
+
+.config-action-button {
+    margin-right : 0.5rem;
+}

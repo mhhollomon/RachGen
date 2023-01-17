@@ -17,6 +17,7 @@ import { MidiDialogComponent } from './midi-dialog/midi-dialog.component';
 import { PreferencesService } from './services/preferences.service';
 import { PreferenceDialogComponent } from './preference-dialog/preference-dialog.component';
 import { ChordEditDialogComponent } from './chord-edit-dialog/chord-edit-dialog.component';
+import { GeneratorOptionsComponent } from './generator-options/generator-options.component';
 
 @NgModule({
   declarations: [
@@ -28,7 +29,8 @@ import { ChordEditDialogComponent } from './chord-edit-dialog/chord-edit-dialog.
     LongPressDirective,
     MidiDialogComponent,
     PreferenceDialogComponent,
-    ChordEditDialogComponent
+    ChordEditDialogComponent,
+    GeneratorOptionsComponent
   ],
   imports: [
     BrowserModule, 
