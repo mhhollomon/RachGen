@@ -1,7 +1,13 @@
 
 <!--- CONTROLS -->
+<mat-expansion-panel [expanded]="generatorOptionsExpanded" (closed)="generatorOptionsPanelChange(false)" (opened)="generatorOptionsPanelChange(true)">
+    <mat-expansion-panel-header>
+        <mat-panel-title>Generator Options</mat-panel-title>
+    </mat-expansion-panel-header>
 
-<app-generator-options [(options)]="generateOptions" (scaleInfoChange)="scale_info_change($event)"></app-generator-options>
+
+    <app-generator-options [(options)]="generateOptions" (scaleInfoChange)="scale_info_change($event)"></app-generator-options>
+</mat-expansion-panel>
 
 <!-- Generate Button -->
 <div class="db mv4 br2 ma2">

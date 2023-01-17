@@ -6,6 +6,10 @@ import { ScaleService } from '../scale.service';
 import { ChordType, InversionType } from '../utils/music-theory/chord';
 import { ScaleType } from '../utils/music-theory/scale';
 
+export interface GeneratorOptions extends RandomChordOptions {
+  count_range_mode : boolean;
+}
+
 export interface ScaleInfo {
   source : string;
   tonality : string;
@@ -20,8 +24,9 @@ export interface ScaleInfo {
 export class GeneratorOptionsComponent {
 
 
-  @Input() options : RandomChordOptions = {
+  @Input() options : GeneratorOptions = {
     scale : null, 
+    count_range_mode : false,
     count : { min : 4, max : 6}, 
     duplicates : 'none',
     extensions : { 
@@ -41,7 +46,7 @@ export class GeneratorOptionsComponent {
     }  
   }
 
-  @Output()optionsChange = new EventEmitter<RandomChordOptions>;
+  @Output()optionsChange = new EventEmitter<GeneratorOptions>;
 
   @Output() scaleInfoChange = new EventEmitter<ScaleInfo>;
 
@@ -91,16 +96,17 @@ export class GeneratorOptionsComponent {
   }
 
   range_mode_change() {
-    this.count_range_mode = ! this.count_range_mode;
+    this.options.count_range_mode = ! this.options.count_range_mode;
 
-    if (this.count_range_mode) {
+    if (this.options.count_range_mode) {
       if (this.options.count.min > this.options.count.max) {
         const temp = this.options.count.min;
         this.options.count.min = this.options.count.max;
         this.options.count.max = temp;
       }
-
     }
+
+    this.optionsChange.emit(this.options);
   }
 
   yesno_slider_ticks(value : number) : string {
@@ -248,6 +254,9 @@ export class GeneratorOptionsComponent {
     this.options.inversions['root'] = { flag : true, weight : 5 };
     this.options.inversions['first'] = { flag : false, weight : 3 };
     this.options.inversions['second'] = { flag : false, weight : 2 };
+
+    this.scaleData = { source : 'Random', tonality : 'Major', center : 'Random' };
+    this.scaleInfoChange.emit(this.scaleData);
 
   }
 

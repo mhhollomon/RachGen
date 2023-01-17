@@ -31,7 +31,7 @@
         <!-- Two different modes "ranged" and "single" -->
         <div class="general-params-item chord-count-container">
 
-            <ng-template [ngIf]="count_range_mode" [ngIfElse]="singleRangeMode">
+            <ng-template [ngIf]="options.count_range_mode" [ngIfElse]="singleRangeMode">
             <div class="chord-count-input">
                 <mat-form-field  class="small-input">
                     <mat-label>Min Count</mat-label>
@@ -68,11 +68,11 @@
             <!-- Switch range mode -->
             <div class="chord-count-icon">
                 <button mat-mini-fab class="material-symbols-outlined" [disabled]="any_chords_locked()"
-                            matTooltip="Switch to {{ count_range_mode ? 'single' : 'range' }} mode"  
+                            matTooltip="Switch to {{ options.count_range_mode ? 'single' : 'range' }} mode"  
                             (click)="range_mode_change()">
-                    <mat-icon>{{count_range_mode ? 'unfold_less' : 'unfold_more'}}</mat-icon>
+                    <mat-icon>{{options.count_range_mode ? 'unfold_less' : 'unfold_more'}}</mat-icon>
                 </button>
-                <mat-label class="chord-count-icon-button-label mhh-mat-label">{{count_range_mode ? 'SINGLE' : 'RANGE'}}</mat-label>
+                <mat-label class="chord-count-icon-button-label mhh-mat-label">{{options.count_range_mode ? 'SINGLE' : 'RANGE'}}</mat-label>
             </div>
 
         </div>

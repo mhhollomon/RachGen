@@ -18,7 +18,7 @@ import { MidiDialogComponent, MidiConfig } from '../midi-dialog/midi-dialog.comp
 import { PreferencesService } from '../services/preferences.service';
 import { filter } from 'rxjs';
 import { ChordEditDialogComponent } from '../chord-edit-dialog/chord-edit-dialog.component';
-import { ScaleInfo } from '../generator-options/generator-options.component';
+import { GeneratorOptions, ScaleInfo } from '../generator-options/generator-options.component';
 
 
 const HELP_TEXT = `
@@ -175,8 +175,9 @@ const octavePlacement : { [ index : string ] : number } = {
 })
 export class RandomChordsComponent implements OnInit {
 
-  generateOptions : RandomChordOptions = {
-    scale : null, 
+  generateOptions : GeneratorOptions = {
+    scale : null,
+    count_range_mode : false,
     count : { min : 4, max : 6}, 
     duplicates : 'none',
     extensions : { 
@@ -207,8 +208,6 @@ export class RandomChordsComponent implements OnInit {
   show_chord_tones = true;
   scale_notes : Note[] = [];
 
-  count_range_mode = false;
-
   mode  = 'Diatonic';
 
   all_play_active = false;
@@ -218,6 +217,8 @@ export class RandomChordsComponent implements OnInit {
     includeScale : true,
     includeMarkers : false,
   }
+
+  generatorOptionsExpanded = true;
   
 
   constructor(private scaleService : ScaleService,
@@ -230,6 +231,11 @@ export class RandomChordsComponent implements OnInit {
 
     ) {
 
+      // Do this in the constructor to make sure it is set before th view initializes.
+      this.generatorOptionsExpanded = this.preferences.read('gen_opts_panel', true);
+      this.generateOptions = this.preferences.read('gen_opts_data', this.generateOptions);
+
+
   }
 
   ngOnInit(): void {
@@ -238,8 +244,11 @@ export class RandomChordsComponent implements OnInit {
     // Snag any changes to the midi preferences.
     Object.assign(this.midi_config, this.preferences.read('midi', this.midi_config));
 
+
     this.preferences.prefChange.pipe(filter((k)=> k === 'midi')).subscribe(() => {
       Object.assign(this.midi_config, this.preferences.read('midi', this.midi_config));
+
+    
     });
   }
 
@@ -278,6 +287,11 @@ export class RandomChordsComponent implements OnInit {
   }
 
   /************* EVENT HANDLERS   *************************/
+
+  generatorOptionsPanelChange(v : boolean) {
+    this.generatorOptionsExpanded = v;
+    this.preferences.write('gen_opts_panel', v);
+  }
 
   stopPropagation(evnt : Event) {
     evnt.stopPropagation();
@@ -341,7 +355,7 @@ export class RandomChordsComponent implements OnInit {
 
     this.all_play_active = false;
 
-    if (this.count_range_mode) {
+    if (this.generateOptions.count_range_mode) {
       if (this.generateOptions.count.min > this.chord_count_max || this.generateOptions.count.min < 1) {
         return;
       }
@@ -360,6 +374,8 @@ export class RandomChordsComponent implements OnInit {
       this.generateOptions.count.max = this.generateOptions.count.min
 
     }
+
+    this.preferences.write('gen_opts_data', this.generateOptions);
 
     let picked_key : Scale | null = null;
 
