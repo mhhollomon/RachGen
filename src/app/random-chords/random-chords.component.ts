@@ -9,7 +9,7 @@ import  * as Midiwriter  from 'midi-writer-js'
 
 import { HelpTextEmitterService } from '../services/help-text-emitter.service';
 import {ScaleService } from '../scale.service';
-import { RandomChordService, DuplicateControl } from '../random-chord.service';
+import { RandomChordService, DuplicateControl, RandomChordError } from '../random-chord.service';
 import { Chord, ChordType, InversionType } from '../utils/music-theory/music-theory';
 import { Note, Scale, ScaleType } from '../utils/music-theory/music-theory';
 import { AudioService } from '../audio.service';
@@ -589,17 +589,18 @@ export class RandomChordsComponent implements OnInit {
       let error_msg = 'oopsy - unknown error';
       if (typeof e === "string") {
         error_msg = e;
+      } else if (e instanceof RandomChordError) {
+        error_msg = e.message;
       } else if (e instanceof Error) {
           error_msg = e.message;
           if (e.stack) {
             error_msg += "\n" + e.stack;
           }
-
-        this.dialog.open(ErrorDialogComponent, {
-          data: error_msg,
-        });
-
       }
+
+      this.dialog.open(ErrorDialogComponent, {
+        data: error_msg,
+      });
     }
 
   }
