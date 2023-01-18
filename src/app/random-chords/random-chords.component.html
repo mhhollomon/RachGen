@@ -49,7 +49,7 @@
     <!-- Chord Information -->
 
     <!-- Action Header -->
-    <div class="chord-container ml1 pb3">
+    <div class="chord-action-header-container ml1 pb3">
         <div class="chord-lock">
             <button mat-icon-button class="material-symbols-outlined" (click)="unlock_all_chords()"
                     *ngIf="show_chords" matTooltip="Unlock all chords">
@@ -62,7 +62,7 @@
                 <mat-icon>{{all_play_active ? 'stop' : 'fast_forward'}}</mat-icon>
             </button>
         </div>
-        <div class="chord-tones">
+        <div class="chord-add-action">
             <button mat-icon-button class="material-symbols-outlined" (click)="add_chord()"
                     *ngIf="show_chords" matTooltip="Add a new chord to the top of the chord list">
                 <mat-icon>add</mat-icon>
