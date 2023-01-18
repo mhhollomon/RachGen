@@ -6,7 +6,7 @@
     </mat-expansion-panel-header>
 
 
-    <app-generator-options [(options)]="generateOptions" (scaleInfoChange)="scale_info_change($event)"></app-generator-options>
+    <app-generator-options [options]="gen_opts()" (optionsChange)="generate_options_change($event)"   (scaleInfoChange)="scale_info_change($event)"></app-generator-options>
 </mat-expansion-panel>
 
 <!-- Generate Button -->
@@ -62,6 +62,12 @@
                 <mat-icon>{{all_play_active ? 'stop' : 'fast_forward'}}</mat-icon>
             </button>
         </div>
+        <div class="chord-tones">
+            <button mat-icon-button class="material-symbols-outlined" (click)="add_chord()"
+                    *ngIf="show_chords" matTooltip="Add a new chord to the top of the chord list">
+                <mat-icon>add</mat-icon>
+            </button>
+        </div>
     </div>
 
     <div cdkDropList cdkDropListLockAxis="y" (cdkDropListDropped)="chord_drop($event)">
@@ -88,10 +94,18 @@
                 <span class="dib mh2" *ngFor="let t of c.invertedChordTones()" >{{t.noteDisplay()}}</span>
             </div>
             
-            <div class="chord-edit">
+            <div class="right-action">
                 <button class="dif material-symbols-outlined"
-                            matTooltip="Edit parts of the chord" (click)="edit_chord_modal(i)" mat-icon-button>
+                            matTooltip="Edit parts of the chord" (click)="edit_chord_modal(i)" [disabled]="chord_locked(i)" mat-icon-button>
                     <mat-icon>edit</mat-icon>
+                </button>
+                <button class="dif material-symbols-outlined"
+                            matTooltip="generate a new chord" (click)="generate_new_chord(i)" [disabled]="chord_locked(i)" mat-icon-button>
+                    <mat-icon>casino</mat-icon>
+                </button>
+                <button class="dif material-symbols-outlined"
+                            matTooltip="Delete chord" (click)="delete_chord(i)" [disabled]="chord_locked(i)" mat-icon-button>
+                    <mat-icon>delete</mat-icon>
                 </button>
             </div>
 

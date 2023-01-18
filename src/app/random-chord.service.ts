@@ -358,7 +358,7 @@ export class ChordSequenceBuilder {
   }
 
   /* This tries to find a chord that meets the duplicates criteria */
-  find_a_chord(index : number) : Chord {
+  private find_a_chord(index : number) : Chord {
 
     let try_again = true;
     let newChord = new Chord();
@@ -430,7 +430,7 @@ export class ChordSequenceBuilder {
     return this.mkchord(scale, chord);
   }
 
-  gen_one_chord() : Chord {
+  private gen_one_chord() : Chord {
 
     if (this.options.scale) {
       return this.gen_diatonic_chord();

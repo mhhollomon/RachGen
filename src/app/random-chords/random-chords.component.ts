@@ -18,7 +18,7 @@ import { MidiDialogComponent, MidiConfig } from '../midi-dialog/midi-dialog.comp
 import { PreferencesService } from '../services/preferences.service';
 import { filter } from 'rxjs';
 import { ChordEditDialogComponent } from '../chord-edit-dialog/chord-edit-dialog.component';
-import { GeneratorOptions, ScaleInfo } from '../generator-options/generator-options.component';
+import { GeneratorOptions, ScaleInfo, defaultGeneratorOptions } from '../generator-options/generator-options.component';
 
 
 const HELP_TEXT = `
@@ -175,28 +175,7 @@ const octavePlacement : { [ index : string ] : number } = {
 })
 export class RandomChordsComponent implements OnInit {
 
-  generateOptions : GeneratorOptions = {
-    scale_mode : 'Diatonic',
-    scale : null,
-    count_range_mode : false,
-    count : { min : 4, max : 6}, 
-    duplicates : 'none',
-    extensions : { 
-      '7th'  : { flag : true,  weight : 25 }, 
-      '9th'  : { flag : false, weight : 25 }, 
-      '11th' : { flag : false, weight : 25 },
-    },
-    inversions : {
-      'root'   : { flag : true,  weight : 5 },
-      'first'  : { flag : false, weight : 3 },
-      'second' : { flag : false, weight : 2 },
-    },
-    chordTypes : {
-      'triad' : { flag : true,  weight : 3 },
-      'sus2'  : { flag : false, weight : 3 },
-      'sus4'  : { flag : false, weight : 3 },
-    }  
-  }
+  generateOptions : GeneratorOptions = defaultGeneratorOptions();
 
   scaleData : ScaleInfo = {source : 'Random', tonality : 'Major', center : 'C' }
 
@@ -285,7 +264,23 @@ export class RandomChordsComponent implements OnInit {
     this.scaleData = Object.assign({}, event);
   }
 
+  gen_opts() : GeneratorOptions {
+    return Object.assign({}, this.generateOptions);
+  }
+
   /************* EVENT HANDLERS   *************************/
+
+  generate_options_change(event : GeneratorOptions) {
+    if (event.scale_mode !== this.generateOptions.scale_mode) {
+      this.chords = [];
+      this.show_chords = false;
+    }
+
+    this.generateOptions = Object.assign({}, event);
+    if (this.generateOptions.scale_mode === 'Chromatic') {
+      this.generateOptions.scale = null;
+    }
+  }
 
   generatorOptionsPanelChange(v : boolean) {
     this.generatorOptionsExpanded = v;
@@ -305,7 +300,6 @@ export class RandomChordsComponent implements OnInit {
 
 
   chord_drop(evnt : CdkDragDrop<string[]>) {
-    console.log(`Moving ${evnt.previousIndex} to ${evnt.currentIndex}`)
     moveItemInArray(this.chords, evnt.previousIndex, evnt.currentIndex);
   }
 
@@ -318,6 +312,41 @@ export class RandomChordsComponent implements OnInit {
       }
 
     })
+  }
+
+  delete_chord(chord_index : number) {
+
+    this.chords.splice(chord_index, 1);
+  }
+
+  add_chord() {
+    const newChord = new Chord();
+
+    // For chromatic mode
+    let scale = this.generateOptions.scale
+    if (scale === null) {
+      scale = new Scale('C', 'major');
+    }
+
+    newChord.setScale(scale)
+        .setRootFromDegree(1)
+
+    this.chords.unshift(newChord);
+    this.edit_chord_modal(0);
+  }
+
+  generate_new_chord(chord_index : number) {
+    const builder = this.randomChordService.builder();
+
+    // override count to just do one.
+    builder.setOptions(this.generateOptions)
+      .setCount({min : 1, max : 1});
+
+    const newChords = builder.generate_chords();
+
+    this.chords[chord_index] = newChords[0];
+
+
   }
 
   /********   CHORD LOCKING ***************/
@@ -372,6 +401,10 @@ export class RandomChordsComponent implements OnInit {
 
       this.generateOptions.count.max = this.generateOptions.count.min
 
+    }
+
+    if (this.generateOptions.scale_mode === 'Chromatic') {
+      this.generateOptions.scale = null;
     }
 
     this.preferences.write('gen_opts_data', this.generateOptions);

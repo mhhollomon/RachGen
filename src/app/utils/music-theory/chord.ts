@@ -61,6 +61,7 @@ export class Chord {
     set scale(s : Scale) {
       this.scaleCache = s;
       this.needChordTones = true;
+      this.setRootFromDegree(this.rootDegree);
     }
 
     setScale(s : Scale ) : Chord {
@@ -100,9 +101,12 @@ export class Chord {
       if (degree <= 0 || degree > 7 )
         throw Error('Note.setRootFromDegree : degree is out of range (1-7)');
 
-      if (degree !== this.rootDegree) {
+      // if needChordTones then something else about the chord
+      // has changed, it might be the scale, so rootCache needs
+      // to be recalculated.
+      if (degree !== this.rootDegree || this.needChordTones) {
         this.rootDegree = degree;
-        this.rootCache = this.scale.notesOfScale()[degree - 1];
+        this.rootCache = this.scaleCache.notesOfScale()[degree - 1];
         this.needChordTones = true;
       }
 

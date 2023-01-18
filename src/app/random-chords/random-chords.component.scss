@@ -1,7 +1,7 @@
 
 %chord-container-styles  {
     display : grid;
-    grid-template-columns: [lockbutton] 3rem [playbutton] 2rem [chordname] minmax(5rem, 15rem) [tones] minmax(8rem, 1fr) [editbutton] 3rem;
+    grid-template-columns: [lockbutton] 3rem [playbutton] 2rem [chordname] minmax(5rem, 15rem) [tones] minmax(8rem, 1fr) [right-action] auto;
     column-gap: 0.5rem;
     border-bottom : 1px #888888 solid;
     transition: background 0.75s;
@@ -43,10 +43,10 @@
     justify-self: start;
 }
 
-.chord-edit {
-    grid-column-start:  edit-button;
+.chord-action {
+    grid-column-start:  right-action;
     align-self: center;
-    justify-self: center;
+    justify-self: right;
 }
 
 

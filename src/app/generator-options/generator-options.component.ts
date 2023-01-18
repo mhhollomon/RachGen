@@ -11,6 +11,32 @@ export interface GeneratorOptions extends RandomChordOptions {
   count_range_mode : boolean;
 }
 
+
+export function defaultGeneratorOptions() : GeneratorOptions {
+  return {
+    scale_mode : 'Diatonic',
+    scale : null, 
+    count_range_mode : false,
+    count : { min : 4, max : 6}, 
+    duplicates : 'none',
+    extensions : { 
+      '7th'  : { flag : true,  weight : 30 }, 
+      '9th'  : { flag : false, weight : 30 }, 
+      '11th' : { flag : false, weight : 30 },
+    },
+    inversions : {
+      'root'   : { flag : true,  weight : 5 },
+      'first'  : { flag : false, weight : 3 },
+      'second' : { flag : false, weight : 2 },
+    },
+    chordTypes : {
+      'triad' : { flag : true,  weight : 3 },
+      'sus2'  : { flag : false, weight : 3 },
+      'sus4'  : { flag : false, weight : 3 },
+    }  
+  }
+}
+
 export interface ScaleInfo {
   source : string;
   tonality : string;
@@ -25,28 +51,7 @@ export interface ScaleInfo {
 export class GeneratorOptionsComponent {
 
 
-  @Input() options : GeneratorOptions = {
-    scale_mode : 'Diatonic',
-    scale : null, 
-    count_range_mode : false,
-    count : { min : 4, max : 6}, 
-    duplicates : 'none',
-    extensions : { 
-      '7th'  : { flag : true,  weight : 25 }, 
-      '9th'  : { flag : false, weight : 25 }, 
-      '11th' : { flag : false, weight : 25 },
-    },
-    inversions : {
-      'root'   : { flag : true,  weight : 5 },
-      'first'  : { flag : false, weight : 3 },
-      'second' : { flag : false, weight : 2 },
-    },
-    chordTypes : {
-      'triad' : { flag : true,  weight : 3 },
-      'sus2'  : { flag : false, weight : 3 },
-      'sus4'  : { flag : false, weight : 3 },
-    }  
-  }
+  @Input() options : GeneratorOptions = defaultGeneratorOptions();
 
   @Output()optionsChange = new EventEmitter<GeneratorOptions>;
 
@@ -79,6 +84,12 @@ export class GeneratorOptionsComponent {
   }
 
   constructor(private scaleService : ScaleService) {}
+
+  scale_mode_change(event : MatSelectChange) {
+    this.options.scale_mode = event.value;
+    if (event.value === 'Chromatic') this.options.scale = null;
+    this.optionsChange.emit(Object.assign({}, this.options));
+  }
 
   scale_source_change(event : MatRadioChange) {
     this.scaleData.source = event.value;
@@ -243,17 +254,8 @@ export class GeneratorOptionsComponent {
   }
 
   set_defaults() {
-    this.options.chordTypes['triad'] = { flag : true, weight : 3};
-    this.options.chordTypes['sus2'] = { flag : false, weight : 3};;
-    this.options.chordTypes['sus4'] = { flag : false, weight : 3};;
 
-    this.options.extensions['7th'] = { flag : true, weight : 25};
-    this.options.extensions['9th'] = { flag : false, weight : 25};
-    this.options.extensions['11th'] = { flag : false, weight : 25};
-
-    this.options.inversions['root'] = { flag : true, weight : 5 };
-    this.options.inversions['first'] = { flag : false, weight : 3 };
-    this.options.inversions['second'] = { flag : false, weight : 2 };
+    Object.assign(this.options, defaultGeneratorOptions());
 
     this.scaleData = { source : 'Random', tonality : 'Major', center : 'Random' };
     this.scaleInfoChange.emit(this.scaleData);
