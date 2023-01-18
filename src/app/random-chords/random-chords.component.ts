@@ -308,7 +308,7 @@ export class RandomChordsComponent implements OnInit {
     
     dia.afterClosed().subscribe((newChord) => {
       if (newChord) {
-        this.chords[chord_index] = Object.assign(this.chords[chord_index], newChord);
+        this.chords[chord_index] = newChord.clone();
       }
 
     })

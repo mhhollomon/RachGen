@@ -18,6 +18,7 @@ import { PreferencesService } from './services/preferences.service';
 import { PreferenceDialogComponent } from './preference-dialog/preference-dialog.component';
 import { ChordEditDialogComponent } from './chord-edit-dialog/chord-edit-dialog.component';
 import { GeneratorOptionsComponent } from './generator-options/generator-options.component';
+import { EditCustomComponent } from './chord-edit-dialog/edit-custom/edit-custom.component';
 
 @NgModule({
   declarations: [
@@ -30,7 +31,8 @@ import { GeneratorOptionsComponent } from './generator-options/generator-options
     MidiDialogComponent,
     PreferenceDialogComponent,
     ChordEditDialogComponent,
-    GeneratorOptionsComponent
+    GeneratorOptionsComponent,
+    EditCustomComponent
   ],
   imports: [
     BrowserModule, 

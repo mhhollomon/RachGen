@@ -1,4 +1,7 @@
 <h1 mat-dialog-title>Chord Edit</h1>
+
+<mat-tab-group [selectedIndex]="startTab" (selectedTabChange)="change_tabs($event)" >
+    <mat-tab label="Standard">
 <div mat-dialog-content>
     <br>
     <mat-button-toggle-group name="root-note" (change)="root_note_change($event)" [value]="current_root_note()" aria-label="Root Note">
@@ -43,3 +46,8 @@
     <button mat-button mat-dialog-close><span class="material-symbols-outlined">cancel</span></button>
     <button mat-button [mat-dialog-close]="chord"><span class="material-symbols-outlined">check</span></button>
 </div>
+    </mat-tab>
+    <mat-tab label="Custom">
+        <app-edit-custom [chord]="customChord"></app-edit-custom>
+    </mat-tab>
+</mat-tab-group>

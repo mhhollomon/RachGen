@@ -1,11 +1,11 @@
 import { Component, Inject } from '@angular/core';
 import { MatButtonToggleChange } from '@angular/material/button-toggle';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatRadioChange } from '@angular/material/radio';
-import { MatSelectChange } from '@angular/material/select';
+import { MatTabChangeEvent } from '@angular/material/tabs';
 import { AudioService } from '../audio.service';
 import { PreferencesService } from '../services/preferences.service';
-import { Chord, ChordType } from '../utils/music-theory/chord';
+import { CustomChord } from '../utils/custom-chord';
+import { Chord } from '../utils/music-theory/chord';
 
 const audition_pref_name = 'edit_audition'
 
@@ -16,11 +16,26 @@ const audition_pref_name = 'edit_audition'
 })
 export class ChordEditDialogComponent {
 
+  startTab : number;
+  customChord : CustomChord = new CustomChord();
+
+  customNotValid = true;
+
   constructor(
     @Inject(MAT_DIALOG_DATA) public chord : Chord,
     private audioService : AudioService,
     private preferences : PreferencesService
       ) {
+
+        if (this.chord instanceof CustomChord) {
+          console.log("This is a custom chord");
+          (this.chord as CustomChord).copy(this.customChord);
+          this.customNotValid = false;
+          this.startTab = 1;
+        } else {
+          console.log("This is a standard chord");
+          this.startTab = 0;
+        }
 
         this.auditionCache = this.preferences.read(audition_pref_name, true);
 
@@ -51,6 +66,15 @@ export class ChordEditDialogComponent {
 
   current_root_note() : string {
     return this.chord.getRootName();
+  }
+
+  change_tabs(event : MatTabChangeEvent) {
+    if (event.index === 1 && this.customNotValid) {
+      this.customChord = new CustomChord(this.chord); 
+      this.customNotValid = false;     
+
+    }
+
   }
 
   async audition_chord(event? : Event ) {

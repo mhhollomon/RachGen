@@ -1,0 +1,21 @@
+<h1 mat-dialog-title>Chord Edit</h1>
+
+<div mat-dialog-content>
+    <br>
+    <mat-form-field>
+        <mat-label>Chord Name</mat-label>
+        <input matNativeControl [(ngModel)]="chord.nameCache">
+    </mat-form-field>
+
+    <div *ngFor="let n of chord.notes; let i = index">
+    <mat-button-toggle-group name="root-note" (change)="note_change(i, $event)" [value]="n.note()" aria-label="Root Note">
+        <mat-button-toggle value="{{n}}" *ngFor="let n of chromatic_list()"><span class="f7">{{n}}</span></mat-button-toggle>
+    </mat-button-toggle-group>
+    </div>
+    <button mat-button (click)="add_a_tone()"><span class="material-symbols-outlined">add</span></button>
+
+
+<div mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close><span class="material-symbols-outlined">cancel</span></button>
+    <button mat-button [mat-dialog-close]="chord"><span class="material-symbols-outlined">check</span></button>
+</div>

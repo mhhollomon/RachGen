@@ -86,7 +86,7 @@ export class Chord {
     get root() : Note { return this.rootCache; }
     getRootName() : string { return this.rootCache.note(); }
 
-    setRoot(root : Note, degree : number) : Chord {
+    setRoot(root : Note, degree : number) : this {
       if (degree <= 0 || degree > 7 )
         throw Error('Note.setRoot : degree is out of range (1-7)');
 
@@ -97,7 +97,7 @@ export class Chord {
       return this;
     }
 
-    setRootFromDegree(degree : number) : Chord {
+    setRootFromDegree(degree : number) : this {
       if (degree <= 0 || degree > 7 )
         throw Error('Note.setRootFromDegree : degree is out of range (1-7)');
 
@@ -114,13 +114,13 @@ export class Chord {
 
     }
 
-    setInversion(inv : InversionType) : Chord {
+    setInversion(inv : InversionType) : this {
       this.inversion = inv;
 
       return this;
     }
 
-    setExtension(ext : ExtensionType, value : boolean) : Chord {
+    setExtension(ext : ExtensionType, value : boolean) : this {
       if (value !== this.extensions[ext]) {
         this.extensions[ext] = value;
         this.needChordTones = true;
@@ -153,7 +153,19 @@ export class Chord {
       return clone;
     }
 
-    private addChordTone(chordalPosition : number, note : Note) : Chord {
+    protected copy(o : Chord) {
+      o.rootCache = this.rootCache;
+      o.rootDegree = this.rootDegree;
+      o.scaleCache = this.scaleCache;
+      Object.assign(o.extensions, this.extensions);
+      o.inversion =this.inversion;
+      o.chordTypeCache = this.chordTypeCache;
+
+      o.keep = this.keep;
+
+    }
+
+    private addToToneCache(chordalPosition : number, note : Note) : Chord {
       this.chordTonesCache[chordalPosition] = note;
 
       return this;
@@ -177,27 +189,27 @@ export class Chord {
 
       const scaleNotes = this.scale.notesOfScale();
 
-      this.addChordTone(1, scaleNotes[degreeToScale(this.rootDegree, 1)]);
-      this.addChordTone(5, scaleNotes[degreeToScale(this.rootDegree, 5)]);
+      this.addToToneCache(1, scaleNotes[degreeToScale(this.rootDegree, 1)]);
+      this.addToToneCache(5, scaleNotes[degreeToScale(this.rootDegree, 5)]);
   
       if (this.chordType === 'sus2') {
-        this.addChordTone(2, scaleNotes[degreeToScale(this.rootDegree, 2)]);
+        this.addToToneCache(2, scaleNotes[degreeToScale(this.rootDegree, 2)]);
       } else if (this.chordType === 'sus4') {
-        this.addChordTone(4, scaleNotes[degreeToScale(this.rootDegree, 4)]);
+        this.addToToneCache(4, scaleNotes[degreeToScale(this.rootDegree, 4)]);
       } else {
-        this.addChordTone(3, scaleNotes[degreeToScale(this.rootDegree, 3)]);
+        this.addToToneCache(3, scaleNotes[degreeToScale(this.rootDegree, 3)]);
       }
 
       if (this.extensions['7th']) {
-        this.addChordTone(7, scaleNotes[degreeToScale(this.rootDegree, 7)]);
+        this.addToToneCache(7, scaleNotes[degreeToScale(this.rootDegree, 7)]);
       }
       
       if (this.extensions['9th']) {
-        this.addChordTone(9, scaleNotes[degreeToScale(this.rootDegree, 9)]);
+        this.addToToneCache(9, scaleNotes[degreeToScale(this.rootDegree, 9)]);
       }
   
       if (this.extensions['11th']) {
-        this.addChordTone(11, scaleNotes[degreeToScale(this.rootDegree, 11)]);
+        this.addToToneCache(11, scaleNotes[degreeToScale(this.rootDegree, 11)]);
       }
   
       this.needChordTones = false;
