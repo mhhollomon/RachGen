@@ -47,6 +47,8 @@ export type ScaleType = keyof typeof ScaleTypeEnum;
 export class Scale {
     rootNote : Note;
     scaleType : ScaleType;
+
+    private notesCache : Note[] | null = null;
  
 
     constructor(rootNote : string | Note, scaleType : ScaleType ) {
@@ -79,6 +81,10 @@ export class Scale {
     id() { return this.fullName(); }
 
     notesOfScale() : Note[] {
+
+        if (this.notesCache)
+            return this.notesCache;
+        
         const notes :Note[] = [];
     
         const scaleSteps = scaleStepData[this.scaleType];
@@ -115,6 +121,8 @@ export class Scale {
           notes.push(new Note(genericNotes[index].name, newAlter));
           scaleDegree += 1;
         }
+
+        this.notesCache = notes;
         
         return notes;
     

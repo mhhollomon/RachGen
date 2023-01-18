@@ -11,7 +11,7 @@ import {MatInputModule} from '@angular/material/input';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatFormFieldModule, MAT_FORM_FIELD_DEFAULT_OPTIONS} from '@angular/material/form-field';
 import {MatCheckboxModule} from '@angular/material/checkbox';
-import {MatRadioModule} from '@angular/material/radio';
+import {MatRadioModule, MAT_RADIO_DEFAULT_OPTIONS} from '@angular/material/radio';
 import {MatGridListModule} from '@angular/material/grid-list';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatTooltipModule, MAT_TOOLTIP_DEFAULT_OPTIONS} from '@angular/material/tooltip';
@@ -47,8 +47,9 @@ import {DragDropModule} from '@angular/cdk/drag-drop';
     ],
     providers: [
         {provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: {appearance: 'outline', floatLabel: 'always'}},
-        {provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue : {showDelay : 1000, }}
-      ],
+        {provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue : {showDelay : 1000, }},
+        {provide: MAT_RADIO_DEFAULT_OPTIONS, useValue: { color: 'accent' }, },
+    ],
     
 })
 export class MaterialModule {}

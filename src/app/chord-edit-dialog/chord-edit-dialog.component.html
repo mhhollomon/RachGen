@@ -1,11 +1,28 @@
 <h1 mat-dialog-title>Chord Edit</h1>
 <div mat-dialog-content>
+    <br>
+    <mat-form-field>
+        <mat-label>Root Note</mat-label>
+        <mat-select [value]="current_root_note()" (selectionChange)="root_note_change($event)">
+            <mat-option value="{{n.note()}}" *ngFor="let n of chord.scale.notesOfScale()">{{n.noteDisplay()}}</mat-option>
+        </mat-select>
+    </mat-form-field>
+
     <div>
-    <mat-label class="mr2 mt2 mhh-mat-label">Inversion</mat-label>
-        <mat-radio-group [(ngModel)]="chord.inversion">       
-            <mat-radio-button value="root"  (click)="audition_chord()" matTooltip="Chord to root position">Root</mat-radio-button>
-            <mat-radio-button value="first"  (click)="audition_chord()" matTooltip="Chord to first inversion">First Inv</mat-radio-button>
-            <mat-radio-button value="second" (click)="audition_chord()" matTooltip="Chord to second inversion">Second Inv</mat-radio-button>
+        <mat-label class="mr2 mt2 mhh-mat-label">Inversion</mat-label>
+        <mat-radio-group name="inversion-rb" [(ngModel)]="chord.inversion">       
+            <mat-radio-button name="inversion-rb" value="root"   (click)="audition_chord()" matTooltip="Chord to root position">Root</mat-radio-button>
+            <mat-radio-button name="inversion-rb" value="first"  (click)="audition_chord()" matTooltip="Chord to first inversion">First Inv</mat-radio-button>
+            <mat-radio-button name="inversion-rb" value="second" (click)="audition_chord()" matTooltip="Chord to second inversion">Second Inv</mat-radio-button>
+        </mat-radio-group>
+    </div>
+
+    <div>
+        <mat-label class="mr2 mt2 mhh-mat-label">Type</mat-label>
+        <mat-radio-group name="chord-type-rb" [(ngModel)]="chord.chordType">       
+            <mat-radio-button name="chord-type-rb" value="triad" (click)="audition_chord()" matTooltip="Change chord to a triad">Triad</mat-radio-button>
+            <mat-radio-button name="chord-type-rb" value="sus2"  [disabled]="chord.isDim()" (click)="audition_chord($event)" matTooltip="Change chord to a Sus2">Sus2</mat-radio-button>
+            <mat-radio-button name="chord-type-rb" value="sus4"  [disabled]="chord.isDim()" (click)="audition_chord($event)" matTooltip="Change chord to a sus4">Sus4</mat-radio-button>
         </mat-radio-group>
     </div>
 

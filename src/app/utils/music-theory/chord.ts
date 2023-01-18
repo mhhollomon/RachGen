@@ -25,10 +25,10 @@ function degreeToScale(rootDegree : number, chordal : number) {
 
 
 export class Chord {
-    private root : Note;
+    private rootCache : Note;
     private rootDegree  = 1;
     inversion : InversionType;
-    chordType : ChordType;
+    private chordTypeCache : ChordType = 'triad';
     private chordTonesCache : ChordToneList = {};
     private needChordTones  = true;
 
@@ -41,7 +41,7 @@ export class Chord {
     keep = false;
   
     constructor(root  = new Note('C'),  chordType : ChordType = 'triad', inversion : InversionType = 'root') {
-      this.root = root;
+      this.rootCache = root;
       this.inversion = inversion;
       this.chordType = chordType;
 
@@ -69,13 +69,45 @@ export class Chord {
       return this;
     }
 
-    setRoot(root : Note, degree : number) {
+    get chordType() { return this.chordTypeCache; }
+    set chordType(ct : ChordType ) {
+      this.setChordType(ct);
+    }
+
+    setChordType(t : ChordType) {
+      if (t !== this.chordType ) {
+        this.chordTypeCache = t;
+        this.needChordTones = true;
+      }
+      return this;
+    }
+
+    get root() : Note { return this.rootCache; }
+    getRootName() : string { return this.rootCache.note(); }
+
+    setRoot(root : Note, degree : number) : Chord {
       if (degree <= 0 || degree > 7 )
         throw Error('Note.setRoot : degree is out of range (1-7)');
 
-      this.root = root;
+      this.rootCache = root;
       this.rootDegree = degree;
       this.needChordTones = true;
+
+      return this;
+    }
+
+    setRootFromDegree(degree : number) : Chord {
+      if (degree <= 0 || degree > 7 )
+        throw Error('Note.setRootFromDegree : degree is out of range (1-7)');
+
+      if (degree !== this.rootDegree) {
+        this.rootDegree = degree;
+        this.rootCache = this.scale.notesOfScale()[degree - 1];
+        this.needChordTones = true;
+      }
+
+      return this;
+
     }
 
     setInversion(inv : InversionType) : Chord {

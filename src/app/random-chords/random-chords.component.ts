@@ -9,7 +9,7 @@ import  * as Midiwriter  from 'midi-writer-js'
 
 import { HelpTextEmitterService } from '../services/help-text-emitter.service';
 import {ScaleService } from '../scale.service';
-import { RandomChordService, RandomChordError, RandomChordOptions } from '../random-chord.service';
+import { RandomChordService, RandomChordError } from '../random-chord.service';
 import { Chord } from '../utils/music-theory/music-theory';
 import { Note, Scale, ScaleType } from '../utils/music-theory/music-theory';
 import { AudioService } from '../audio.service';
@@ -19,7 +19,6 @@ import { PreferencesService } from '../services/preferences.service';
 import { filter } from 'rxjs';
 import { ChordEditDialogComponent } from '../chord-edit-dialog/chord-edit-dialog.component';
 import { GeneratorOptions, ScaleInfo } from '../generator-options/generator-options.component';
-import { DEFAULT_INTERPOLATION_CONFIG } from '@angular/compiler';
 
 
 const HELP_TEXT = `
