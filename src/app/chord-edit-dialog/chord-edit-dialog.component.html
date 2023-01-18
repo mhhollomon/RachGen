@@ -1,12 +1,9 @@
 <h1 mat-dialog-title>Chord Edit</h1>
 <div mat-dialog-content>
     <br>
-    <mat-form-field>
-        <mat-label>Root Note</mat-label>
-        <mat-select [value]="current_root_note()" (selectionChange)="root_note_change($event)">
-            <mat-option value="{{n.note()}}" *ngFor="let n of chord.scale.notesOfScale()">{{n.noteDisplay()}}</mat-option>
-        </mat-select>
-    </mat-form-field>
+    <mat-button-toggle-group name="root-note" (change)="root_note_change($event)" [value]="current_root_note()" aria-label="Root Note">
+        <mat-button-toggle value="{{n.note()}}" *ngFor="let n of chord.scale.notesOfScale()"><span class="f7">{{n.noteDisplay()}}</span></mat-button-toggle>
+    </mat-button-toggle-group>
 
     <div>
         <mat-label class="mr2 mt2 mhh-mat-label">Inversion</mat-label>

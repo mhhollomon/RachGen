@@ -1,4 +1,5 @@
 import { Component, Inject } from '@angular/core';
+import { MatButtonToggleChange } from '@angular/material/button-toggle';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatRadioChange } from '@angular/material/radio';
 import { MatSelectChange } from '@angular/material/select';
@@ -42,7 +43,7 @@ export class ChordEditDialogComponent {
   get eleventh() { return this.chord.extensions['11th']; }
   set eleventh(v : boolean) { this.chord.setExtension('11th', v)}
 
-  root_note_change(event : MatSelectChange) {
+  root_note_change(event : MatButtonToggleChange) {
     let rootDegree = this.chord.scale.notesOfScale().map((v)=> v.note()).indexOf(event.value);
     this.chord.setRoot(this.chord.scale.notesOfScale()[rootDegree], rootDegree+1);
     this.audition_chord();
