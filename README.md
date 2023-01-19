@@ -1,27 +1,41 @@
-# MusicStuff
+# RAndom CHord GENerator
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 15.0.1.
+[https://mhhollomon.github.io/RachGen/](https://mhhollomon.github.io/RachGen/)
 
-## Development server
+A random chord and progression generator.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+- Generates a list of chords based on options you provide.
+- Lets you tweak the list including
+    - editing individual chords
+    - "Rolling the dice" for a new chord.
+    - Locking chords you like
+- List to individual chords or the entire list
+- Download midi for the chords.
 
-## Code scaffolding
+## Latest change log
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+### Add Chords
+- You can add a new chord to the top of list. It will always start out as the tonic, root position chord for the key you are in.
+However, it will immediately pop up the edit window to allow you to change that.
 
-## Build
+### Edit
+- You can edit more parts of the chord 
+- It is now disabled if the chord is locked
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+### Delete
+- You can delete a chord
+- It is disabled if the chord is locked
 
-## Running unit tests
+### Replace Chord
+- You can now generate a new chord for a single line without having to lock all the others.
+However, unlike the locks, it does not honor the duplicates control and will happily give you
+a duplicate (or the same chord if you're really unlucky).
+- It is disabled if the chord is locked.
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
 
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+### Custom Chords
+When editing there is now a new "Custom" tab that will let you take control and use exactly the notes you want.
+Thanks to @Gdaddy  for suggesting this feature.
+Please consider this experimental and do let me know if you stumble across a bug.
+Note : The tab you are on makes a difference when you hit the check button to apply your changes.
+If you are on the custom tab, you will get a custom chord, if you are on the "Standard" tab, you will get a standard chord. 
