@@ -1,4 +1,27 @@
 
+/* The first row in the list of chords that contain column actions */
+.chord-action-header-container {
+    display : grid;
+    grid-template-columns: [lockbutton] 3rem [playbutton] 2rem [add-area] 1fr [empty] 5em;
+    column-gap: 0.5rem;
+    border-bottom : 1px #888888 solid;
+    transition: background 0.75s;
+
+}
+
+.chord-add-action {
+    grid-column-start:  add-area;
+    align-self: center;
+    justify-self: center;
+}
+
+
+
+//*******************************************
+// Main body of the chord list
+//*******************************************
+
+
 %chord-container-styles  {
     display : grid;
     grid-template-columns: [lockbutton] 3rem [playbutton] 2rem [chordname] minmax(5rem, 15rem) [tones] minmax(8rem, 1fr) [right-action] auto;
@@ -7,16 +30,17 @@
     transition: background 0.75s;
 }
 
-.chord-container {
+.chord-row-container {
     @extend %chord-container-styles;
+    position : relative;
 }
 
-:host-context(.darkMode) .chord-container.playing {
+:host-context(.darkMode) .chord-row-container.playing {
     @extend %chord-container-styles;
     background-color : #212121;
 }
 
-.chord-container.playing {
+.chord-row-container.playing {
     @extend %chord-container-styles;
     background-color : #d1d1d1;
 }
@@ -39,8 +63,19 @@
 
 .chord-tones {
     grid-column-start:  tones;
+    display : flex;
+    width: 100%;
+    height : 100%;
     align-self: center;
-    justify-self: start;
+    justify-self: flex-start;
+    justify-content: flex-start;
+    align-content: center;
+    align-items: center;
+}
+
+.one-chord-tone {
+    display : flex;
+    align-content: center;  
 }
 
 .chord-action {
@@ -49,22 +84,47 @@
     justify-self: right;
 }
 
-.chord-action-header-container {
-    display : grid;
-    grid-template-columns: [lockbutton] 3rem [playbutton] 2rem [add-area] 1fr;
-    column-gap: 0.5rem;
-    border-bottom : 1px #888888 solid;
-    transition: background 0.75s;
+//*******************************
+// Hovers for the add buttons
+//*******************************
 
+.hover-item {
+    display : none;
+    // bleah - can't transition on display
+    // leave here just in case you can in the future.
+    transition-property: display;
+    transition-duration: 5s;
+    position : absolute;
+    border : 1px solid rgb(250, 250, 250);
+    width : 2rem;
 }
 
-.chord-add-action {
-    grid-column-start:  add-area;
-    align-self: center;
-    justify-self: center;
+:host-context(.darkMode) .hover-item {
+    display : none;
+    position : absolute;
+    border : 1px solid rgb(48, 48, 48);
+}
+
+.hover-item.hover-top {
+    border-radius : 0 0 50% 50%;
+    left : 50%;
+    top : 0;
+}
+
+.hover-item.hover-bottom {
+    border-radius: 50% 50% 0 0;
+    left : 50%;
+    bottom : 0;
+}
+
+.chord-tones:hover .hover-item {
+    display: block;
 }
 
 
+/********************************************
+ * Styles for the expansion panel at the top of the chord list
+ ********************************************/
 .chord-panel-title-container {
     display : grid;
     grid-template-columns: [lockbutton] 3rem [key] 7rem [buttons] 1fr;
@@ -99,3 +159,5 @@
     // the same size as one "normal"
     max-width: 106px;
 }
+
+

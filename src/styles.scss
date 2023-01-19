@@ -61,3 +61,13 @@ table {
 .darkMode .bg-light-gray {
     background-color: rgb(82, 78, 78);
 }
+
+.accent-colors {
+    background-color: mat.get-color-from-palette(theme.$dartmouth-green-palette, default);
+    color: mat.get-color-from-palette(theme.$dartmouth-green-palette, default-contrast);
+}
+
+.accent-colors:active {
+    background-color: mat.get-color-from-palette(theme.$dartmouth-green-palette, 500);
+    color: mat.get-color-from-palette(theme.$dartmouth-green-palette, default-contrast);
+}

@@ -18,6 +18,8 @@ export class AppComponent implements OnInit {
   current_help_text = 'None';
   current_help_page = 'Unknown';
 
+  header_text = 'Random Chord Generator';
+
   darkMode = false;
 
 
@@ -37,6 +39,21 @@ export class AppComponent implements OnInit {
         })
 
         this.darkMode = this.theme_service.isDarkMode();
+
+        let mq = window.matchMedia("(max-width: 500px)");
+
+        mq.addEventListener("change", () => {this.changeText(mq)})
+
+        
+
+    }
+
+    changeText( mq : MediaQueryList,) {
+        if (mq.matches) {
+            this.header_text = 'RachGen'
+        } else {
+            this.header_text = 'Random Chord Generator';
+        }
     }
 
     openHelpDialog() {

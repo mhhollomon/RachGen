@@ -7,3 +7,32 @@ a.header-link {
     cursor: pointer;
     text-decoration: none;
 }
+
+.header-container {
+    display : grid;
+    grid-template-columns: [logo] 60px [name] minmax(min-content, 1fr) [icons] max-content;
+    width : 100%;
+    gap : 0.25rem;
+    margin : 0;
+}
+
+.header-logo {
+    grid-column-start: logo;
+    align-self : center;
+    justify-self: center;
+}
+
+.header-name {
+    grid-column-start: name;
+    justify-self : start;
+    align-self : center;
+    margin-left : 0.5rem;
+}
+
+.header-buttons {
+    grid-column-start: icons;
+    justify-self : end;
+    align-self : center;
+    display : flex;
+    justify-content: right;
+}

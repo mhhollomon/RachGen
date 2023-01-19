@@ -319,7 +319,7 @@ export class RandomChordsComponent implements OnInit {
     this.chords.splice(chord_index, 1);
   }
 
-  add_chord() {
+  add_chord(pos : 'before' | 'after', index : number) {
     const newChord = new Chord();
 
     // For chromatic mode
@@ -329,11 +329,15 @@ export class RandomChordsComponent implements OnInit {
     }
 
     newChord.setScale(scale)
-        .setRootFromDegree(1)
+        .setRootFromDegree(1);
 
-    this.chords.unshift(newChord);
-    this.edit_chord_modal(0);
+    if (pos === 'after') index += 1;
+
+    this.chords.splice(index, 0, newChord)
+
+    this.edit_chord_modal(index);
   }
+
 
   generate_new_chord(chord_index : number) {
     const builder = this.randomChordService.builder();

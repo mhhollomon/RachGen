@@ -26,11 +26,13 @@
             <div class="chord-panel-title-container mt1">
                 <label class="mhh-mat-label chord-panel-title-key mr2">{{panelTitle}}</label>
                 <div class="chord-panel-title-buttons">
+                    <!--
                     <button mat-icon-button class="material-symbols-outlined"
                                 matTooltip="Show/Hide the actual chord tones"  
                                 (click)="chord_tone_change($event)">
                         <mat-icon>{{ show_chord_tones ? 'visibility_off' : 'visibility' }} </mat-icon>
                     </button>
+                -->
                     <button class="ml4 ba br2" mat-icon-button class="material-symbols-outlined" 
                             matTooltip="Download midi file for the chords" [disabled]="midi_disabled"
                             (click)="wait_for_midi('click', $event)" 
@@ -49,7 +51,7 @@
     <!-- Chord Information -->
 
     <!-- Action Header -->
-    <div class="chord-action-header-container ml1 pb3">
+    <div class="chord-action-header-container ml1 pv2">
         <div class="chord-lock">
             <button mat-icon-button class="material-symbols-outlined" (click)="unlock_all_chords()"
                     *ngIf="show_chords" matTooltip="Unlock all chords">
@@ -63,7 +65,7 @@
             </button>
         </div>
         <div class="chord-add-action">
-            <button mat-icon-button class="material-symbols-outlined" (click)="add_chord()"
+            <button mat-icon-button class="material-symbols-outlined" (click)="add_chord('before', 0)"
                     *ngIf="show_chords" matTooltip="Add a new chord to the top of the chord list">
                 <mat-icon>add</mat-icon>
             </button>
@@ -72,7 +74,7 @@
 
     <div cdkDropList cdkDropListLockAxis="y" (cdkDropListDropped)="chord_drop($event)">
 
-        <div class="chord-container chord-index-{{i}} ml1 pb3" cdkDrag *ngFor="let c of chords; let i=index">
+        <div class="chord-row-container chord-index-{{i}} ml1 pv2" cdkDrag *ngFor="let c of chords; let i=index">
             <div class="chord-lock">
                 <button mat-icon-button class="chord-lock" [color]="chord_locked(i) ? 'accent' : ''" 
                         class="material-symbols-outlined" matTooltip="Lock chord" (click)="lock_chord(i)">
@@ -91,7 +93,11 @@
                 <span class="dif">{{c.computeNameDisplay()}}</span>
             </div>
             <div class="chord-tones" *ngIf="show_chord_tones">
+                <button class="hover-item accent-colors hover-top" (click)="add_chord('before', i)">+</button>
+                <button class="hover-item accent-colors hover-bottom" (click)="add_chord('after', i)">+</button>
+                <div class="one-chord-tone">
                 <span class="dib mh2" *ngFor="let t of c.invertedChordTones()" >{{t.noteDisplay()}}</span>
+                </div>
             </div>
             
             <div class="right-action">
