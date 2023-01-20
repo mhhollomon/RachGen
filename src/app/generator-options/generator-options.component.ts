@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatRadioChange } from '@angular/material/radio';
 import { MatSelectChange } from '@angular/material/select';
-import { RandomChordOptions } from '../random-chord.service';
+import { DuplicateControl, RandomChordOptions } from '../random-chord.service';
 import { ScaleService } from '../scale.service';
 import { ChordType, InversionType } from '../utils/music-theory/chord';
 import { ScaleType } from '../utils/music-theory/scale';
@@ -59,8 +59,6 @@ export class GeneratorOptionsComponent {
 
   scaleData : ScaleInfo = {source: 'Random', tonality : 'major', center : 'Random'}
 
-  count_range_mode = false;
-
   get scale_disabled() : boolean {
     return this.options.scale_mode !== 'Diatonic';
   };
@@ -83,6 +81,16 @@ export class GeneratorOptionsComponent {
     return 6;
   }
 
+  // Need to set a level of indirection on these
+  get inversions() { return this.options.inversions; }
+  get extensions() { return this.options.extensions; }
+  get chordTypes() { return this.options.chordTypes; }
+  get count() { return this.options.count; }
+  get count_range_mode() { return this.options.count_range_mode; }
+  set count_range_mode(m : boolean) { this.options.count_range_mode = m; }
+
+  get duplicates() { return this.options.duplicates; }
+
   constructor(private scaleService : ScaleService) {}
 
   scale_mode_change(event : MatSelectChange) {
@@ -104,6 +112,11 @@ export class GeneratorOptionsComponent {
   scale_center_change(event : MatSelectChange) {
     this.scaleData.center = event.value;
     this.scaleInfoChange.emit(this.scaleData);
+  }
+
+  duplicate_change(event : MatSelectChange) {
+    this.options.duplicates = event.value;
+    this.optionsChange.emit(Object.assign({}, this.options));
   }
 
   range_mode_change() {
@@ -255,9 +268,14 @@ export class GeneratorOptionsComponent {
 
   set_defaults() {
 
-    Object.assign(this.options, defaultGeneratorOptions());
+    const def = defaultGeneratorOptions();
 
-    this.scaleData = { source : 'Random', tonality : 'Major', center : 'Random' };
+    Object.assign(this.options, def);
+
+    this.optionsChange.emit(this.options);
+
+
+    this.scaleData = { source : 'Random', tonality : 'major', center : 'Random' };
     this.scaleInfoChange.emit(this.scaleData);
 
   }

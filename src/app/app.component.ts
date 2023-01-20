@@ -27,7 +27,7 @@ export class AppComponent implements OnInit {
         private router: Router, 
         public dialog: MatDialog, 
         private help_text : HelpTextEmitterService,
-        private theme_service : ThemeService
+        private theme_service : ThemeService,
         ) {
     }
 
@@ -48,6 +48,11 @@ export class AppComponent implements OnInit {
 
         mq.addEventListener("change", () => {this.changeText(mq)})
 
+
+        // Make sure we notice if the theme changes from somewhere else.
+        this.theme_service.themeChange.subscribe(() => {
+            this.darkMode = this.theme_service.isDarkMode();
+        });
         
 
     }
@@ -76,11 +81,6 @@ export class AppComponent implements OnInit {
 
     toggleDarkMode() {
         this.darkMode = ! this.darkMode;
-
-        if (this.darkMode) {
-            this.theme_service.setTheme('dark');
-        } else {
-            this.theme_service.setTheme('light');
-        }
+        this.theme_service.setTheme((this.darkMode ? 'dark' : 'light'));
     }
 }
