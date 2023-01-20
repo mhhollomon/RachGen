@@ -48,12 +48,14 @@ export class PreferencesService implements OnInit {
       let retval : any = null;
       try {
         retval = JSON.parse(blob);
+        return retval;
       } catch(e) {
         console.log(e);
       }
     }
 
     return fallback;
+
 
   }
 
