@@ -248,6 +248,9 @@ export class GeneratorOptionsComponent {
     if (this.options.chordTypes['sus4'].flag) {
       this.options.chordTypes['triad'].weight += 0.0001;
     }
+
+    this.optionsChange.emit(this.options);
+
   }
 
 
@@ -263,6 +266,8 @@ export class GeneratorOptionsComponent {
     this.options.inversions['root'].flag = true;
     this.options.inversions['first'].flag = true;
     this.options.inversions['second'].flag = true;
+
+    this.optionsChange.emit(this.options);
     
   }
 

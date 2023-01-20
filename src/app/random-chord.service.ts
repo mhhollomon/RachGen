@@ -116,6 +116,7 @@ export class ChordSequenceBuilder {
       .setExtension('7th', cfg.extensions['7th'])
       .setExtension('9th', cfg.extensions['9th'])
       .setExtension('11th', cfg.extensions['11th'])
+      .setInversions(cfg.inversions)
       .setChordTypes(cfg.chordTypes)
 
     return this;
