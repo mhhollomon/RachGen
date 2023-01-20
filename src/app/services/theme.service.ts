@@ -1,11 +1,13 @@
 import { Injectable, Inject, EventEmitter } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
+import { PreferencesService } from './preferences.service';
+import { filter } from 'rxjs';
 
 
 export type ThemeType = 'dark' | 'light';
 
-const ls_key = 'rg.theme';
-const old_key = 'theme';
+const prefs_key = 'theme';
+const default_theme : ThemeType = 'light';
 
 @Injectable({
   providedIn: 'root'
@@ -15,18 +17,21 @@ export class ThemeService {
   private theme : ThemeType = 'light';
   public themeChange = new EventEmitter();
 
-  constructor(@Inject(DOCUMENT) private document: Document) {
-    const savedValue = localStorage.getItem(ls_key);
+  constructor(
+    @Inject(DOCUMENT) private document: Document,
+    private prefs : PreferencesService,
+  ) {
+    const savedValue = this.prefs.read(prefs_key, default_theme);
+    this.setTheme(savedValue as ThemeType);
 
-    console.log('localStorage = ', savedValue);
-    if (savedValue) {
-        this.setTheme(savedValue as ThemeType);
-    } else {
-      const old_value = localStorage.getItem(old_key);
-      if (old_value) {
-        this.setTheme(old_value as ThemeType);
-      }
-    }
+    this.prefs.prefChange.pipe(filter((k) => k===prefs_key)).subscribe(()=>{
+      this.prefs_change();
+    })
+
+  }
+
+  prefs_change() {
+    this.setTheme(this.prefs.read(prefs_key, default_theme));
   }
 
 
@@ -42,7 +47,7 @@ export class ThemeService {
 
       this.theme = newTheme;
       this.themeChange.emit(newTheme);
-      localStorage.setItem(ls_key, this.theme);
+      this.prefs.write(prefs_key, newTheme)
     }
 
   }

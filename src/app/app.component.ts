@@ -40,7 +40,11 @@ export class AppComponent implements OnInit {
 
         this.darkMode = this.theme_service.isDarkMode();
 
-        let mq = window.matchMedia("(max-width: 500px)");
+        // Window Size
+        let mq = window.matchMedia("only screen and (max-width: 700px)");
+
+        // check at the start
+        this.changeText(mq);
 
         mq.addEventListener("change", () => {this.changeText(mq)})
 

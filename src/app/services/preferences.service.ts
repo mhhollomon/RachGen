@@ -35,4 +35,26 @@ export class PreferencesService {
     }
 
   }
+
+  clear_settings() {
+    let i = 0;
+    let stop = false;
+
+    // get rid of the old "theme" preference
+    localStorage.removeItem('theme');
+
+    while(! stop) {
+      let key = localStorage.key(i) as  string;
+      if (key != null) {
+        if (key.substring(0, prefix.length+1) === (prefix + '.')) {
+          localStorage.removeItem(key);
+          this.prefChange.emit(key.substring(prefix.length+1));
+        } else {
+          i += 1;
+        }
+      } else {
+        stop = true;
+      }
+    }
+  }
 }

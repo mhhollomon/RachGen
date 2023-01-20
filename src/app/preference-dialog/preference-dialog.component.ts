@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { ClearSettingsDialogComponent } from '../clear-settings-dialog/clear-settings-dialog.component';
 import { MidiConfig } from '../midi-dialog/midi-dialog.component';
 import { PreferencesService } from '../services/preferences.service';
 
@@ -17,7 +19,10 @@ export class PreferenceDialogComponent {
 
   midi_changed = false;
 
-  constructor(private prefs : PreferencesService) {
+  constructor(
+    public dialog: MatDialog, 
+    private prefs : PreferencesService,
+    ) {
     const midi = prefs.read('midi', null);
     if (midi) {
       Object.assign(this.midi_config, midi);
@@ -32,6 +37,17 @@ export class PreferenceDialogComponent {
 
   midi_change() {
     this.midi_changed = true;
+  }
+
+  clear_settings() {
+    const dia = this.dialog.open(ClearSettingsDialogComponent);
+
+    dia.afterClosed().subscribe((data) => {
+      if (data) {
+        this.prefs.clear_settings();
+      }
+    })
+
   }
 
 }
