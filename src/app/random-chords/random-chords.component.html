@@ -100,6 +100,10 @@
                 </div>
             </div>
             
+            <div class="chord-scale">
+                <span class="dib mh2">{{c.scale.fullDisplay()}}</span>
+            </div>
+
             <div class="right-action">
                 <button class="dif material-symbols-outlined"
                             matTooltip="Edit parts of the chord" (click)="edit_chord_modal(i)" [disabled]="chord_locked(i)" mat-icon-button>

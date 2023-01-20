@@ -24,7 +24,7 @@
 
 %chord-container-styles  {
     display : grid;
-    grid-template-columns: [lockbutton] 3rem [playbutton] 2rem [chordname] minmax(5rem, 15rem) [tones] minmax(8rem, 1fr) [right-action] auto;
+    grid-template-columns: [lockbutton] 3rem [playbutton] 2rem [chordname] minmax(5rem, 15rem) [tones] minmax(8rem, 40rem) [scale] 1fr [right-action] auto;
     column-gap: 0.5rem;
     border-bottom : 1px #888888 solid;
     transition: background 0.75s;
@@ -69,13 +69,18 @@
     align-self: center;
     justify-self: flex-start;
     justify-content: flex-start;
-    align-content: center;
     align-items: center;
 }
 
 .one-chord-tone {
     display : flex;
     align-content: center;  
+}
+
+.chord-scale {
+    grid-column-start:  scale;
+    align-self: center;
+    justify-self: right;
 }
 
 .chord-action {

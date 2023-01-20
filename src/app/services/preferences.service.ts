@@ -29,10 +29,15 @@ export class PreferencesService {
     const blob = localStorage.getItem(realkey);
 
     if (blob) {
-      return JSON.parse(blob);
-    } else {
-      return fallback;
+      let retval : any = null;
+      try {
+        retval = JSON.parse(blob);
+      } catch(e) {
+        console.log(e);
+      }
     }
+    
+    return fallback;
 
   }
 
