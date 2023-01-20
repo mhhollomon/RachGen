@@ -1,13 +1,29 @@
-import { EventEmitter, Injectable, Output } from '@angular/core';
+import { EventEmitter, Injectable, OnInit, Output } from '@angular/core';
 
 const prefix = 'rg';
 
 @Injectable({
   providedIn: 'root'
 })
-export class PreferencesService {
+export class PreferencesService implements OnInit {
 
   @Output() public prefChange: EventEmitter<string> = new EventEmitter();
+
+  ngOnInit() {
+    const blob = localStorage.getItem('rg.theme');
+
+    if (blob) {
+
+      let retval : any = null;
+      try {
+        retval = JSON.parse(blob);
+      } catch(e) {
+        this.write('theme', 'light');
+      }
+    }
+
+
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   write(key : string, data : any) {
@@ -36,7 +52,7 @@ export class PreferencesService {
         console.log(e);
       }
     }
-    
+
     return fallback;
 
   }
