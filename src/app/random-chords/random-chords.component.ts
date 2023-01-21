@@ -19,6 +19,8 @@ import { PreferencesService } from '../services/preferences.service';
 import { filter } from 'rxjs';
 import { ChordEditDialogComponent } from '../chord-edit-dialog/chord-edit-dialog.component';
 import { GeneratorOptions, ScaleInfo, defaultGeneratorOptions } from '../generator-options/generator-options.component';
+import { NewListDialogComponent } from '../new-list-dialog/new-list-dialog.component';
+import { ConfirmActionDialogComponent } from '../confirm-action-dialog/confirm-action-dialog.component';
 
 
 const HELP_TEXT = `
@@ -361,6 +363,32 @@ export class RandomChordsComponent implements OnInit {
     this.chords[chord_index] = newChords[0];
 
 
+  }
+
+  start_new_list() {
+    if (this.chords_exist) {
+      const dia = this.dialog.open(ConfirmActionDialogComponent, { data: "Removing All Existing Chords"});
+
+      dia.afterClosed().subscribe((confirm) => {
+        if (confirm) {
+          this.chords = [];
+          const dia = this.dialog.open(NewListDialogComponent);
+
+          dia.afterClosed().subscribe((opts) => {
+            this.generate_options_change(opts);
+            this.generate();
+          });
+        }
+      });
+    } else {
+      const dia = this.dialog.open(NewListDialogComponent);
+
+      dia.afterClosed().subscribe((opts) => {
+        this.generate_options_change(opts);
+        this.generate();
+      });
+
+    }
   }
 
   /********   CHORD LOCKING ***************/

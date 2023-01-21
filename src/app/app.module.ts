@@ -20,6 +20,7 @@ import { ChordEditDialogComponent } from './chord-edit-dialog/chord-edit-dialog.
 import { GeneratorOptionsComponent } from './generator-options/generator-options.component';
 import { EditCustomComponent } from './chord-edit-dialog/edit-custom/edit-custom.component';
 import { ConfirmActionDialogComponent } from './confirm-action-dialog/confirm-action-dialog.component';
+import { NewListDialogComponent } from './new-list-dialog/new-list-dialog.component';
 
 @NgModule({
   declarations: [
@@ -34,7 +35,8 @@ import { ConfirmActionDialogComponent } from './confirm-action-dialog/confirm-ac
     ChordEditDialogComponent,
     GeneratorOptionsComponent,
     EditCustomComponent,
-    ConfirmActionDialogComponent
+    ConfirmActionDialogComponent,
+    NewListDialogComponent
   ],
   imports: [
     BrowserModule, 

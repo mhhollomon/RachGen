@@ -1,17 +1,8 @@
 
-<!--- CONTROLS -->
-<mat-expansion-panel [expanded]="generatorOptionsExpanded" (closed)="generatorOptionsPanelChange(false)" (opened)="generatorOptionsPanelChange(true)">
-    <mat-expansion-panel-header>
-        <mat-panel-title>Generator Options</mat-panel-title>
-    </mat-expansion-panel-header>
 
-
-    <app-generator-options [options]="gen_opts()" (optionsChange)="generate_options_change($event)"   (scaleInfoChange)="scale_info_change($event)"></app-generator-options>
-</mat-expansion-panel>
-
-<!-- Generate Button -->
+<!-- New List Button -->
 <div class="db mv4 br2 ma2">
-    <button  mat-raised-button id="generate_chords_button" color="primary" (click)="generate()">Generate Chords</button>
+    <button  mat-raised-button id="generate_chords_button" color="primary" (click)="start_new_list()">Start New List</button>
 </div>
 <!--
     --------------------------- OUTPUT ------------------------------------
@@ -140,3 +131,13 @@
         </div>
     </div>
 </div>
+
+<br>
+<!--- CONTROLS -->
+<mat-expansion-panel [expanded]="generatorOptionsExpanded" (closed)="generatorOptionsPanelChange(false)" (opened)="generatorOptionsPanelChange(true)">
+    <mat-expansion-panel-header>
+        <mat-panel-title>Generator Options</mat-panel-title>
+    </mat-expansion-panel-header>
+
+    <app-generator-options [options]="gen_opts()" (optionsChange)="generate_options_change($event)"   (scaleInfoChange)="scale_info_change($event)"></app-generator-options>
+</mat-expansion-panel>
