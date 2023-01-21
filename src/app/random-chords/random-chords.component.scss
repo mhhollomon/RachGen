@@ -1,18 +1,42 @@
 
+$medium-width : 700px;
+$desktop-width : 800px;
+
 /* The first row in the list of chords that contain column actions */
 .chord-action-header-container {
     display : grid;
-    grid-template-columns: [lockbutton] 3rem [playbutton] 2rem [add-area] 1fr [empty] 5em;
+    grid-template-columns: [lock-button] 3rem [play-button] 2rem [add-area] 1fr [right-action] minmax(3rem, auto);
     column-gap: 0.5rem;
     border-bottom : 1px #888888 solid;
     transition: background 0.75s;
+    position : relative;
 
+}
+
+.chord-header-lock {
+    grid-column-start: lock-button;
+    align-self: center;
+}
+
+.chord-header-play {
+    grid-column-start: play-button;
+    align-self: center;
+    justify-self: center;
 }
 
 .chord-add-action {
     grid-column-start:  add-area;
     align-self: center;
     justify-self: center;
+    // To align with the hover buttons in the row below
+    // And the action buttons on its own row. trial-and-error.
+    position: absolute;
+    top : calc(50% - 1.5rem);
+    left : calc(50% - 3.5rem);
+}
+
+.header-right-action {
+    grid-column-start:  right-action;
 }
 
 
@@ -21,10 +45,9 @@
 // Main body of the chord list
 //*******************************************
 
-
 %chord-container-styles  {
     display : grid;
-    grid-template-columns: [lockbutton] 3rem [playbutton] 2rem [chordname] minmax(5rem, 15rem) [tones] minmax(8rem, 40rem) [scale] 1fr [right-action] auto;
+    grid-template-columns: [lock-button] 3rem [play-button] 2rem [chord-main] minmax(10rem, 1fr) [right-action] minmax(3rem, auto);
     column-gap: 0.5rem;
     border-bottom : 1px #888888 solid;
     transition: background 0.75s;
@@ -45,49 +68,94 @@
     background-color : #d1d1d1;
 }
 
+//------------------------
+// columns in chord-row-container
+//------------------------
+
 .chord-lock {
-    grid-column-start: lockbutton;
+    grid-column-start: lock-button;
     align-self: center;
 }
 
 .chord-play {
-    grid-column-start: playbutton;
+    grid-column-start: play-button;
     align-self: center;
     justify-self: center;
 }
 
-.chord-name {
-    grid-column-start: chordname;
-    align-self: center;
-}
-
-.chord-tones {
-    grid-column-start:  tones;
-    display : flex;
+.chord-main {
+    grid-column-start:  chord-main;
     width: 100%;
     height : 100%;
     align-self: center;
     justify-self: flex-start;
-    justify-content: flex-start;
-    align-items: center;
 }
 
-.one-chord-tone {
-    display : flex;
-    align-content: center;  
-}
-
-.chord-scale {
-    grid-column-start:  scale;
-    align-self: center;
-    justify-self: left;
-}
-
-.chord-action {
+.chord-right-action {
     grid-column-start:  right-action;
     align-self: center;
     justify-self: right;
 }
+
+
+
+//---- container for the chord-main area
+
+.chord-main-container {
+    display : grid;
+    grid-template-columns: [hover-col] 1px [chord-name chord-tones chord-scale] minmax(10rem, 1fr);
+    align-items: center;
+    justify-items : start;
+    gap : 1rem;
+
+}
+
+@media only screen and (min-width : $medium-width) {
+    .chord-main-container {
+        grid-template-columns: [hover-col] 1px [chord-name] minmax(4em, 12rem) [chord-tones chord-scale] minmax(10rem, 1fr);
+    }
+
+}
+
+@media only screen and (min-width : $desktop-width) {
+    .chord-main-container {
+        grid-template-columns: [hover-col] 1px [chord-name] minmax(4em, 12rem) [chord-tones] minmax(4rem, 12rem) [chord-scale] 1fr;
+    }
+
+}
+
+     
+
+//-----------------
+// Columns inside chord-main
+
+.chord-main-hover {
+    grid-column-start:  hover-col;
+}
+
+.chord-name {
+    grid-column-start: chord-name;
+    align-self : center;
+    font-weight : bold;
+}
+
+@media (min-width : $medium-width) {
+    .chord-name {
+        font-weight : normal;
+    }
+}
+
+.chord-tones {
+    grid-column-start: chord-tones;
+    display : flex;
+    flex-wrap: wrap;
+    gap : 1rem;
+}
+
+.chord-scale {
+    grid-column-start: chord-scale;
+}
+
 
 //*******************************
 // Hovers for the add buttons
@@ -98,7 +166,7 @@
     // bleah - can't transition on display
     // leave here just in case you can in the future.
     transition-property: display;
-    transition-duration: 5s;
+    transition-duration: 1s;
     position : absolute;
     border : 1px solid rgb(250, 250, 250);
     width : 2rem;
@@ -122,7 +190,7 @@
     bottom : 0;
 }
 
-.chord-tones:hover .hover-item {
+.chord-main:hover .hover-item {
     display: block;
 }
 

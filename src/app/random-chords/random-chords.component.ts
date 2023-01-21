@@ -182,10 +182,8 @@ export class RandomChordsComponent implements OnInit {
 
   chords : Chord[] = [];
 
-  show_chords = false;
   show_key = true;
   show_scale = false;
-  show_chord_tones = true;
   scale_notes : Note[] = [];
 
   all_play_active = false;
@@ -230,6 +228,8 @@ export class RandomChordsComponent implements OnInit {
     });
   }
 
+  get chords_exist() { return this.chords.length > 0; }
+
   get chord_count_max() : number {
     if (this.generateOptions.duplicates !== 'none') {
       return 30;
@@ -251,14 +251,19 @@ export class RandomChordsComponent implements OnInit {
 
     let retval = this.generateOptions.scale_mode;
     
-    if (this.generateOptions.scale_mode === 'Diatonic' && this.show_chords) {
-      if (this.generateOptions.scale) {
+    if (this.generateOptions.scale_mode === 'Diatonic') {
+
+      if (this.generateOptions.scale && this.generateOptions.scale instanceof Scale) {
         retval = this.generateOptions.scale.fullDisplay();    
       }
     }
 
     return retval;
   }
+
+  get default_scale() { return this.generateOptions.scale; }
+
+  default_scale_exists() { return this.default_scale != null && this.default_scale instanceof Scale; }
 
   scale_info_change(event : ScaleInfo) {
     this.scaleData = Object.assign({}, event);
@@ -273,7 +278,6 @@ export class RandomChordsComponent implements OnInit {
   generate_options_change(event : GeneratorOptions) {
     if (event.scale_mode !== this.generateOptions.scale_mode) {
       this.chords = [];
-      this.show_chords = false;
     }
 
     this.generateOptions = Object.assign({}, event);
@@ -291,14 +295,6 @@ export class RandomChordsComponent implements OnInit {
     evnt.stopPropagation();
   }
   
-  chord_tone_change(evnt : Event) {
-
-    this.stopPropagation(evnt);
-
-    this.show_chord_tones = ! this.show_chord_tones;
-  }
-
-
   chord_drop(evnt : CdkDragDrop<string[]>) {
     moveItemInArray(this.chords, evnt.previousIndex, evnt.currentIndex);
   }
@@ -382,6 +378,18 @@ export class RandomChordsComponent implements OnInit {
     return false;
   }
 
+  all_chords_locked() : boolean {
+    for (const c of this.chords) {
+      if (! c.keep) return false;
+    }
+    return true;
+  }
+   
+
+  delete_unlocked_chords() {
+    this.chords = this.chords.filter((k) => k.keep);
+  }
+
 
   generate() {
 
@@ -450,7 +458,6 @@ export class RandomChordsComponent implements OnInit {
         this.chords = builder.generate_chords();
       }
 
-      this.show_chords = true;
       /*
       for (const c in this.chords) {
         console.log(c, this.chords[c]);
@@ -549,7 +556,7 @@ export class RandomChordsComponent implements OnInit {
   private midi_state = 'off';
 
   get midi_disabled():boolean {
-    return (! this.show_chords) || this.chords.length < 1;
+    return this.chords.length < 1;
   }
 
   wait_for_midi(source : string, event : Event) {
@@ -602,7 +609,7 @@ export class RandomChordsComponent implements OnInit {
   generate_midi(config : MidiConfig) {
     console.log("generating midi data");
 
-    if (!this.show_chords || this.chords.length < 1) return;
+    if (this.chords.length < 1) return;
 
     const mainTrack = new Midiwriter.Track();
     let bassTrack;
