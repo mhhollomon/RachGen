@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { ConfirmActionDialogComponent } from '../clear-settings-dialog/confirm-action-dialog.component';
+import { ConfirmActionDialogComponent } from '../confirm-action-dialog/confirm-action-dialog.component';
 import { MidiConfig } from '../midi-dialog/midi-dialog.component';
 import { PreferencesService } from '../services/preferences.service';
 
