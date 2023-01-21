@@ -299,12 +299,28 @@ export class RandomChordsComponent implements OnInit {
     moveItemInArray(this.chords, evnt.previousIndex, evnt.currentIndex);
   }
 
-  edit_chord_modal(chord_index : number) {
-    const dia = this.dialog.open(ChordEditDialogComponent, { data : this.chords[chord_index].clone() });
+  edit_chord_modal(chord_index : number, chord? : Chord) {
+
+    // if chord is defined then we are being asked to edit them add
+    // if it is NOT defined, we are being asked to edit the existing chord.
+
+    let adding_chord = false;
+
+    if (chord == undefined) {
+      chord = this.chords[chord_index].clone()
+    } else {
+      adding_chord = true;
+    }
+
+    const dia = this.dialog.open(ChordEditDialogComponent, { data : chord });
     
     dia.afterClosed().subscribe((newChord) => {
       if (newChord) {
-        this.chords[chord_index] = newChord.clone();
+        if (adding_chord) {
+          this.chords.splice(chord_index, 0, newChord.clone())
+        } else {
+          this.chords[chord_index] = newChord.clone();
+        }
       }
 
     })
@@ -329,9 +345,7 @@ export class RandomChordsComponent implements OnInit {
 
     if (pos === 'after') index += 1;
 
-    this.chords.splice(index, 0, newChord)
-
-    this.edit_chord_modal(index);
+    this.edit_chord_modal(index, newChord);
   }
 
 
