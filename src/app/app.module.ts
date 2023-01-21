@@ -19,7 +19,7 @@ import { PreferenceDialogComponent } from './preference-dialog/preference-dialog
 import { ChordEditDialogComponent } from './chord-edit-dialog/chord-edit-dialog.component';
 import { GeneratorOptionsComponent } from './generator-options/generator-options.component';
 import { EditCustomComponent } from './chord-edit-dialog/edit-custom/edit-custom.component';
-import { ClearSettingsDialogComponent } from './clear-settings-dialog/clear-settings-dialog.component';
+import { ConfirmActionDialogComponent } from './clear-settings-dialog/confirm-action-dialog.component';
 
 @NgModule({
   declarations: [
@@ -34,7 +34,7 @@ import { ClearSettingsDialogComponent } from './clear-settings-dialog/clear-sett
     ChordEditDialogComponent,
     GeneratorOptionsComponent,
     EditCustomComponent,
-    ClearSettingsDialogComponent
+    ConfirmActionDialogComponent
   ],
   imports: [
     BrowserModule, 

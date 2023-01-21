@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ClearSettingsDialogComponent } from './clear-settings-dialog.component';
+import { ConfirmActionDialogComponent } from './confirm-action-dialog.component';
 
 describe('ClearSettingsDialogComponent', () => {
-  let component: ClearSettingsDialogComponent;
-  let fixture: ComponentFixture<ClearSettingsDialogComponent>;
+  let component: ConfirmActionDialogComponent;
+  let fixture: ComponentFixture<ConfirmActionDialogComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ClearSettingsDialogComponent ]
+      declarations: [ ConfirmActionDialogComponent ]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ClearSettingsDialogComponent);
+    fixture = TestBed.createComponent(ConfirmActionDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

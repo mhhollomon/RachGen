@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { ClearSettingsDialogComponent } from '../clear-settings-dialog/clear-settings-dialog.component';
+import { ConfirmActionDialogComponent } from '../clear-settings-dialog/confirm-action-dialog.component';
 import { MidiConfig } from '../midi-dialog/midi-dialog.component';
 import { PreferencesService } from '../services/preferences.service';
 
@@ -40,7 +40,7 @@ export class PreferenceDialogComponent {
   }
 
   clear_settings() {
-    const dia = this.dialog.open(ClearSettingsDialogComponent);
+    const dia = this.dialog.open(ConfirmActionDialogComponent, {data : "Clearing Saved Preferences"});
 
     dia.afterClosed().subscribe((data) => {
       if (data) {
