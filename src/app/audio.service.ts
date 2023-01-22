@@ -32,8 +32,10 @@ const pitch_map : { [ index : string] : number[] } = {
   'Cb': [30.87, 61.74, 123.5, 246.9, 493.9, 987.8, 1976, 3951, 7902],
 };
 
-const smoothingInterval = 0.02;
-const beepLengthInSeconds = 0.5;
+const attackTime = 0.02;
+const decayTime = 0.04;
+const releaseTime = 0.1;
+const beepLengthInSeconds = 0.1;
 
 @Injectable({
   providedIn: 'root'
@@ -76,8 +78,9 @@ export class AudioService {
     }
 
     const now = this.audioContext.currentTime;
-    this.topgain.gain.setTargetAtTime(1, now, smoothingInterval);
-    this.topgain.gain.setTargetAtTime(0, now + seconds, smoothingInterval);
+    this.topgain.gain.setTargetAtTime(1, now, attackTime);
+    this.topgain.gain.setTargetAtTime(0.60, attackTime, attackTime+decayTime);
+    this.topgain.gain.setTargetAtTime(0, now + seconds, releaseTime);
 
   }
   
