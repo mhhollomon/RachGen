@@ -267,7 +267,7 @@ export class RandomChordsComponent implements OnInit {
   default_scale_click(event : Event) {
     this.stopPropagation(event);
 
-    const input_scale = (this.default_scale || CMajorID() );
+    const input_scale = (this.default_scale?.scaleID() || CMajorID() );
     const dia = this.dialog.open(ScaleChangeDialogComponent, { data : input_scale} );
 
     dia.afterClosed().subscribe((s) => {
