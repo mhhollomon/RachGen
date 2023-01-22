@@ -24,12 +24,7 @@ export class ScaleChangeDialogComponent {
 
   constructor(
     private scaleService : ScaleService,
-    @Inject(MAT_DIALOG_DATA) public scaleID : ScaleID) {
-      this.scaleID = scaleID;
-    if (scaleID == undefined) {
-      this.scaleID = { key_center : 'C', type : 'major' };
-    }
-  }
+    @Inject(MAT_DIALOG_DATA) public scaleID : ScaleID) {  }
 
 
 

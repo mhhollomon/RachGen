@@ -11,7 +11,7 @@ import { HelpTextEmitterService } from '../services/help-text-emitter.service';
 import {ScaleService } from '../scale.service';
 import { RandomChordService, RandomChordError } from '../random-chord.service';
 import { Chord } from '../utils/music-theory/chord';
-import { Scale, ScaleType } from '../utils/music-theory/scale';
+import { CMajorID, Scale, ScaleType } from '../utils/music-theory/scale';
 import { Note } from '../utils/music-theory/note';
 import { AudioService } from '../audio.service';
 import { DOCUMENT } from '@angular/common';
@@ -253,7 +253,7 @@ export class RandomChordsComponent implements OnInit {
   }
 
   get panelTitle() : string {
-    return (this.default_scale ? this.default_scale.fullDisplay() :  "No Default Scale");
+    return (this.default_scale ? this.default_scale.fullDisplay() :  "No Scale");
   }
 
   default_scale_exists() { return this.default_scale != null && this.default_scale instanceof Scale; }
@@ -266,12 +266,14 @@ export class RandomChordsComponent implements OnInit {
 
   default_scale_click(event : Event) {
     this.stopPropagation(event);
-    const dia = this.dialog.open(ScaleChangeDialogComponent, { data : this.default_scale?.scaleID() } );
+
+    const input_scale = (this.default_scale || CMajorID() );
+    const dia = this.dialog.open(ScaleChangeDialogComponent, { data : input_scale} );
 
     dia.afterClosed().subscribe((s) => {
       if (s) {
         this.default_scale = new Scale(s);
-        this.generateOptions.scale = s;
+        this.generateOptions.scale = Object.assign({}, s);
         this.scale_notes = this.default_scale.notesOfScale();
       }
     })
@@ -423,6 +425,9 @@ export class RandomChordsComponent implements OnInit {
 
   append_to_list() {
     const old_chords = this.chords.slice(); // copy away the old chords;
+    this.generateOptions.key_source = 'Selected';
+    this.generateOptions.center = this.generateOptions.scale.key_center;
+    this.generateOptions.tonality = this.generateOptions.scale.type;
     this.gen_list(() => {
       this.chords = old_chords.concat(this.chords);
     });

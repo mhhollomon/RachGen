@@ -1,28 +1,33 @@
 
 <h1 mat-dialog-title>Change Default Scale</h1>
-<div mat-dialog-content class="mt2">
-    <mat-form-field>
-        <mat-label>Tonality</mat-label>
-        <mat-select [(ngModel)]="scale_type">
-            <mat-option value="major">Major</mat-option>
-            <mat-option value="minor">Minor</mat-option>
-            <mat-option value="mixolydian">Mixolydian</mat-option>
-            <mat-option value="dorian">Dorian</mat-option>
-            <mat-option value="lydian">Lydian</mat-option>
-            <mat-option value="phrygian">Phrygian</mat-option>
-        </mat-select>
-    </mat-form-field>
+<div mat-dialog-content>
+    <!-- mat-dialog-content set margin-top:0 on its first child. 
+         This is here to absorb that :) -->
+    <br>
+    <div class="select-container">
+        <mat-form-field>
+            <mat-label>Tonality</mat-label>
+            <mat-select [(ngModel)]="scale_type">
+                <mat-option value="major">Major</mat-option>
+                <mat-option value="minor">Minor</mat-option>
+                <mat-option value="mixolydian">Mixolydian</mat-option>
+                <mat-option value="dorian">Dorian</mat-option>
+                <mat-option value="lydian">Lydian</mat-option>
+                <mat-option value="phrygian">Phrygian</mat-option>
+            </mat-select>
+        </mat-form-field>
 
-    <!-- Key Center -->
-    <mat-form-field>
-        <mat-label>Key Center</mat-label>
-        <mat-select [(ngModel)]="center">
-            <mat-option value={{k}} 
-                *ngFor="let k of getKeyList()">
-                    {{k}}
-            </mat-option>
-        </mat-select>
-    </mat-form-field>
+        <!-- Key Center -->
+        <mat-form-field>
+            <mat-label>Key Center</mat-label>
+            <mat-select [(ngModel)]="center">
+                <mat-option value={{k}} 
+                    *ngFor="let k of getKeyList()">
+                        {{k}}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+    </div>
 </div>
 
 <app-scale-info [scaleID]="scaleID"></app-scale-info>

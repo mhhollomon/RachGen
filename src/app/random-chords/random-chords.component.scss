@@ -53,19 +53,29 @@ $desktop-width : 800px;
     transition: background 0.75s;
 }
 
+$hightlight-color-darker : #d1d1d1;
+$hightlight-color-lighter : #212121;
+
 .chord-row-container {
     @extend %chord-container-styles;
     position : relative;
 }
 
+:host-context(.darkMode) .chord-row-container:hover {
+    background-color : $hightlight-color-lighter;
+}
+
+.chord-row-container:hover {
+    background-color : $hightlight-color-darker;
+}
+
+
 :host-context(.darkMode) .chord-row-container.playing {
-    @extend %chord-container-styles;
-    background-color : #212121;
+    background-color : $hightlight-color-lighter;
 }
 
 .chord-row-container.playing {
-    @extend %chord-container-styles;
-    background-color : #d1d1d1;
+    background-color : $hightlight-color-darker;
 }
 
 //------------------------
