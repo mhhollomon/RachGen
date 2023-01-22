@@ -119,7 +119,7 @@
                         <mat-icon>more_vert</mat-icon>
                         <mat-menu #menu="matMenu">
                             <button mat-menu-item (click)="set_default_scale(i)">Set default to this</button>
-                            <button mat-menu-item>Set this to default</button>
+                            <button mat-menu-item (click)="set_to_default_scale(i)">Set this to default</button>
                         </mat-menu>
                     </button>
 

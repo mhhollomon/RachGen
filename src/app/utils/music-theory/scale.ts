@@ -109,6 +109,10 @@ export class Scale {
 
     scaleID() : ScaleID { return { key_center : this.root(), type : this.scaleType};}
 
+    isSame(o : Scale) : boolean {
+        return (this.rootNote.equal(o.rootNote) && this.scaleType === o.scaleType);
+    }
+
     notesOfScale() : Note[] {
 
         if (this.notesCache)

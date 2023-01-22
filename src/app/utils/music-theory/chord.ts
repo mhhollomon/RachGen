@@ -153,6 +153,20 @@ export class Chord {
       return clone;
     }
 
+    change_scale(newScale : Scale) {
+      // first try to protect the pitch, 
+      // then go for scale degree.
+
+      const newNotes = newScale.notesOfScale();
+
+      const index = newNotes.findIndex((v) => v.same(this.root));
+
+      this.setScale(newScale);
+      if (index >= 0) {
+        // we found the same pitch so fix up the scaleDegree
+        this.setRootFromDegree(index+1);
+      }
+    }
     protected copy(o : Chord) {
       o.rootCache = this.rootCache;
       o.rootDegree = this.rootDegree;

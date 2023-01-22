@@ -342,9 +342,24 @@ export class RandomChordsComponent implements OnInit {
   }
 
   set_default_scale(chord_index : number) {
-    this.default_scale = this.chords[chord_index].scale;
-    this.scale_notes = this.default_scale.notesOfScale();
-    this.generateOptions.scale = this.default_scale.scaleID();
+
+    const chord_scale = this.chords[chord_index].scale;
+    if (! this.default_scale?.isSame(chord_scale)) {
+      this.default_scale = chord_scale;
+      this.scale_notes = chord_scale.notesOfScale();
+      this.generateOptions.scale = chord_scale.scaleID();
+    }
+  }
+
+  set_to_default_scale(chord_index : number) {
+    if (! this.default_scale) return;
+
+    const chord = this.chords[chord_index];
+    if (! this.default_scale.isSame(chord.scale)) {
+      chord.change_scale(this.default_scale);
+    }
+
+
   }
 
   async gen_list(fn? : () => void ) {
