@@ -244,3 +244,11 @@ $hightlight-color-lighter : #212121;
 }
 
 
+.menu-anchor {
+    text-decoration: underline;
+}
+
+.menu-anchor:hover {
+    text-decoration: underline;
+    font-weight: bold;
+}

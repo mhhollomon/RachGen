@@ -112,16 +112,12 @@
                     <span *ngFor="let t of c.invertedChordTones()" >{{t.noteDisplay()}}</span>
                 </div>
                 <div class="chord-scale" *ngIf="!chordIsCustom(i)">
-                   {{c.scale.fullDisplay()}}
-                   <button class="dif material-symbols-outlined"
-                        matTooltip="Menu" [matMenuTriggerFor]="menu" 
-                        [disabled]="chord_locked(i)" mat-icon-button>
-                        <mat-icon>more_vert</mat-icon>
+                   <a [matMenuTriggerFor]="menu" class="menu-anchor">{{c.scale.fullDisplay()}}
                         <mat-menu #menu="matMenu">
                             <button mat-menu-item (click)="set_default_scale(i)">Set default to this</button>
                             <button mat-menu-item (click)="set_to_default_scale(i)">Set this to default</button>
                         </mat-menu>
-                    </button>
+                    </a>
 
                 </div>
             </div>
