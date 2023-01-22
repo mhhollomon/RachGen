@@ -22,6 +22,7 @@ import { ChordEditDialogComponent } from '../chord-edit-dialog/chord-edit-dialog
 import { GeneratorOptions, defaultGeneratorOptions } from '../generator-options/generator-options.component';
 import { NewListDialogComponent } from '../new-list-dialog/new-list-dialog.component';
 import { ConfirmActionDialogComponent } from '../confirm-action-dialog/confirm-action-dialog.component';
+import { CustomChord } from '../utils/custom-chord';
 
 
 const HELP_TEXT = `
@@ -311,6 +312,13 @@ export class RandomChordsComponent implements OnInit {
     this.chords.splice(chord_index, 1);
   }
 
+  chordIsCustom(chord : Chord | number) : boolean {
+    if (typeof chord === 'number')
+      chord = this.chords[chord];
+
+    return (chord instanceof CustomChord);
+  }
+
   add_chord(pos : 'before' | 'after', index : number) {
     const newChord = new Chord();
 
@@ -329,10 +337,16 @@ export class RandomChordsComponent implements OnInit {
   generate_new_chord(chord_index : number) {
     const builder = this.randomChordService.builder();
 
+    let scale : Scale = this.chords[chord_index].scale;
+
+    if (this.chordIsCustom(chord_index) && this.default_scale) {
+      scale = this.default_scale;
+    }
+
     // override count to just do one.
     builder.setOptions(this.generateOptions)
       .setCount({min : 1, max : 1})
-      .setKey(this.chords[chord_index].scale);
+      .setKey(scale);
 
     const newChords = builder.generate_chords();
 
@@ -376,15 +390,19 @@ export class RandomChordsComponent implements OnInit {
 
   start_new_list() {
     if (this.chords_exist) {
-      const dia = this.dialog.open(ConfirmActionDialogComponent, { data: "Removing All Existing Chords"});
+      const dia = this.dialog.open(ConfirmActionDialogComponent, 
+          { data: "Removing All Existing Chords"});
 
       dia.afterClosed().subscribe((confirm) => {
         if (confirm) {
           this.chords = [];
+          this.generateOptions.key_source = 'Random';
           this.gen_list();
         }
       });
     } else {
+      // this can't go in gen_list since that is also shared by append_to_list
+      this.generateOptions.key_source = 'Random';
       this.gen_list();
     }
   }
@@ -433,8 +451,22 @@ export class RandomChordsComponent implements OnInit {
   }
    
 
-  delete_unlocked_chords() {
-    this.chords = this.chords.filter((k) => k.keep);
+  delete_unlocked_chords(do_it? : boolean ) {
+
+    if (do_it) {
+      this.chords = this.chords.filter((k) => k.keep);
+      return;
+    }
+
+    if (! this.any_chords_locked() ) {
+      const dia = this.dialog.open(ConfirmActionDialogComponent, { data : 'This will delete all chords since none are locked'});
+      dia.afterClosed().subscribe((yes) => {
+        if (yes) this.delete_unlocked_chords(true);
+      });
+
+    } else {
+      this.delete_unlocked_chords(true);
+    }
   }
 
 

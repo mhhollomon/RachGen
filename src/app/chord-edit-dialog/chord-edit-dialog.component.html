@@ -2,50 +2,50 @@
 
 <mat-tab-group [selectedIndex]="startTab" (selectedTabChange)="change_tabs($event)" >
     <mat-tab label="Standard">
-<div mat-dialog-content>
-    <br>
-    <mat-button-toggle-group name="root-note" (change)="root_note_change($event)" [value]="current_root_note()" aria-label="Root Note">
-        <mat-button-toggle value="{{n.note()}}" *ngFor="let n of chord.scale.notesOfScale()"><span class="f7">{{n.noteDisplay()}}</span></mat-button-toggle>
-    </mat-button-toggle-group>
+        <div mat-dialog-content>
+            <br>
+            <mat-button-toggle-group name="root-note" (change)="root_note_change($event)" [value]="current_root_note()" aria-label="Root Note">
+                <mat-button-toggle value="{{n.note()}}" *ngFor="let n of chord.scale.notesOfScale()"><span class="f7">{{n.noteDisplay()}}</span></mat-button-toggle>
+            </mat-button-toggle-group>
 
-    <div>
-        <mat-label class="mr2 mt2 mhh-mat-label">Inversion</mat-label>
-        <mat-radio-group name="inversion-rb" [(ngModel)]="chord.inversion">       
-            <mat-radio-button name="inversion-rb" value="root"   (click)="audition_chord()" matTooltip="Chord to root position">Root</mat-radio-button>
-            <mat-radio-button name="inversion-rb" value="first"  (click)="audition_chord()" matTooltip="Chord to first inversion">First Inv</mat-radio-button>
-            <mat-radio-button name="inversion-rb" value="second" (click)="audition_chord()" matTooltip="Chord to second inversion">Second Inv</mat-radio-button>
-        </mat-radio-group>
-    </div>
+            <div>
+                <mat-label class="mr2 mt2 mhh-mat-label">Inversion</mat-label>
+                <mat-radio-group name="inversion-rb" [(ngModel)]="chord.inversion">       
+                    <mat-radio-button name="inversion-rb" value="root"   (click)="audition_chord()" matTooltip="Chord to root position">Root</mat-radio-button>
+                    <mat-radio-button name="inversion-rb" value="first"  (click)="audition_chord()" matTooltip="Chord to first inversion">First Inv</mat-radio-button>
+                    <mat-radio-button name="inversion-rb" value="second" (click)="audition_chord()" matTooltip="Chord to second inversion">Second Inv</mat-radio-button>
+                </mat-radio-group>
+            </div>
 
-    <div>
-        <mat-label class="mr2 mt2 mhh-mat-label">Type</mat-label>
-        <mat-radio-group name="chord-type-rb" [(ngModel)]="chord.chordType">       
-            <mat-radio-button name="chord-type-rb" value="triad" (click)="audition_chord()" matTooltip="Change chord to a triad">Triad</mat-radio-button>
-            <mat-radio-button name="chord-type-rb" value="sus2"  [disabled]="chord.isDim()" (click)="audition_chord($event)" matTooltip="Change chord to a Sus2">Sus2</mat-radio-button>
-            <mat-radio-button name="chord-type-rb" value="sus4"  [disabled]="chord.isDim()" (click)="audition_chord($event)" matTooltip="Change chord to a sus4">Sus4</mat-radio-button>
-        </mat-radio-group>
-    </div>
+            <div>
+                <mat-label class="mr2 mt2 mhh-mat-label">Type</mat-label>
+                <mat-radio-group name="chord-type-rb" [(ngModel)]="chord.chordType">       
+                    <mat-radio-button name="chord-type-rb" value="triad" (click)="audition_chord()" matTooltip="Change chord to a triad">Triad</mat-radio-button>
+                    <mat-radio-button name="chord-type-rb" value="sus2"  [disabled]="chord.isDim()" (click)="audition_chord($event)" matTooltip="Change chord to a Sus2">Sus2</mat-radio-button>
+                    <mat-radio-button name="chord-type-rb" value="sus4"  [disabled]="chord.isDim()" (click)="audition_chord($event)" matTooltip="Change chord to a sus4">Sus4</mat-radio-button>
+                </mat-radio-group>
+            </div>
 
-    <div>
-        <mat-label class="mr2 mt2 mhh-mat-label">Extensions</mat-label>
-        <div>        
-            <mat-checkbox [(ngModel)]="seventh"  (click)="audition_chord()" matTooltip="Add 7th">7th</mat-checkbox>
-            <mat-checkbox [(ngModel)]="ninth"    (click)="audition_chord()" matTooltip="Add 9th">9th</mat-checkbox>
-            <mat-checkbox [(ngModel)]="eleventh" (click)="audition_chord()" matTooltip="Add 11th">11th</mat-checkbox>
+            <div>
+                <mat-label class="mr2 mt2 mhh-mat-label">Extensions</mat-label>
+                <div>        
+                    <mat-checkbox [(ngModel)]="seventh"  (click)="audition_chord()" matTooltip="Add 7th">7th</mat-checkbox>
+                    <mat-checkbox [(ngModel)]="ninth"    (click)="audition_chord()" matTooltip="Add 9th">9th</mat-checkbox>
+                    <mat-checkbox [(ngModel)]="eleventh" (click)="audition_chord()" matTooltip="Add 11th">11th</mat-checkbox>
+                </div>
+            </div>
+
+            <div class="mt3">
+                <button mat-raised-button (click)="play_chord()" color="primary" >{{chord.computeNameDisplay()}}</button>
+            </div>
+            <div>        
+                <mat-checkbox [(ngModel)]="audition"  matTooltip="audition when changing">Audition on Change</mat-checkbox>
+            </div>
         </div>
-    </div>
-
-    <div class="mt3">
-        <button mat-raised-button (click)="play_chord()" color="primary" >{{chord.computeNameDisplay()}}</button>
-    </div>
-    <div>        
-        <mat-checkbox [(ngModel)]="audition"  matTooltip="audition when changing">Audition on Change</mat-checkbox>
-    </div>
-</div>
-<div mat-dialog-actions align="end">
-    <button mat-button mat-dialog-close><span class="material-symbols-outlined">cancel</span></button>
-    <button mat-button [mat-dialog-close]="chord"><span class="material-symbols-outlined">check</span></button>
-</div>
+        <div mat-dialog-actions align="end">
+            <button mat-button mat-dialog-close><span class="material-symbols-outlined">cancel</span></button>
+            <button mat-button [mat-dialog-close]="chord"><span class="material-symbols-outlined">check</span></button>
+        </div>
     </mat-tab>
     <mat-tab label="Custom">
         <app-edit-custom [chord]="customChord"></app-edit-custom>

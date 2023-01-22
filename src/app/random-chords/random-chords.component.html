@@ -111,7 +111,7 @@
                 <div class="chord-tones">
                     <span *ngFor="let t of c.invertedChordTones()" >{{t.noteDisplay()}}</span>
                 </div>
-                <div class="chord-scale">
+                <div class="chord-scale" *ngIf="!chordIsCustom(i)">
                    {{c.scale.fullDisplay()}}
                    <button class="dif material-symbols-outlined"
                         matTooltip="Menu" [matMenuTriggerFor]="menu" 

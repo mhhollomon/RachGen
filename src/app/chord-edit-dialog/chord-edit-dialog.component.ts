@@ -70,7 +70,7 @@ export class ChordEditDialogComponent {
 
   change_tabs(event : MatTabChangeEvent) {
     if (event.index === 1 && this.customNotValid) {
-      this.customChord = new CustomChord(this.chord); 
+      this.customChord = new CustomChord(this.chord.clone()); 
       this.customNotValid = false;     
 
     }
