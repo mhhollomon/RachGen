@@ -133,6 +133,12 @@ export class Chord {
       return (this.chordTones[1].interval(this.chordTones[5]) !== 7);
     }
 
+    isMin() : boolean {
+      return (this.chordType == 'triad') 
+          && (! this.isDim()) 
+          && (this.chordTones[1].interval(this.chordTones[3]) === 3);
+    }
+
     deepEqual(o : Chord) {
       return (this.root === o.root) 
           && (this.rootDegree === o.rootDegree)

@@ -10,6 +10,18 @@ import { ScaleID, ScaleType } from '../utils/music-theory/scale';
 })
 export class ScaleChangeDialogComponent {
 
+  set center(c : string) {
+    this.scaleID = { key_center : c, type : this.scaleID.type };
+  }
+
+  get center() { return this.scaleID.key_center; }
+
+  set scale_type(t : ScaleType) {
+    this.scaleID = { key_center : this.scaleID.key_center, type : t };
+  }
+
+  get scale_type() : ScaleType { return this.scaleID.type; }
+
   constructor(
     private scaleService : ScaleService,
     @Inject(MAT_DIALOG_DATA) public scaleID : ScaleID) {
@@ -18,6 +30,8 @@ export class ScaleChangeDialogComponent {
       this.scaleID = { key_center : 'C', type : 'major' };
     }
   }
+
+
 
   getKeyList() : string[] {
     return this.scaleService.getKeyList(this.scaleID.type as ScaleType);

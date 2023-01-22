@@ -3,7 +3,7 @@
 <div mat-dialog-content class="mt2">
     <mat-form-field>
         <mat-label>Tonality</mat-label>
-        <mat-select [(ngModel)]="scaleID.type">
+        <mat-select [(ngModel)]="scale_type">
             <mat-option value="major">Major</mat-option>
             <mat-option value="minor">Minor</mat-option>
             <mat-option value="mixolydian">Mixolydian</mat-option>
@@ -16,7 +16,7 @@
     <!-- Key Center -->
     <mat-form-field>
         <mat-label>Key Center</mat-label>
-        <mat-select [ngModel]="scaleID.key_center">
+        <mat-select [(ngModel)]="center">
             <mat-option value={{k}} 
                 *ngFor="let k of getKeyList()">
                     {{k}}
@@ -24,6 +24,8 @@
         </mat-select>
     </mat-form-field>
 </div>
+
+<app-scale-info [scaleID]="scaleID"></app-scale-info>
 
 <div mat-dialog-actions align="end">
     <button mat-button mat-dialog-close><span class="material-symbols-outlined">cancel</span></button>

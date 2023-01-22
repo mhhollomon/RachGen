@@ -22,6 +22,7 @@ import { EditCustomComponent } from './chord-edit-dialog/edit-custom/edit-custom
 import { ConfirmActionDialogComponent } from './confirm-action-dialog/confirm-action-dialog.component';
 import { NewListDialogComponent } from './new-list-dialog/new-list-dialog.component';
 import { ScaleChangeDialogComponent } from './scale-change-dialog/scale-change-dialog.component';
+import { ScaleInfoComponent } from './scale-info/scale-info.component';
 
 @NgModule({
   declarations: [
@@ -38,7 +39,8 @@ import { ScaleChangeDialogComponent } from './scale-change-dialog/scale-change-d
     EditCustomComponent,
     ConfirmActionDialogComponent,
     NewListDialogComponent,
-    ScaleChangeDialogComponent
+    ScaleChangeDialogComponent,
+    ScaleInfoComponent
   ],
   imports: [
     BrowserModule, 

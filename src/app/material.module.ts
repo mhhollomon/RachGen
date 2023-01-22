@@ -20,6 +20,8 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatDialogModule} from '@angular/material/dialog';
 import {MatSliderModule} from '@angular/material/slider';
 import {MatMenuModule} from '@angular/material/menu';
+import {MatTableModule} from '@angular/material/table'
+
 import {DragDropModule} from '@angular/cdk/drag-drop';
 
 @NgModule({
@@ -45,6 +47,7 @@ import {DragDropModule} from '@angular/cdk/drag-drop';
         MatDialogModule,
         MatSliderModule,
         MatMenuModule,
+        MatTableModule,
         
         DragDropModule,
     ],

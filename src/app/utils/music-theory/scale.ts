@@ -1,6 +1,7 @@
 
 import { throwIfEmpty } from 'rxjs';
 import {capitalize} from '../util-library';
+import { Chord } from './chord';
 import { Note } from "./note";
 
 interface GenericNoteData {
@@ -48,6 +49,10 @@ export type ScaleType = keyof typeof ScaleTypeEnum;
 export interface ScaleID {
     key_center : string;
     type : ScaleType;
+}
+
+export function CMajorID() : ScaleID {
+    return { key_center : 'C', type : 'major'}
 }
 
 export function isScaleID(object: any) : object is ScaleID {
@@ -159,6 +164,44 @@ export class Scale {
         
         return notes;
     
+    }
+
+    chordForDegree(degree : number) : Chord {
+        const retval = new Chord();
+
+        retval.setScale(this).setRootFromDegree(degree)
+            .setInversion('root')
+            .setChordType('triad');
+
+
+        return retval;
+    }
+
+    romanForDegree(degree : number) : string {
+        degree = Math.floor(degree);
+
+        let retval = '';
+
+        switch(degree) {
+            case 1 : retval = 'I'; break;
+            case 2 : retval = 'II'; break;
+            case 3 : retval = 'III'; break;
+            case 4 : retval = 'IV'; break;
+            case 5 : retval = 'V'; break;
+            case 6 : retval = 'VI'; break;
+            case 7 : retval = 'VII'; break;
+            default : throw Error("bad degree in romanForDegee");
+        }
+
+        const chord = this.chordForDegree(degree);
+        if (chord.isMin()) {
+            retval = retval.toLowerCase();
+        } else if (chord.isDim()) {
+            retval = retval.toLowerCase() + "\u00b0";
+        }
+
+
+        return retval;
     }
 
 }
