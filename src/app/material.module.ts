@@ -19,6 +19,7 @@ import {MatSidenavModule} from '@angular/material/sidenav';
 import {MatIconModule} from '@angular/material/icon';
 import {MatDialogModule} from '@angular/material/dialog';
 import {MatSliderModule} from '@angular/material/slider';
+import {MatMenuModule} from '@angular/material/menu';
 import {DragDropModule} from '@angular/cdk/drag-drop';
 
 @NgModule({
@@ -43,6 +44,8 @@ import {DragDropModule} from '@angular/cdk/drag-drop';
         MatIconModule,
         MatDialogModule,
         MatSliderModule,
+        MatMenuModule,
+        
         DragDropModule,
     ],
     providers: [

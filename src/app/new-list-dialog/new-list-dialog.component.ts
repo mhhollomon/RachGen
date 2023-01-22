@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
-import { defaultGeneratorOptions, GeneratorOptions } from '../generator-options/generator-options.component';
-import { PreferencesService } from '../services/preferences.service';
+import { Component, Inject } from '@angular/core';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { GeneratorOptions } from '../generator-options/generator-options.component';
 
 @Component({
   selector: 'app-new-list-dialog',
@@ -9,10 +9,8 @@ import { PreferencesService } from '../services/preferences.service';
 })
 export class NewListDialogComponent {
 
-  gen_opts : GeneratorOptions;
 
-  constructor(private prefs : PreferencesService) {
-    this.gen_opts = prefs.read('gen_opts_data', defaultGeneratorOptions());
+  constructor(@Inject(MAT_DIALOG_DATA) public gen_opts : GeneratorOptions) {
   }
   
 }

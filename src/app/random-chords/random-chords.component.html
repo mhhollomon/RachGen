@@ -11,7 +11,7 @@
 <div class="ba bw1 br3 ph2 min-h-2">
     <div class="mt2"></div>
     <!-- Key Information -->
-    <mat-expansion-panel [disabled]="generateOptions.scale_mode === 'Chromatic'">
+    <mat-expansion-panel>
         <mat-expansion-panel-header>
           <mat-panel-title>
             <div class="chord-panel-title-container mt1">
@@ -46,10 +46,14 @@
                 <mat-icon>{{all_play_active ? 'stop' : 'fast_forward'}}</mat-icon>
             </button>
         </div>
-        <div class="chord-add-action">
+        <div class="chord-add-action"> <!-- These actually float -->
             <button mat-icon-button class="material-symbols-outlined" (click)="add_chord('before', 0)"
-                    [disabled]="!default_scale_exists()"  matTooltip="Add a new chord to the top of the chord list">
+                    [disabled]="!default_scale_exists()"  matTooltip="Add one new chord to the top of the chord list">
                 <mat-icon>add</mat-icon>
+            </button>
+            <button mat-icon-button class="material-symbols-outlined" (click)="append_to_list()"
+                     matTooltip="Add new chords to the end of the list">
+                <mat-icon>add_box</mat-icon>
             </button>
         </div>
         <div class="header-right-action">
@@ -108,7 +112,17 @@
                     <span *ngFor="let t of c.invertedChordTones()" >{{t.noteDisplay()}}</span>
                 </div>
                 <div class="chord-scale">
-                    <span class="dib">{{c.scale.fullDisplay()}}</span>
+                   {{c.scale.fullDisplay()}}
+                   <button class="dif material-symbols-outlined"
+                        matTooltip="Menu" [matMenuTriggerFor]="menu" 
+                        [disabled]="chord_locked(i)" mat-icon-button>
+                        <mat-icon>more_vert</mat-icon>
+                        <mat-menu #menu="matMenu">
+                            <button mat-menu-item (click)="set_default_scale(i)">Set default to this</button>
+                            <button mat-menu-item>Set this to default</button>
+                        </mat-menu>
+                    </button>
+
                 </div>
             </div>
             
@@ -139,5 +153,5 @@
         <mat-panel-title>Generator Options</mat-panel-title>
     </mat-expansion-panel-header>
 
-    <app-generator-options [options]="gen_opts()" (optionsChange)="generate_options_change($event)"   (scaleInfoChange)="scale_info_change($event)"></app-generator-options>
+    <app-generator-options [options]="gen_opts()" (optionsChange)="generate_options_change($event)"></app-generator-options>
 </mat-expansion-panel>

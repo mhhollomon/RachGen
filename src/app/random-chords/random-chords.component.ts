@@ -10,15 +10,16 @@ import  * as Midiwriter  from 'midi-writer-js'
 import { HelpTextEmitterService } from '../services/help-text-emitter.service';
 import {ScaleService } from '../scale.service';
 import { RandomChordService, RandomChordError } from '../random-chord.service';
-import { Chord } from '../utils/music-theory/music-theory';
-import { Note, Scale, ScaleType } from '../utils/music-theory/music-theory';
+import { Chord } from '../utils/music-theory/chord';
+import { Scale, ScaleType } from '../utils/music-theory/scale';
+import { Note } from '../utils/music-theory/note';
 import { AudioService } from '../audio.service';
 import { DOCUMENT } from '@angular/common';
 import { MidiDialogComponent, MidiConfig } from '../midi-dialog/midi-dialog.component';
 import { PreferencesService } from '../services/preferences.service';
 import { filter } from 'rxjs';
 import { ChordEditDialogComponent } from '../chord-edit-dialog/chord-edit-dialog.component';
-import { GeneratorOptions, ScaleInfo, defaultGeneratorOptions } from '../generator-options/generator-options.component';
+import { GeneratorOptions, defaultGeneratorOptions } from '../generator-options/generator-options.component';
 import { NewListDialogComponent } from '../new-list-dialog/new-list-dialog.component';
 import { ConfirmActionDialogComponent } from '../confirm-action-dialog/confirm-action-dialog.component';
 
@@ -179,7 +180,7 @@ export class RandomChordsComponent implements OnInit {
 
   generateOptions : GeneratorOptions = defaultGeneratorOptions();
 
-  scaleData : ScaleInfo = {source : 'Random', tonality : 'Major', center : 'C' }
+  default_scale : Scale | null = null;
 
 
   chords : Chord[] = [];
@@ -250,26 +251,10 @@ export class RandomChordsComponent implements OnInit {
   }
 
   get panelTitle() : string {
-
-    let retval = this.generateOptions.scale_mode;
-    
-    if (this.generateOptions.scale_mode === 'Diatonic') {
-
-      if (this.generateOptions.scale && this.generateOptions.scale instanceof Scale) {
-        retval = this.generateOptions.scale.fullDisplay();    
-      }
-    }
-
-    return retval;
+    return (this.default_scale ? this.default_scale.fullDisplay() :  "No Default Scale");
   }
-
-  get default_scale() { return this.generateOptions.scale; }
 
   default_scale_exists() { return this.default_scale != null && this.default_scale instanceof Scale; }
-
-  scale_info_change(event : ScaleInfo) {
-    this.scaleData = Object.assign({}, event);
-  }
 
   gen_opts() : GeneratorOptions {
     return Object.assign({}, this.generateOptions);
@@ -278,14 +263,7 @@ export class RandomChordsComponent implements OnInit {
   /************* EVENT HANDLERS   *************************/
 
   generate_options_change(event : GeneratorOptions) {
-    if (event.scale_mode !== this.generateOptions.scale_mode) {
-      this.chords = [];
-    }
-
     this.generateOptions = Object.assign({}, event);
-    if (this.generateOptions.scale_mode === 'Chromatic') {
-      this.generateOptions.scale = null;
-    }
   }
 
   generatorOptionsPanelChange(v : boolean) {
@@ -336,13 +314,10 @@ export class RandomChordsComponent implements OnInit {
   add_chord(pos : 'before' | 'after', index : number) {
     const newChord = new Chord();
 
-    // For chromatic mode
-    let scale = this.generateOptions.scale
-    if (scale === null) {
-      scale = new Scale('C', 'major');
-    }
 
-    newChord.setScale(scale)
+    if (! this.default_scale ) return; 
+
+    newChord.setScale(this.default_scale)
         .setRootFromDegree(1);
 
     if (pos === 'after') index += 1;
@@ -356,13 +331,32 @@ export class RandomChordsComponent implements OnInit {
 
     // override count to just do one.
     builder.setOptions(this.generateOptions)
-      .setCount({min : 1, max : 1});
+      .setCount({min : 1, max : 1})
+      .setKey(this.chords[chord_index].scale);
 
     const newChords = builder.generate_chords();
 
     this.chords[chord_index] = newChords[0];
 
 
+  }
+
+  set_default_scale(chord_index : number) {
+    this.default_scale = this.chords[chord_index].scale;
+    this.scale_notes = this.default_scale.notesOfScale();
+    this.generateOptions.scale = this.default_scale.scaleID();
+  }
+
+  async gen_list(fn? : () => void ) {
+    const dia = this.dialog.open(NewListDialogComponent, { data : Object.assign({}, this.generateOptions) });
+
+    dia.afterClosed().subscribe((opts) => {
+      this.generate_options_change(opts);
+      this.generate();
+      this.default_scale = new Scale (this.generateOptions.scale);
+      this.scale_notes = this.default_scale.notesOfScale();
+      if (fn) fn();
+    });
   }
 
   start_new_list() {
@@ -372,23 +366,19 @@ export class RandomChordsComponent implements OnInit {
       dia.afterClosed().subscribe((confirm) => {
         if (confirm) {
           this.chords = [];
-          const dia = this.dialog.open(NewListDialogComponent);
-
-          dia.afterClosed().subscribe((opts) => {
-            this.generate_options_change(opts);
-            this.generate();
-          });
+          this.gen_list();
         }
       });
     } else {
-      const dia = this.dialog.open(NewListDialogComponent);
-
-      dia.afterClosed().subscribe((opts) => {
-        this.generate_options_change(opts);
-        this.generate();
-      });
-
+      this.gen_list();
     }
+  }
+
+  append_to_list() {
+    const old_chords = this.chords.slice(); // copy away the old chords;
+    this.gen_list(() => {
+      this.chords = old_chords.concat(this.chords);
+    });
   }
 
   /********   CHORD LOCKING ***************/
@@ -457,36 +447,21 @@ export class RandomChordsComponent implements OnInit {
 
     }
 
-    if (this.generateOptions.scale_mode === 'Chromatic') {
-      this.generateOptions.scale = null;
-    }
-
     this.preferences.write('gen_opts_data', this.generateOptions);
 
     let picked_key : Scale | null = null;
 
-    if (this.generateOptions.scale_mode === 'Diatonic') {
-
-      if (this.scaleData.source === "Selected") {
-        if (this.scaleData.center === 'Random') {
-          this.generateOptions.scale = this.scaleService.choose(this.scaleData.tonality as ScaleType);
-        } else {
-          this.generateOptions.scale = new Scale(this.scaleData.center, this.scaleData.tonality as ScaleType);
-        }
+    if (this.generateOptions.key_source === "Selected") {
+      if (this.generateOptions.center === 'Random') {
+        this.generateOptions.scale = this.scaleService.choose(this.generateOptions.tonality as ScaleType).scaleID();
       } else {
-        this.generateOptions.scale = this.scaleService.choose();
+        this.generateOptions.scale = { key_center : this.generateOptions.center, type : this.generateOptions.tonality as ScaleType};
       }
-      this.scale_notes = this.scaleService.getScaleNotes(this.generateOptions.scale);
-      picked_key = this.generateOptions.scale;
-      this.show_key = true;
-
     } else {
-
-      // -- Chromatic Mode
-      this.show_key = false;
-      this.scale_notes = [];
-      
+      this.generateOptions.scale = this.scaleService.choose().scaleID();
     }
+    picked_key = new Scale(this.generateOptions.scale);
+
 
     try {
       const builder = this.randomChordService.builder();
@@ -500,11 +475,6 @@ export class RandomChordsComponent implements OnInit {
         this.chords = builder.generate_chords();
       }
 
-      /*
-      for (const c in this.chords) {
-        console.log(c, this.chords[c]);
-      }
-      */
     } catch(e) {
       let error_msg = 'oopsy - unknown error';
       if (typeof e === "string") {
@@ -666,7 +636,7 @@ export class RandomChordsComponent implements OnInit {
     }
 
     if (config.includeScale) {
-      trackName += this.generateOptions.scale?.fullName();
+      trackName += this.default_scale?.fullName();
     }
 
     mainTrack.addTrackName(trackName);
@@ -704,9 +674,9 @@ export class RandomChordsComponent implements OnInit {
       }
     }
 
-    if (this.generateOptions.scale_mode === 'Diatonic' && config.includeScale) {
+    if (config.includeScale) {
       if (config.includeMarkers) {
-        mainTrack.addMarker(this.generateOptions.scale?.fullName() + " Scale")
+        mainTrack.addMarker(this.default_scale?.fullName() + " Scale")
       }
 
       let octave = ['G', 'A', 'B'].includes(this.scale_notes[0].toSharp().noteClass) ? 3 : 4;

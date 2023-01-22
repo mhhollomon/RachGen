@@ -1,17 +1,5 @@
 <div class="ma2">
     <div class="general-params-container">
-        <!-- Mode Selection -->
-        <div class="general-params-item">
-            <mat-form-field>
-                <mat-label>Mode</mat-label>
-                <mat-select [value]="options.scale_mode" (selectionChange)="scale_mode_change($event)"   [disabled]="any_chords_locked()" 
-                        [matTooltip]="any_chords_locked() ? 'Disabled due chords being locked' : 'Set the key mode'"
-                         >
-                    <mat-option value="Diatonic">Diatonic</mat-option>
-                    <mat-option value="Chromatic">Chromatic</mat-option>
-                </mat-select>
-            </mat-form-field>
-        </div>
 
         <!-- General Parameters -->
 
@@ -183,18 +171,18 @@
 <!-- Key Selection  (Diatonic only) -->
 <div class="ma2" *ngIf="!scale_disabled">
     <label class="mhh-mat-label">Key</label>
-    <mat-radio-group [value]="scaleData.source" (change)="scale_source_change($event)">
+    <mat-radio-group [value]="options.key_source" (change)="scale_source_change($event)">
         <mat-radio-button value="Random" matTooltip="Let the computer choose the key">Random</mat-radio-button>
         <mat-radio-button value="Selected" matTooltip="You pick the key">Selected</mat-radio-button>
     </mat-radio-group>
 
     
-    <div class="mt2 mh4 param-container" *ngIf="scaleData.source === 'Selected'">
+    <div class="mt2 mh4 param-container" *ngIf="options.key_source === 'Selected'">
 
         <!-- Sonority -->
         <mat-form-field>
             <mat-label>Tonality</mat-label>
-            <mat-select [value]="scaleData.tonality" (selectionChange)="scale_sonority_change($event)">
+            <mat-select [value]="options.tonality" (selectionChange)="scale_sonority_change($event)">
                 <mat-option value="major">Major</mat-option>
                 <mat-option value="minor">Minor</mat-option>
                 <mat-option value="mixolydian">Mixolydian</mat-option>
@@ -207,7 +195,7 @@
         <!-- Key Center -->
         <mat-form-field>
             <mat-label>Key Center</mat-label>
-            <mat-select [value]="scaleData.center" (selectionChange)="scale_center_change($event)">
+            <mat-select [value]="options.center" (selectionChange)="scale_center_change($event)">
                 <mat-option value="Random">Random</mat-option>
                 <mat-option value={{k}} 
                     *ngFor="let k of getKeyList()">

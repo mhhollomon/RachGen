@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Choice, Chooser, mkch } from './utils/chooser';
-import { Note, Scale, ScaleType } from './utils/music-theory/music-theory'
+import { Scale, ScaleType } from './utils/music-theory/scale';
+import { Note } from './utils/music-theory/note';
 
 
 const sonorityChoices : Choice<ScaleType>[] = [

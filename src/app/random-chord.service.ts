@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { Choice, Chooser, equalWeightedChooser, mkch, yesno } from './utils/chooser';
-import { Scale, Note, Chord, ScaleType, ChordType, ExtensionType, InversionType } from './utils/music-theory/music-theory';
+import { Chooser, equalWeightedChooser, mkch, yesno } from './utils/chooser';
+import { Chord, ChordType, ExtensionType, InversionType } from './utils/music-theory/chord';
+import { Scale, ScaleID, ScaleType } from './utils/music-theory/scale';
+import { Note } from './utils/music-theory/note';
 import { ScaleService } from './scale.service';
 import { range } from './utils/util-library';
-import { ObjectUnsubscribedError } from 'rxjs';
 
 
 const qualityToScaleType : { [key : string] : ScaleType } = {
@@ -16,12 +17,6 @@ const qualityToScaleType : { [key : string] : ScaleType } = {
 function yesno100(yesWeight : number) : boolean {
   return yesno(yesWeight, 100-yesWeight);
 }
-
-
-/* This is for Chromatic generation - much simpler */
-
-const chromaticNotes = ['A', 'Bb', 'C', 'C#', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'G#', 'Ab'];
-const chromaticQualityChooser = new Chooser([ mkch('min', 3), mkch('maj', 3), mkch('dim', 1), mkch('aug', 1) ]);
 
 export class RandomChordError extends Error {
   constructor(m : string) {
@@ -61,7 +56,7 @@ export interface ChordTypeConfig {
 }
 
 export interface RandomChordOptions {
-  scale : Scale | null; // If scale is null, the we operate in Chromatic Mode
+  scale : ScaleID;
   count : RandomChordCountConfig;
   duplicates : DuplicateControl;
   extensions : ExtensionConfg;
@@ -73,7 +68,7 @@ export class ChordSequenceBuilder {
 
   // The options 
   options : RandomChordOptions = { 
-    scale : null, 
+    scale : { key_center : 'C', type : 'major'}, 
     count : { min : 1, max : 1}, 
     duplicates : 'any',
     extensions : { 
@@ -95,13 +90,13 @@ export class ChordSequenceBuilder {
 
   public chordList : Chord[] = [];
 
+  private scale = new Scale(this.options.scale);
+
 
   private invertChooser = new Chooser<InversionType>([]);
   private chordTypeChooser = new Chooser<ChordType>([])
 
   private noteChooser = equalWeightedChooser(range(1,8));
-  private chromaticChooser = new Chooser(chromaticNotes.map(v => mkch(v)));
-
 
   constructor(private scaleService : ScaleService) { }
 
@@ -122,18 +117,22 @@ export class ChordSequenceBuilder {
     return this;
   }
 
-  setKey(newKey : Scale | null) : ChordSequenceBuilder;
+  setKey(newKey : Scale | ScaleID ) : ChordSequenceBuilder;
   setKey(newKey : string, scaleType : ScaleType) : ChordSequenceBuilder;
-  setKey(newKey : string | Scale | null, scaleType? : ScaleType) : ChordSequenceBuilder {
+  setKey(newKey : string | Scale | ScaleID, scaleType? : ScaleType) : ChordSequenceBuilder {
 
     if (typeof newKey === 'string') {
       if (! scaleType) { 
         throw new RandomChordError("No scale Type given with key name")
       }
-      this.options.scale = new Scale(newKey, scaleType);
+      this.scale = new Scale(newKey, scaleType);
+    } else if (newKey instanceof Scale) {
+      this.scale = newKey;
     } else {
-      this.options.scale = newKey;
+      this.scale = new Scale(newKey);
     }
+
+    this.options.scale = this.scale.scaleID();
 
     return this;
   }
@@ -395,15 +394,12 @@ export class ChordSequenceBuilder {
     return newChord;
   }
 
-  private gen_diatonic_chord() {
 
-    if (! this.options.scale) {
-      throw("somebody goofed");
-    }
+  private gen_one_chord() : Chord {
 
     const chord = new Chord();
 
-    const scale = this.scaleService.getScaleNotes(this.options.scale);
+    const scale = this.scale.notesOfScale();
     const rootDegree = this.noteChooser.choose();
     const note = scale[rootDegree-1];
 
@@ -412,33 +408,8 @@ export class ChordSequenceBuilder {
     chord.chordType = this.chordTypeChooser.choose();
 
 
-    return this.mkchord(this.options.scale, chord);
-
-  }
-
-  private gen_chromatic_chord() : Chord {
-
-    const note = new Note(this.chromaticChooser.choose());
-    const chQual = chromaticQualityChooser.choose();
-
-    const chord = new Chord();
-
-    chord.chordType = this.chordTypeChooser.choose();
-
-    const scale = new Scale(note, qualityToScaleType[chQual]);
-    chord.setRoot(note, 1);
-
-    return this.mkchord(scale, chord);
-  }
-
-  private gen_one_chord() : Chord {
-
-    if (this.options.scale) {
-      return this.gen_diatonic_chord();
-    } else {
-      return this.gen_chromatic_chord();
-    }
-
+    return this.mkchord(this.scale, chord);
+  
   }
 
   private mkchord(key : Scale, chord : Chord) : Chord {

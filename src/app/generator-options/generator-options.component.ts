@@ -7,16 +7,21 @@ import { ChordType, InversionType } from '../utils/music-theory/chord';
 import { ScaleType } from '../utils/music-theory/scale';
 
 export interface GeneratorOptions extends RandomChordOptions {
-  scale_mode : string;
   count_range_mode : boolean;
+  key_source : string;
+  tonality : string;
+  center : string;
 }
 
 
 export function defaultGeneratorOptions() : GeneratorOptions {
   return {
-    scale_mode : 'Diatonic',
-    scale : null, 
     count_range_mode : false,
+    key_source : 'Random',
+    tonality : 'major',
+    center : 'Random',
+
+    scale : {key_center : 'C', type : 'major'}, 
     count : { min : 4, max : 6}, 
     duplicates : 'none',
     extensions : { 
@@ -37,12 +42,6 @@ export function defaultGeneratorOptions() : GeneratorOptions {
   }
 }
 
-export interface ScaleInfo {
-  source : string;
-  tonality : string;
-  center : string;
-}
-
 @Component({
   selector: 'app-generator-options',
   templateUrl: './generator-options.component.html',
@@ -55,12 +54,8 @@ export class GeneratorOptionsComponent {
 
   @Output()optionsChange = new EventEmitter<GeneratorOptions>;
 
-  @Output() scaleInfoChange = new EventEmitter<ScaleInfo>;
-
-  scaleData : ScaleInfo = {source: 'Random', tonality : 'major', center : 'Random'}
-
   get scale_disabled() : boolean {
-    return this.options.scale_mode !== 'Diatonic';
+    return false;
   };
 
 
@@ -93,25 +88,19 @@ export class GeneratorOptionsComponent {
 
   constructor(private scaleService : ScaleService) {}
 
-  scale_mode_change(event : MatSelectChange) {
-    this.options.scale_mode = event.value;
-    if (event.value === 'Chromatic') this.options.scale = null;
+  scale_source_change(event : MatRadioChange) {
+    this.options.key_source = event.value;
     this.optionsChange.emit(Object.assign({}, this.options));
   }
 
-  scale_source_change(event : MatRadioChange) {
-    this.scaleData.source = event.value;
-    this.scaleInfoChange.emit(Object.assign({}, this.scaleData));
-  }
-
   scale_sonority_change(event : MatSelectChange) {
-    this.scaleData.tonality = event.value;
-    this.scaleInfoChange.emit(this.scaleData);
+    this.options.tonality = event.value;
+    this.optionsChange.emit(Object.assign({}, this.options));
   }
 
   scale_center_change(event : MatSelectChange) {
-    this.scaleData.center = event.value;
-    this.scaleInfoChange.emit(this.scaleData);
+    this.options.center = event.value;
+    this.optionsChange.emit(Object.assign({}, this.options));
   }
 
   duplicate_change(event : MatSelectChange) {
@@ -278,17 +267,12 @@ export class GeneratorOptionsComponent {
     Object.assign(this.options, def);
 
     this.optionsChange.emit(this.options);
-
-
-    this.scaleData = { source : 'Random', tonality : 'major', center : 'Random' };
-    this.scaleInfoChange.emit(this.scaleData);
-
   }
 
   any_chords_locked() : boolean { return false; }
 
   getKeyList() : string[] {
-    return this.scaleService.getKeyList(this.scaleData.tonality as ScaleType);
+    return this.scaleService.getKeyList(this.options.tonality as ScaleType);
   }
 
 

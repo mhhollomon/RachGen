@@ -1,4 +1,5 @@
 
+import { throwIfEmpty } from 'rxjs';
 import {capitalize} from '../util-library';
 import { Note } from "./note";
 
@@ -44,6 +45,15 @@ const ScaleTypeEnum = {
 
 export type ScaleType = keyof typeof ScaleTypeEnum;
 
+export interface ScaleID {
+    key_center : string;
+    type : ScaleType;
+}
+
+export function isScaleID(object: any) : object is ScaleID {
+    return 'key_center' in object;
+}
+
 export class Scale {
     rootNote : Note;
     scaleType : ScaleType;
@@ -51,11 +61,28 @@ export class Scale {
     private notesCache : Note[] | null = null;
  
 
-    constructor(rootNote : string | Note, scaleType : ScaleType ) {
+    constructor(id : ScaleID )
+    constructor(rootNote : string | Note, scaleType : ScaleType )
+    constructor(rootNote : string | Note | ScaleID, scaleType? : ScaleType ) {
 
-        this.scaleType = scaleType;
-        this.rootNote = (typeof rootNote == 'string') ? new Note(rootNote) : rootNote;
-
+        if (scaleType) {
+            this.scaleType = scaleType;
+            if (typeof rootNote == 'string') {
+                this.rootNote = new Note(rootNote);
+            } else if (rootNote instanceof Note) {
+                this.rootNote = rootNote;
+            } else {
+                // This shouldn't happen if I understand the overload system
+                this.rootNote = new Note(rootNote.key_center)
+            }
+        } else {
+            if (isScaleID(rootNote)) {
+                this.rootNote = new Note(rootNote.key_center);
+                this.scaleType = rootNote.type;
+            } else {
+                throw Error("type Error");
+            }
+        }
     }
 
     root() {
@@ -79,6 +106,8 @@ export class Scale {
     }
 
     id() { return this.fullName(); }
+
+    scaleID() : ScaleID { return { key_center : this.root(), type : this.scaleType};}
 
     notesOfScale() : Note[] {
 
