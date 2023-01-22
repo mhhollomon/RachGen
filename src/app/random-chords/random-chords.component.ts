@@ -23,6 +23,7 @@ import { GeneratorOptions, defaultGeneratorOptions } from '../generator-options/
 import { NewListDialogComponent } from '../new-list-dialog/new-list-dialog.component';
 import { ConfirmActionDialogComponent } from '../confirm-action-dialog/confirm-action-dialog.component';
 import { CustomChord } from '../utils/custom-chord';
+import { ScaleChangeDialogComponent } from '../scale-change-dialog/scale-change-dialog.component';
 
 
 const HELP_TEXT = `
@@ -262,6 +263,19 @@ export class RandomChordsComponent implements OnInit {
   }
 
   /************* EVENT HANDLERS   *************************/
+
+  default_scale_click(event : Event) {
+    this.stopPropagation(event);
+    const dia = this.dialog.open(ScaleChangeDialogComponent, { data : this.default_scale?.scaleID() } );
+
+    dia.afterClosed().subscribe((s) => {
+      if (s) {
+        this.default_scale = new Scale(s);
+        this.generateOptions.scale = s;
+        this.scale_notes = this.default_scale.notesOfScale();
+      }
+    })
+  }
 
   generate_options_change(event : GeneratorOptions) {
     this.generateOptions = Object.assign({}, event);

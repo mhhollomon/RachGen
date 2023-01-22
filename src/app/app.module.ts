@@ -21,6 +21,7 @@ import { GeneratorOptionsComponent } from './generator-options/generator-options
 import { EditCustomComponent } from './chord-edit-dialog/edit-custom/edit-custom.component';
 import { ConfirmActionDialogComponent } from './confirm-action-dialog/confirm-action-dialog.component';
 import { NewListDialogComponent } from './new-list-dialog/new-list-dialog.component';
+import { ScaleChangeDialogComponent } from './scale-change-dialog/scale-change-dialog.component';
 
 @NgModule({
   declarations: [
@@ -36,7 +37,8 @@ import { NewListDialogComponent } from './new-list-dialog/new-list-dialog.compon
     GeneratorOptionsComponent,
     EditCustomComponent,
     ConfirmActionDialogComponent,
-    NewListDialogComponent
+    NewListDialogComponent,
+    ScaleChangeDialogComponent
   ],
   imports: [
     BrowserModule, 

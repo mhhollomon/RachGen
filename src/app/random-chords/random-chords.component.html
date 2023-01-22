@@ -15,7 +15,7 @@
         <mat-expansion-panel-header>
           <mat-panel-title>
             <div class="chord-panel-title-container mt1">
-                <label class="mhh-mat-label chord-panel-title-key mr2">{{panelTitle}}</label>
+                <button mat-stroked-button class="chord-panel-title-key mr2" (click)="default_scale_click($event)">{{panelTitle}}</button>
                 <div class="chord-panel-title-buttons">
                     <button class="ml4 ba br2" mat-icon-button class="material-symbols-outlined" 
                             matTooltip="Download midi file for the chords" [disabled]="midi_disabled"

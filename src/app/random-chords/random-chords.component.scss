@@ -200,7 +200,7 @@ $desktop-width : 800px;
  ********************************************/
 .chord-panel-title-container {
     display : grid;
-    grid-template-columns: [lockbutton] 3rem [key] 7rem [buttons] 1fr;
+    grid-template-columns: [lockbutton] 3rem [key] 9rem [buttons] 1fr;
     width : 100%;
 }
 

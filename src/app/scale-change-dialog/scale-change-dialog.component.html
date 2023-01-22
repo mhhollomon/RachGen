@@ -1,0 +1,31 @@
+
+<h1 mat-dialog-title>Change Default Scale</h1>
+<div mat-dialog-content class="mt2">
+    <mat-form-field>
+        <mat-label>Tonality</mat-label>
+        <mat-select [(ngModel)]="scaleID.type">
+            <mat-option value="major">Major</mat-option>
+            <mat-option value="minor">Minor</mat-option>
+            <mat-option value="mixolydian">Mixolydian</mat-option>
+            <mat-option value="dorian">Dorian</mat-option>
+            <mat-option value="lydian">Lydian</mat-option>
+            <mat-option value="phrygian">Phrygian</mat-option>
+        </mat-select>
+    </mat-form-field>
+
+    <!-- Key Center -->
+    <mat-form-field>
+        <mat-label>Key Center</mat-label>
+        <mat-select [ngModel]="scaleID.key_center">
+            <mat-option value={{k}} 
+                *ngFor="let k of getKeyList()">
+                    {{k}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+</div>
+
+<div mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close><span class="material-symbols-outlined">cancel</span></button>
+    <button mat-button [mat-dialog-close]="scaleID"><span class="material-symbols-outlined" >check</span></button>
+</div>
