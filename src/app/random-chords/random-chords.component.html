@@ -127,6 +127,7 @@
                 <div class="chord-scale" *ngIf="!chordIsCustom(i)">
                    <a [matMenuTriggerFor]="menu" class="menu-anchor">{{c.scale.fullDisplay()}}
                         <mat-menu #menu="matMenu">
+                            <button mat-menu-item (click)="show_chord_scale_info(i)">Scale info</button>
                             <button mat-menu-item (click)="set_default_scale(i)">Set default to this</button>
                             <button mat-menu-item (click)="set_to_default_scale(i)">Set this to default</button>
                         </mat-menu>

@@ -55,6 +55,8 @@ export function CMajorID() : ScaleID {
     return { key_center : 'C', type : 'major'}
 }
 
+export function defaultScaleID() { return CMajorID(); }
+
 export function isScaleID(object: any) : object is ScaleID {
     return 'key_center' in object;
 }

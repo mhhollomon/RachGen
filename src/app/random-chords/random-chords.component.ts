@@ -24,7 +24,7 @@ import { GeneratorOptions, defaultGeneratorOptions } from '../generator-options/
 import { NewListDialogComponent } from '../new-list-dialog/new-list-dialog.component';
 import { ConfirmActionDialogComponent } from '../confirm-action-dialog/confirm-action-dialog.component';
 import { CustomChord } from '../utils/custom-chord';
-import { ScaleChangeDialogComponent } from '../scale-change-dialog/scale-change-dialog.component';
+import { defaultScaleChangeConfig, ScaleChangeDialogComponent } from '../scale-change-dialog/scale-change-dialog.component';
 import { MatExpansionPanel } from '@angular/material/expansion';
 
 
@@ -273,6 +273,14 @@ export class RandomChordsComponent implements OnInit, AfterViewInit {
 
   /************* EVENT HANDLERS   *************************/
 
+  show_chord_scale_info(chord_index : number) {
+    const dia_data = defaultScaleChangeConfig();
+    dia_data.allow_change = false;
+
+    this.dialog.open(ScaleChangeDialogComponent, { data : dia_data});
+
+  }
+
   default_scale_click(event : Event) {
     this.stopPropagation(event);
 
@@ -284,8 +292,9 @@ export class RandomChordsComponent implements OnInit, AfterViewInit {
   }
 
   change_default_scale() {
-    const input_scale = (this.default_scale?.scaleID() || CMajorID() );
-    const dia = this.dialog.open(ScaleChangeDialogComponent, { data : input_scale} );
+    const dia_data = defaultScaleChangeConfig();
+    dia_data.scaleID = (this.default_scale?.scaleID() || CMajorID() );
+    const dia = this.dialog.open(ScaleChangeDialogComponent, { data : dia_data} );
 
     dia.afterClosed().subscribe((s) => {
       if (s) {

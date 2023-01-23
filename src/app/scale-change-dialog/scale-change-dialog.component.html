@@ -1,10 +1,10 @@
 
-<h1 mat-dialog-title>Change Default Scale</h1>
+<h1 mat-dialog-title>{{ dialog_title }}</h1>
 <div mat-dialog-content>
     <!-- mat-dialog-content set margin-top:0 on its first child. 
          This is here to absorb that :) -->
     <br>
-    <div class="select-container">
+    <div class="select-container" *ngIf="allow_change">
         <mat-form-field>
             <mat-label>Tonality</mat-label>
             <mat-select [(ngModel)]="scale_type">
@@ -34,5 +34,5 @@
 
 <div mat-dialog-actions align="end">
     <button mat-button mat-dialog-close><span class="material-symbols-outlined">cancel</span></button>
-    <button mat-button [mat-dialog-close]="scaleID"><span class="material-symbols-outlined" >check</span></button>
+    <button mat-button [mat-dialog-close]="scaleID" *ngIf="allow_change"><span class="material-symbols-outlined" >check</span></button>
 </div>
