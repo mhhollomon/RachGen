@@ -208,9 +208,14 @@ $hightlight-color-lighter : #212121;
 /********************************************
  * Styles for the expansion panel at the top of the chord list
  ********************************************/
-.chord-panel-title-container {
+
+ %panel-grid-template {
     display : grid;
     grid-template-columns: [lockbutton] 3rem [key] 9rem [buttons] 1fr;
+ }
+
+.chord-panel-title-container {
+    @extend %panel-grid-template;
     width : 100%;
 }
 
@@ -230,6 +235,23 @@ $hightlight-color-lighter : #212121;
     justify-self: end;
 }
 
+// --- The content in the exapnsion area.
+
+.chord-panel-content-container {
+    @extend %panel-grid-template;
+    width : 100%;
+}
+
+.chord-panel-content-button {
+    grid-column-start: key;
+    align-self: center;   
+}
+
+.chord-panel-content-info {
+    grid-column-start:  buttons;
+    align-self: center;
+    justify-self : start;
+}
 
 
 .mdc-fab--mini {

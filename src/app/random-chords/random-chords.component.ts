@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { AfterViewInit, Component, Inject, OnInit, ViewChild } from '@angular/core';
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 
@@ -25,6 +25,7 @@ import { NewListDialogComponent } from '../new-list-dialog/new-list-dialog.compo
 import { ConfirmActionDialogComponent } from '../confirm-action-dialog/confirm-action-dialog.component';
 import { CustomChord } from '../utils/custom-chord';
 import { ScaleChangeDialogComponent } from '../scale-change-dialog/scale-change-dialog.component';
+import { MatExpansionPanel } from '@angular/material/expansion';
 
 
 const HELP_TEXT = `
@@ -179,7 +180,7 @@ const octavePlacement : { [ index : string ] : number } = {
   templateUrl: './random-chords.component.html',
   styleUrls: ['./random-chords.component.scss']
 })
-export class RandomChordsComponent implements OnInit {
+export class RandomChordsComponent implements OnInit, AfterViewInit {
 
   generateOptions : GeneratorOptions = defaultGeneratorOptions();
 
@@ -197,6 +198,8 @@ export class RandomChordsComponent implements OnInit {
   midi_config : MidiConfig = defaultMidiConfig();
 
   generatorOptionsExpanded = true;
+
+  @ViewChild('expansion') private _expansion_panel! :MatExpansionPanel;
   
 
   constructor(private scaleService : ScaleService,
@@ -209,7 +212,7 @@ export class RandomChordsComponent implements OnInit {
 
     ) {
 
-      // Do this in the constructor to make sure it is set before th view initializes.
+      // Do this in the constructor to make sure it is set before the view initializes.
       this.generatorOptionsExpanded = this.preferences.read('gen_opts_panel', true);
       this.generateOptions = this.preferences.read('gen_opts_data', this.generateOptions);
 
@@ -233,6 +236,10 @@ export class RandomChordsComponent implements OnInit {
 
     
     });
+  }
+
+  ngAfterViewInit(): void {
+      this._expansion_panel.close();
   }
 
   get chords_exist() { return this.chords.length > 0; }
@@ -269,6 +276,14 @@ export class RandomChordsComponent implements OnInit {
   default_scale_click(event : Event) {
     this.stopPropagation(event);
 
+    if (! this.default_scale_exists()) {
+      this.change_default_scale();
+    } else {
+      this._expansion_panel.toggle();
+    }
+  }
+
+  change_default_scale() {
     const input_scale = (this.default_scale?.scaleID() || CMajorID() );
     const dia = this.dialog.open(ScaleChangeDialogComponent, { data : input_scale} );
 
@@ -278,7 +293,7 @@ export class RandomChordsComponent implements OnInit {
         this.generateOptions.scale = Object.assign({}, s);
         this.scale_notes = this.default_scale.notesOfScale();
       }
-    })
+    });
   }
 
   generate_options_change(event : GeneratorOptions) {
@@ -490,6 +505,17 @@ export class RandomChordsComponent implements OnInit {
     }
   }
 
+  replace_unlocked_chords() {
+    if (! this.any_chords_locked()) {
+      const dia = this.dialog.open(ConfirmActionDialogComponent, { data : 'This will replace all chords since none are locked'});
+      dia.afterClosed().subscribe((yes) => {
+        if (yes) this.generate();
+      });
+
+    } else {
+      this.generate();
+    }
+  }
 
   generate() {
 

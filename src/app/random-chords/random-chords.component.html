@@ -1,17 +1,17 @@
 
 
-<!-- New List Button -->
+<!--------- Start New List Button ------------->
 <div class="db mv4 br2 ma2">
     <button  mat-raised-button id="generate_chords_button" color="primary" (click)="start_new_list()">Start New List</button>
 </div>
 <!--
     --------------------------- OUTPUT ------------------------------------
 -->
-<!--  -->
 <div class="ba bw1 br3 ph2 min-h-2">
     <div class="mt2"></div>
+    <!----------------- HEADER EXPANSION PANEL ----------------- -->
     <!-- Key Information -->
-    <mat-expansion-panel>
+    <mat-expansion-panel #expansion disabled=true>
         <mat-expansion-panel-header>
           <mat-panel-title>
             <div class="chord-panel-title-container mt1">
@@ -27,12 +27,23 @@
             </div>
           </mat-panel-title>
         </mat-expansion-panel-header>
-        <span class="mh2" *ngFor="let n of scale_notes">{{n.noteDisplay()}}</span>
+        <div class="chord-panel-content-container">
+            <div class="chord-panel-content-button">
+                <button mat-stroked-button color="accent" (click)="change_default_scale()">Change Scale</button>
+            </div>
+            <div class="chord-panel-content-info">
+                <div class="mh2 dib" *ngFor="let n of scale_notes; let index=index">
+                    <span>{{n.noteDisplay()}}</span>
+                    <br>
+                    <span>{{default_scale?.romanForDegree(index+1)}}</span>
+                </div>
+            </div>
+        </div>
     </mat-expansion-panel>
 
-    <!-- Chord Information -->
+    <!------------------------ CHORD LIST ----------------->
 
-    <!-- Action Header -->
+    <!-- Action Header Row -->
     <div class="chord-action-header-container ml1 pv2">
         <div class="chord-header-lock">
             <button mat-icon-button class="material-symbols-outlined" (click)="unlock_all_chords()"
@@ -58,7 +69,7 @@
         </div>
         <div class="header-right-action">
             <button class="dif material-symbols-outlined"
-                        matTooltip="replace all unlocked chords" (click)="generate()" [disabled]="all_chords_locked()" mat-icon-button>
+                        matTooltip="replace all unlocked chords" (click)="replace_unlocked_chords()" [disabled]="all_chords_locked()" mat-icon-button>
                 <mat-icon>casino</mat-icon>
             </button>
             <button class="dif material-symbols-outlined"
@@ -67,6 +78,8 @@
             </button>
         </div>
     </div>
+
+    <!----------- Main Chord List ---------->
 
     <div cdkDropList cdkDropListLockAxis="y" (cdkDropListDropped)="chord_drop($event)">
 
