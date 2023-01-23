@@ -15,7 +15,7 @@ import { CMajorID, Scale, ScaleType } from '../utils/music-theory/scale';
 import { Note } from '../utils/music-theory/note';
 import { AudioService } from '../audio.service';
 import { DOCUMENT } from '@angular/common';
-import { MidiDialogComponent, MidiConfig } from '../midi-dialog/midi-dialog.component';
+import { MidiDialogComponent, MidiConfig, defaultMidiConfig } from '../midi-dialog/midi-dialog.component';
 import { PreferencesService } from '../services/preferences.service';
 import { filter } from 'rxjs';
 import { ChordEditDialogComponent } from '../chord-edit-dialog/chord-edit-dialog.component';
@@ -193,11 +193,7 @@ export class RandomChordsComponent implements OnInit {
 
   all_play_active = false;
 
-  midi_config : MidiConfig = {
-    separateBass : false,
-    includeScale : true,
-    includeMarkers : false,
-  }
+  midi_config : MidiConfig = defaultMidiConfig();
 
   generatorOptionsExpanded = true;
   
@@ -216,16 +212,21 @@ export class RandomChordsComponent implements OnInit {
       this.generatorOptionsExpanded = this.preferences.read('gen_opts_panel', true);
       this.generateOptions = this.preferences.read('gen_opts_data', this.generateOptions);
 
-
   }
 
   ngOnInit(): void {
     this.help_text.setHelp({ help_text : HELP_TEXT, page_name : HELP_PAGE_NAME });
 
+    const midi_pref = this.preferences.read('midi', this.midi_config);
+
+    if (! ('fileName' in midi_pref)) {
+      midi_pref['fileName'] = defaultMidiConfig().fileName; 
+    }
+
+    this.midi_config = midi_pref as MidiConfig;
+
+
     // Snag any changes to the midi preferences.
-    Object.assign(this.midi_config, this.preferences.read('midi', this.midi_config));
-
-
     this.preferences.prefChange.pipe(filter((k)=> k === 'midi')).subscribe(() => {
       Object.assign(this.midi_config, this.preferences.read('midi', this.midi_config));
 
@@ -775,7 +776,7 @@ export class RandomChordsComponent implements OnInit {
     const midi_writer = new Midiwriter.Writer(tracks);
 
     const  blob = new Blob([midi_writer.buildFile()], {type: "audio/midi"});
-    saveAs(blob, "random-chords.mid");
+    saveAs(blob, config.fileName + '.mid');
 
     this.midi_state = 'off';
 

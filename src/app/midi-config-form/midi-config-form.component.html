@@ -1,0 +1,11 @@
+<div>
+    <div><mat-checkbox [(ngModel)]="includeScale">Include Scale in File</mat-checkbox></div>
+    <div><mat-checkbox [(ngModel)]="separateBass">Put Bass Note in Separate Track</mat-checkbox></div>
+    <div><mat-checkbox [(ngModel)]="includeMarkers">Include Timing Markers</mat-checkbox></div>
+    <div>
+        <mat-form-field name="file_name_input">
+            <mat-label>File Name</mat-label>
+            <input matNativeControl [(ngModel)]="fileName"><span>.mid</span>
+        </mat-form-field>
+    </div>
+</div>

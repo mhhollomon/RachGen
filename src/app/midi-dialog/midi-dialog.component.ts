@@ -6,6 +6,16 @@ export interface MidiConfig {
   includeScale : boolean,
   separateBass : boolean,
   includeMarkers : boolean,
+  fileName : string,
+}
+
+export function defaultMidiConfig() : MidiConfig {
+  return {
+    separateBass : false,
+    includeScale : true,
+    includeMarkers : false,
+    fileName : "random-chords",
+  }
 }
 
 @Component({
@@ -15,9 +25,12 @@ export interface MidiConfig {
 })
 export class MidiDialogComponent {
 
+  public localConfig : MidiConfig
+
   constructor(@Inject(MAT_DIALOG_DATA) public config : MidiConfig,
-      public dialogRef: MatDialogRef<MidiDialogComponent>
       ) {
+
+        this.localConfig = Object.assign({}, config);
   }
 
 

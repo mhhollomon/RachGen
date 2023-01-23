@@ -1,10 +1,8 @@
 <h1 mat-dialog-title>MIDI Download Configuration</h1>
 <div mat-dialog-content>
-    <div><mat-checkbox [(ngModel)]="config.includeScale">Include Scale in File</mat-checkbox></div>
-    <div><mat-checkbox [(ngModel)]="config.separateBass">Put Bass Note in Separate Track</mat-checkbox></div>
-    <div><mat-checkbox [(ngModel)]="config.includeMarkers">Include Timing Markers</mat-checkbox></div>
+    <app-midi-config-form [(midiConfig)]="localConfig"></app-midi-config-form>
 </div>
 <div mat-dialog-actions align="end">
     <button mat-button mat-dialog-close><span class="material-symbols-outlined">cancel</span></button>
-    <button mat-button [mat-dialog-close]="config"><span class="material-symbols-outlined" >download</span></button>
+    <button mat-button [mat-dialog-close]="localConfig"><span class="material-symbols-outlined" >download</span></button>
 </div>

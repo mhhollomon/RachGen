@@ -23,6 +23,7 @@ import { ConfirmActionDialogComponent } from './confirm-action-dialog/confirm-ac
 import { NewListDialogComponent } from './new-list-dialog/new-list-dialog.component';
 import { ScaleChangeDialogComponent } from './scale-change-dialog/scale-change-dialog.component';
 import { ScaleInfoComponent } from './scale-info/scale-info.component';
+import { MidiConfigFormComponent } from './midi-config-form/midi-config-form.component';
 
 @NgModule({
   declarations: [
@@ -40,7 +41,8 @@ import { ScaleInfoComponent } from './scale-info/scale-info.component';
     ConfirmActionDialogComponent,
     NewListDialogComponent,
     ScaleChangeDialogComponent,
-    ScaleInfoComponent
+    ScaleInfoComponent,
+    MidiConfigFormComponent
   ],
   imports: [
     BrowserModule, 

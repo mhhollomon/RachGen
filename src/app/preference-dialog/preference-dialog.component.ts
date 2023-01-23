@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmActionDialogComponent } from '../confirm-action-dialog/confirm-action-dialog.component';
-import { MidiConfig } from '../midi-dialog/midi-dialog.component';
+import { defaultMidiConfig, MidiConfig } from '../midi-dialog/midi-dialog.component';
 import { PreferencesService } from '../services/preferences.service';
 
 @Component({
@@ -11,11 +11,7 @@ import { PreferencesService } from '../services/preferences.service';
 })
 export class PreferenceDialogComponent {
 
-  midi_config : MidiConfig = {
-    separateBass : false, 
-    includeMarkers : false,  
-    includeScale : true 
-  };
+  midi_config : MidiConfig = defaultMidiConfig();
 
   midi_changed = false;
 
@@ -35,8 +31,9 @@ export class PreferenceDialogComponent {
     }
   }
 
-  midi_change() {
+  midi_config_change(event : MidiConfig) {
     this.midi_changed = true;
+    this.midi_config = Object.assign({}, event);
   }
 
   clear_settings() {
