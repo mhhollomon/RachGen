@@ -5,7 +5,8 @@ import { MatDialog } from '@angular/material/dialog';
 import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
 
 import { saveAs } from 'file-saver';
-import  * as Midiwriter  from 'midi-writer-js'
+import  * as Midiwriter  from 'midi-writer-js';
+import * as dayjs from 'dayjs';
 
 import { HelpTextEmitterService } from '../services/help-text-emitter.service';
 import {ScaleService } from '../scale.service';
@@ -775,11 +776,37 @@ export class RandomChordsComponent implements OnInit {
 
     const midi_writer = new Midiwriter.Writer(tracks);
 
+    const filename = this.interpolate_midi_filename(config.fileName) + ".mid";
+
     const  blob = new Blob([midi_writer.buildFile()], {type: "audio/midi"});
-    saveAs(blob, config.fileName + '.mid');
+    saveAs(blob, filename);
 
     this.midi_state = 'off';
 
+  }
+
+  interpolate_midi_filename(input_string : string) : string {
+    const re = /(?<varname>\${\w+})/g;
+
+    const date = dayjs();
+
+
+    const value_map : any = {
+      'date' : date.format('YYYYMMDD'),
+      'time' : date.format('HHmmss'),
+      'scale' : this.default_scale?.fullName() || 'unknown',
+      'count' : this.chords.length,
+    }
+
+
+    return input_string.replaceAll(re, (s) => {
+      const varname = s.substring(2, s.length-1);
+      if (varname in value_map) {
+        return value_map[varname];
+      } else {
+        return '???';
+      }
+    });
   }
 
 

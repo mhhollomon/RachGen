@@ -14,7 +14,7 @@ export function defaultMidiConfig() : MidiConfig {
     separateBass : false,
     includeScale : true,
     includeMarkers : false,
-    fileName : "random-chords",
+    fileName : "RachGen_${scale}_${date}_${time}",
   }
 }
 
