@@ -66,13 +66,7 @@ export class AppComponent implements OnInit {
     }
 
     openHelpDialog() {
-
-        this.dialog.open(HelpDialogComponent, {
-            data: {
-                help_text: this.current_help_text,
-                page_name : this.current_help_page,
-            },
-        });
+        this.dialog.open(HelpDialogComponent);
     }
 
     openPreferenceDialog() {

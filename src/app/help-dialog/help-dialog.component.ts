@@ -1,5 +1,4 @@
-import { Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Component } from '@angular/core';
 
 export interface help_data {
   help_text : string,
@@ -12,9 +11,5 @@ export interface help_data {
   styleUrls: ['./help-dialog.component.scss']
 })
 export class HelpDialogComponent  {
-
-  constructor(@Inject(MAT_DIALOG_DATA) public data: help_data) {
-  }
-
 
 }

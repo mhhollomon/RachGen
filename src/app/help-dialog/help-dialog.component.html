@@ -1,5 +1,142 @@
-<h1 mat-dialog-title>Help for {{data.page_name}} page</h1>
-<div mat-dialog-content [innerHTML]="data.help_text"></div>
+<h1 mat-dialog-title>Help Page</h1>
+<div mat-dialog-content>
+    <table>
+    <tr class="bg-light-gray mhh-mat-label"><td class="b">Mode</td></tr>
+    <tr><td>
+        The mode sets how the generated chords are releated to each other and a  specified scale
+        <ul>
+        <li><span class="b">Diatonic</span> - (default) The chords generate will be "in" a key. The root note for
+            each chord will be taken from the given scale. The quality will be set according to the scale.
+            In particular that means that there can be at most 7 unique chords.
+            <p>The key itself may be random or selected by the user (see below). <p>
+        </li>
+        <li><span class="b">Chromatic</span> - The chords are not related to each other. The root note
+            of each chord is selected at random from the keyboard. A quality (major, minor, augmented, diminished)
+            is choosen separately.
+        </ul>
+    </td></tr>
+
+    <tr class="bg-light-gray mhh-mat-label"><td class="b">Duplicates</td></tr>
+    <tr>
+    <td>What duplicates are allowed. A chord is considered a "duplicate" if it has the same root note and the same
+        chord type (triad, sus2, sus4). extensions and inversion are not considered. 
+        <ul>
+            <li><span class="b">None</span> - (default) No duplicates are allowed.</li>
+            <li><span class="b">Not Adjacent</span> - Duplicates are allowed as long as they are not next to each other in the set of chords</li>
+            <li><span class="b">Any</span> - All duplicates are allowed</li>
+        </ul>
+        
+    </td>
+    </tr>
+
+    <tr class="bg-light-gray mhh-mat-label"><td class="b">Chord Count</td></tr>
+    <tr><td>
+    How many chords to generate.
+    <p>By default the interface allows you to pick a particular number of chords
+        to generate. The maximum allowed depends on the configuration. </p>
+
+        <ul>
+        <li> IF Duplicates = 'None' 
+            <ul>
+            <li> IF more than one of triads, sus2, sus4 are chosen, then : 1-10</li>
+            <li> ELSE 1-6</li>
+            </ul>
+        </li>
+        <li>ELSE 1-30</li>
+        </ul>
+
+    <p> The expander to the right allows you to open the interface so that you can choose a range 
+        of numbers. The actual number of chords returned will be in that range - inclusive.</p>
+    </td></tr>
+
+
+    <tr class="bg-light-gray  mhh-mat-label"><td class="b">Selection Actions</td></tr>
+    <tr>
+    <td>
+        Shortcut actions for chord constraints.
+        <p>Note that thes buttons only change things that are below them - so, Chord Types, Extensions, Inversions.
+        Mode, Duplicates, Chord Count are not affected.
+        <ul>
+            <li><span class="b">All the feels</span> - Turn on all selections. Weight sliders are not affected.</li>
+            <li><span class="b">Reset</span> - Set the selections <i>and sliders</i> to default values.</li>
+        </ul>
+        
+    </td>
+    </tr>
+
+    <tr class="bg-light-gray mhh-mat-label"><td class="b">Chord Types</td></tr>
+    <tr>
+    <td>
+        Which chord types are allowed to be generated. At least one chord type must be allowed.
+        <p>Underneath each checkbox is a slider which sets the relative weighting of that chord types.</p>
+        <p>The chance that a particular chord type will be chosen is dependent on the relative positions 
+        of all the sliders that are active. So if all are set high (or low), then they are equally likely to
+        be chosen. The different options will have different weights only if the sliders are in different positions.</p>
+        <p>The sliders will show you in real-time the probability that its option will be picked.</p>
+        <ul>
+            <li><span class="b">Triads</span> - (default) Chords can be the "basic" triads (1,3,5)</li>
+            <li><span class="b">Sus2</span> - The chord will contain the second rather than third</li>
+            <li><span class="b">Sus4</span> - The chord will contain the fourth rather than third</li>
+        </ul>
+        
+    </td>
+    </tr>
+
+    <tr class="bg-light-gray  mhh-mat-label"><td class="b">Extensions</td></tr>
+    <tr>
+    <td>
+        These are additional chord tones that can be added "on top" of the chord.
+        <p>Underneath each checkbox is a slider which sets the probability that the associated extension
+            will be added to the chord. Note that these are independent of each other. When the slider
+            is far to the right, the extension is very likey to be added. Conversely, when the slider
+            is far to the left, the extension is not very likely to be added.</p>      
+    </td>
+    </tr>
+
+    <tr class="bg-light-gray mhh-mat-label"><td class="b">Inversions</td></tr>
+    <tr>
+    <td>
+        The chord will be inverted - the lowest note will be something other than the root of the chord.
+        <p>Underneath each checkbox is a slider which sets the probability that the associated inversion
+            will be generated.</p>
+        <p>The chance that a particular inversion will be chosen is dependent on the relative positions 
+        of all the sliders that are active. So if all are set high (or low), then they are equally likely to
+        be chosen. The different options will have different weights only if the sliders are in different positions.</p>
+        <p>The sliders will show you in real-time the probability that its option will be picked.</p>
+    
+        <p>At least one inversion must be allowed or an error will be generated</p>
+        <p>The default weightings are the weightings that were used by the application before this change.</p>     
+    </td>
+    </tr>
+
+    <tr class="bg-light-gray mhh-mat-label"><td class="b">Key (Diatonic Only)</td></tr>
+    <tr>
+    <td>
+        Control how the key used by the Diatonic Mode is chosen.
+        <ul>
+            <li><span class="b">Random</span> - (default) Let the computer decide</li>
+            <li><span class="b">Selected</span> - The user selects. If chosen, another set of boxes will appear allowing you to choose
+                the tonality (major, minor, dorian, etc) and the key center (or leave the key center random).</li>
+        </ul>
+        
+    </td>
+    </tr>
+
+    <tr class="bg-light-gray mhh-mat-label"><td class="b">Limitations/Caveats</td></tr>
+    <tr><td>
+    <li>3rd Inversion 7ths are never generated.</li>
+    <li>For 9ths, the 9th is never "inverted", any inversion is calculated as if the chord was a triad or 7th.</li>
+    <li>In <span class="b">Chromatic</span> mode
+        <ul>
+            <li>Dominant 7ths are never generated</li>    
+            <li>The chord qualities are weighted in the ratio they appear in a major scale.</li>  
+        </ul>
+    </li> 
+    </td></tr> 
+
+    </table>
+
+</div>
 <mat-dialog-actions align="end">
     <button mat-button mat-dialog-close><span class="material-symbols-outlined">close</span></button>
 </mat-dialog-actions>

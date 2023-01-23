@@ -1,174 +1,31 @@
 import { AfterViewInit, Component, Inject, OnInit, ViewChild } from '@angular/core';
-import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
-import { MatDialog } from '@angular/material/dialog';
+import { DOCUMENT } from '@angular/common';
+import { filter } from 'rxjs';
 
+import { MatDialog } from '@angular/material/dialog';
+import { MatExpansionPanel } from '@angular/material/expansion';
 import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
 
 import { saveAs } from 'file-saver';
 import  * as Midiwriter  from 'midi-writer-js';
 import * as dayjs from 'dayjs';
 
-import { HelpTextEmitterService } from '../services/help-text-emitter.service';
+import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
 import {ScaleService } from '../scale.service';
 import { RandomChordService, RandomChordError } from '../random-chord.service';
 import { Chord } from '../utils/music-theory/chord';
 import { CMajorID, Scale, ScaleType } from '../utils/music-theory/scale';
 import { Note } from '../utils/music-theory/note';
 import { AudioService } from '../audio.service';
-import { DOCUMENT } from '@angular/common';
 import { MidiDialogComponent, MidiConfig, defaultMidiConfig } from '../midi-dialog/midi-dialog.component';
 import { PreferencesService } from '../services/preferences.service';
-import { filter } from 'rxjs';
 import { ChordEditDialogComponent } from '../chord-edit-dialog/chord-edit-dialog.component';
 import { GeneratorOptions, defaultGeneratorOptions } from '../generator-options/generator-options.component';
 import { NewListDialogComponent } from '../new-list-dialog/new-list-dialog.component';
 import { ConfirmActionDialogComponent } from '../confirm-action-dialog/confirm-action-dialog.component';
 import { CustomChord } from '../utils/custom-chord';
 import { defaultScaleChangeConfig, ScaleChangeDialogComponent } from '../scale-change-dialog/scale-change-dialog.component';
-import { MatExpansionPanel } from '@angular/material/expansion';
 
-
-const HELP_TEXT = `
-<p>This page will let you generate a series of random chords</p>
-<table>
-<tr class="bg-light-gray mhh-mat-label"><td class="b">Mode</td></tr>
-<tr><td>
-    The mode sets how the generated chords are releated to each other and a  specified scale
-    <ul>
-      <li><span class="b">Diatonic</span> - (default) The chords generate will be "in" a key. The root note for
-          each chord will be taken from the given scale. The quality will be set according to the scale.
-          In particular that means that there can be at most 7 unique chords.
-          <p>The key itself may be random or selected by the user (see below). <p>
-      </li>
-      <li><span class="b">Chromatic</span> - The chords are not related to each other. The root note
-          of each chord is selected at random from the keyboard. A quality (major, minor, augmented, diminished)
-          is choosen separately.
-    </ul>
-</td></tr>
-
-<tr class="bg-light-gray mhh-mat-label"><td class="b">Duplicates</td></tr>
-<tr>
-  <td>What duplicates are allowed. A chord is considered a "duplicate" if it has the same root note and the same
-      chord type (triad, sus2, sus4). extensions and inversion are not considered. 
-      <ul>
-        <li><span class="b">None</span> - (default) No duplicates are allowed.</li>
-        <li><span class="b">Not Adjacent</span> - Duplicates are allowed as long as they are not next to each other in the set of chords</li>
-        <li><span class="b">Any</span> - All duplicates are allowed</li>
-      </ul>
-      
-  </td>
-</tr>
-
-<tr class="bg-light-gray mhh-mat-label"><td class="b">Chord Count</td></tr>
-<tr><td>
-  How many chords to generate.
-  <p>By default the interface allows you to pick a particular number of chords
-    to generate. The maximum allowed depends on the configuration. </p>
-
-    <ul>
-      <li> IF Duplicates = 'None' 
-        <ul>
-          <li> IF more than one of triads, sus2, sus4 are chosen, then : 1-10</li>
-          <li> ELSE 1-6</li>
-        </ul>
-      </li>
-      <li>ELSE 1-30</li>
-    </ul>
-
-  <p> The expander to the right allows you to open the interface so that you can choose a range 
-    of numbers. The actual number of chords returned will be in that range - inclusive.</p>
-</td></tr>
-
-
-<tr class="bg-light-gray  mhh-mat-label"><td class="b">Selection Actions</td></tr>
-<tr>
-  <td>
-      Shortcut actions for chord constraints.
-      <p>Note that thes buttons only change things that are below them - so, Chord Types, Extensions, Inversions.
-      Mode, Duplicates, Chord Count are not affected.
-      <ul>
-        <li><span class="b">All the feels</span> - Turn on all selections. Weight sliders are not affected.</li>
-        <li><span class="b">Reset</span> - Set the selections <i>and sliders</i> to default values.</li>
-      </ul>
-      
-  </td>
-</tr>
-
-<tr class="bg-light-gray mhh-mat-label"><td class="b">Chord Types</td></tr>
-<tr>
-  <td>
-      Which chord types are allowed to be generated. At least one chord type must be allowed.
-      <p>Underneath each checkbox is a slider which sets the relative weighting of that chord types.</p>
-      <p>The chance that a particular chord type will be chosen is dependent on the relative positions 
-      of all the sliders that are active. So if all are set high (or low), then they are equally likely to
-      be chosen. The different options will have different weights only if the sliders are in different positions.</p>
-      <p>The sliders will show you in real-time the probability that its option will be picked.</p>
-      <ul>
-        <li><span class="b">Triads</span> - (default) Chords can be the "basic" triads (1,3,5)</li>
-        <li><span class="b">Sus2</span> - The chord will contain the second rather than third</li>
-        <li><span class="b">Sus4</span> - The chord will contain the fourth rather than third</li>
-            options are also chosen</li>
-        </li>
-      </ul>
-      
-  </td>
-</tr>
-
-<tr class="bg-light-gray  mhh-mat-label"><td class="b">Extensions</td></tr>
-<tr>
-  <td>
-      These are additional chord tones that can be added "on top" of the chord.
-      <p>Underneath each checkbox is a slider which sets the probability that the associated extension
-        will be added to the chord. Note that these are independent of each other. When the slider
-        is far to the right, the extension is very likey to be added. Conversely, when the slider
-        is far to the left, the extension is not very likely to be added.</p>      
-  </td>
-</tr>
-
-<tr class="bg-light-gray mhh-mat-label"><td class="b">Inversions</td></tr>
-<tr>
-  <td>
-      The chord will be inverted - the lowest note will be something other than the root of the chord.
-      <p>Underneath each checkbox is a slider which sets the probability that the associated inversion
-        will be generated.</p>
-      <p>The chance that a particular inversion will be chosen is dependent on the relative positions 
-      of all the sliders that are active. So if all are set high (or low), then they are equally likely to
-      be chosen. The different options will have different weights only if the sliders are in different positions.</p>
-      <p>The sliders will show you in real-time the probability that its option will be picked.</p>
-  
-      <p>At least one inversion must be allowed or an error will be generated</p>
-      <p>The default weightings are the weightings that were used by the application before this change.</p>     
-  </td>
-</tr>
-
-<tr class="bg-light-gray mhh-mat-label"><td class="b">Key (Diatonic Only)</td></tr>
-<tr>
-  <td>
-    Control how the key used by the Diatonic Mode is chosen.
-      <ul>
-        <li><span class="b">Random</span> - (default) Let the computer decide</li>
-        <li><span class="b">Selected</span> - The user selects. If chosen, another set of boxes will appear allowing you to choose
-              the tonality (major, minor, dorian, etc) and the key center (or leave the key center random).</li>
-      </ul>
-      
-  </td>
-</tr>
-
-<tr class="bg-light-gray mhh-mat-label"><td class="b">Limitations/Caveats</td></tr>
-<tr><td>
-<li>3rd Inversion 7ths are never generated.</li>
-<li>For 9ths, the 9th is never "inverted", any inversion is calculated as if the chord was a triad or 7th.</li>
-<li>In <span class="b">Chromatic</span> mode
-    <ul>
-        <li>Dominant 7ths are never generated</li>    
-        <li>The chord qualities are weighted in the ratio they appear in a major scale.</li>  
-    </ul>
-</li> 
-</td></tr> 
-
-</table>
-`;
-const HELP_PAGE_NAME = "Random Chords";
 
 const octavePlacement : { [ index : string ] : number } = {
   'C' : 0, 'D' : 1, 'E' : 2, 'F' : 3, 'G' : 4, 'A' : 5, 'B' : 6 
@@ -206,7 +63,6 @@ export class RandomChordsComponent implements OnInit, AfterViewInit {
     private randomChordService : RandomChordService,
     private audioService : AudioService,
     public dialog: MatDialog, 
-    private help_text : HelpTextEmitterService,
     @Inject(DOCUMENT) private document : Document,
     private preferences : PreferencesService,
 
@@ -219,8 +75,6 @@ export class RandomChordsComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    this.help_text.setHelp({ help_text : HELP_TEXT, page_name : HELP_PAGE_NAME });
-
     const midi_pref = this.preferences.read('midi', this.midi_config);
 
     if (! ('fileName' in midi_pref)) {
