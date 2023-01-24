@@ -56,6 +56,7 @@ export function CMajorID() : ScaleID {
 
 export function defaultScaleID() { return CMajorID(); }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isScaleID(object: any) : object is ScaleID {
     return 'key_center' in object;
 }

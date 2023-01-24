@@ -2,17 +2,9 @@ import { Injectable } from '@angular/core';
 import { Chooser, equalWeightedChooser, mkch, yesno } from './utils/chooser';
 import { Chord, ChordType, ExtensionType, InversionType } from './utils/music-theory/chord';
 import { Scale, ScaleID, ScaleType } from './utils/music-theory/scale';
-import { Note } from './utils/music-theory/note';
 import { ScaleService } from './scale.service';
 import { range } from './utils/util-library';
 
-
-const qualityToScaleType : { [key : string] : ScaleType } = {
-  'min' : 'minor',
-  'maj' : 'major',
-  'dim' : 'phrygian',
-  'aug' : 'augmented'
-}
 
 function yesno100(yesWeight : number) : boolean {
   return yesno(yesWeight, 100-yesWeight);

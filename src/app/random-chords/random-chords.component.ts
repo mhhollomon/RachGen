@@ -156,6 +156,11 @@ export class RandomChordsComponent implements OnInit, AfterViewInit, OnDestroy {
     const dia_data = defaultScaleChangeConfig();
     dia_data.allow_change = false;
 
+    const chord = this.store.get_a_chord(chord_index);
+    if (chord) {
+      dia_data.scaleID = chord.scale.scaleID();
+    }
+
     this.dialog.open(ScaleChangeDialogComponent, { data : dia_data});
 
   }
@@ -240,7 +245,7 @@ export class RandomChordsComponent implements OnInit, AfterViewInit, OnDestroy {
       test_chord = chord;
     }
 
-    return (chord instanceof CustomChord);
+    return (test_chord instanceof CustomChord);
   }
 
   add_chord(pos : 'before' | 'after', index : number) {
@@ -277,7 +282,7 @@ export class RandomChordsComponent implements OnInit, AfterViewInit, OnDestroy {
       .setKey(scale);
 
     const newChords = builder.generate_chords();
-    this.store.add_chord(newChords[0], chord_index)
+    this.store.replace_chord(newChords[0], chord_index)
 
   }
 
@@ -447,8 +452,6 @@ export class RandomChordsComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.preferences.write('gen_opts_data', this.generateOptions);
 
-    let picked_key : Scale | null = null;
-
     if (this.generateOptions.key_source === "Selected") {
       if (this.generateOptions.center === 'Random') {
         this.generateOptions.scale = this.scaleService.choose(this.generateOptions.tonality as ScaleType).scaleID();
@@ -458,7 +461,6 @@ export class RandomChordsComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       this.generateOptions.scale = this.scaleService.choose().scaleID();
     }
-    picked_key = new Scale(this.generateOptions.scale);
 
 
     try {
@@ -726,6 +728,7 @@ export class RandomChordsComponent implements OnInit, AfterViewInit, OnDestroy {
     const date = dayjs();
 
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const value_map : any = {
       'date' : date.format('YYYYMMDD'),
       'time' : date.format('HHmmss'),

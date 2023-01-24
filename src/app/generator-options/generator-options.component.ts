@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatRadioChange } from '@angular/material/radio';
 import { MatSelectChange } from '@angular/material/select';
-import { DuplicateControl, RandomChordOptions } from '../random-chord.service';
+import { RandomChordOptions } from '../random-chord.service';
 import { ScaleService } from '../scale.service';
 import { ChordType, InversionType } from '../utils/music-theory/chord';
 import { ScaleType } from '../utils/music-theory/scale';
@@ -56,7 +56,7 @@ export class GeneratorOptionsComponent {
 
   get scale_disabled() : boolean {
     return false;
-  };
+  }
 
 
   get chord_count_max() : number {

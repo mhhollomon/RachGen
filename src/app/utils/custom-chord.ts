@@ -1,8 +1,8 @@
-import { Chord, ChordType } from "./music-theory/chord";
+import { Chord } from "./music-theory/chord";
 import { Note } from "./music-theory/note";
 
 export class CustomChord extends Chord{
-    nameCache : string = 'Custom Chord';
+    nameCache  = 'Custom Chord';
     notes : Note[] = [];
 
     constructor(n? : Chord) {
@@ -36,6 +36,6 @@ export class CustomChord extends Chord{
     }
 
     addChordTone(n : string) {
-        this.notes.push(new Note("C"));
+        this.notes.push(new Note(n));
     }
 }

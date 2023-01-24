@@ -1,4 +1,4 @@
-import { EventEmitter, Injectable, OnInit, Output } from '@angular/core';
+import { EventEmitter, Injectable, Output } from '@angular/core';
 
 import { pref_key_list } from './pref-keys';
 
@@ -7,24 +7,21 @@ const prefix = 'rg';
 @Injectable({
   providedIn: 'root'
 })
-export class PreferencesService implements OnInit {
+export class PreferencesService  {
 
   @Output() public prefChange: EventEmitter<string> = new EventEmitter();
 
-  ngOnInit() {
+  constructor() {
     const blob = localStorage.getItem('rg.theme');
 
     if (blob) {
 
-      let retval : any = null;
       try {
-        retval = JSON.parse(blob);
+        JSON.parse(blob);
       } catch(e) {
         this.write('theme', 'light');
       }
     }
-
-
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -53,6 +50,7 @@ export class PreferencesService implements OnInit {
     const blob = localStorage.getItem(realkey);
 
     if (blob) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let retval : any = null;
       try {
         retval = JSON.parse(blob);
@@ -88,7 +86,7 @@ export class PreferencesService implements OnInit {
     localStorage.removeItem('theme');
 
     while(! stop) {
-      let key = localStorage.key(i) as  string;
+      const key = localStorage.key(i) as  string;
       if (key != null) {
         if (key.substring(0, prefix.length+1) === (prefix + '.')) {
           localStorage.removeItem(key);

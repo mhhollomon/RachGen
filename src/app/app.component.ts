@@ -42,7 +42,7 @@ export class AppComponent implements OnInit {
         this.darkMode = this.theme_service.isDarkMode();
 
         // Window Size
-        let mq = window.matchMedia("only screen and (max-width: 700px)");
+        const mq = window.matchMedia("only screen and (max-width: 700px)");
 
         // check at the start
         this.changeText(mq);

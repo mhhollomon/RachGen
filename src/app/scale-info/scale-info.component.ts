@@ -1,5 +1,4 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Chord } from '../utils/music-theory/chord';
 import { CMajorID, Scale, ScaleID } from '../utils/music-theory/scale';
 
 interface scale_note_info {

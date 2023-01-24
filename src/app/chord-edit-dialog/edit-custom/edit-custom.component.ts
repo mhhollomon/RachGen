@@ -1,6 +1,5 @@
-import { Component, Inject, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { MatButtonToggleChange } from '@angular/material/button-toggle';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { CustomChord } from 'src/app/utils/custom-chord';
 import { Note } from 'src/app/utils/music-theory/note';
 

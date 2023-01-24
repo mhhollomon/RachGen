@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { List } from 'immutable';
 import { Chord } from '../utils/music-theory/chord';
 import { Scale, ScaleID } from '../utils/music-theory/scale';
@@ -47,7 +47,7 @@ export class ChordListCacheService {
   }
 
   add_chord(c : Chord, i : number) {
-    let chords = this._chords.getValue();
+    const chords = this._chords.getValue();
     if (i > chords.size) return;
     this._chords.next(chords.splice(i, 0, c));
   }
@@ -57,13 +57,13 @@ export class ChordListCacheService {
   }
 
   replace_chord(c : Chord, i : number) {
-    let chords = this._chords.getValue();
+    const chords = this._chords.getValue();
     if (i > chords.size) return;
     this._chords.next(chords.splice(i, 1, c));
   }
 
   delete_chord(i : number) {
-    let chords = this._chords.getValue();
+    const chords = this._chords.getValue();
     if (i > chords.size) return;
     this._chords.next(chords.splice(i, 1));
   }
@@ -74,7 +74,7 @@ export class ChordListCacheService {
 
   //******************* SCALE    ***********************/
 
-  get scale() { return this._scale.asObservable(); };
+  get scale() { return this._scale.asObservable(); }
 
   get_scale() { return this._scale.getValue() }
   change_scale(s : Scale | ScaleID | null ) {

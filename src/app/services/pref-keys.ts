@@ -13,5 +13,5 @@
         audition_pref,
     ];
 
-export module PrefKeys {
+export namespace PrefKeys {
 }

@@ -16,7 +16,7 @@
       ],
       "rules": {
         "@angular-eslint/directive-selector": [
-          "off",
+          "error",
           {
             "type": "attribute",
             "prefix": "app",

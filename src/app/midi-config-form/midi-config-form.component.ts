@@ -15,7 +15,7 @@ export class MidiConfigFormComponent {
     this._model = Object.assign({}, mc);
   }
 
-  get ngModel() { return this._model};
+  get ngModel() { return this._model}
 
   get includeScale() { return this._model.includeScale; }
   set includeScale(b : boolean ) {
