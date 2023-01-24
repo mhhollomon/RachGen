@@ -24,6 +24,8 @@ import { NewListDialogComponent } from './new-list-dialog/new-list-dialog.compon
 import { ScaleChangeDialogComponent } from './scale-change-dialog/scale-change-dialog.component';
 import { ScaleInfoComponent } from './scale-info/scale-info.component';
 import { MidiConfigFormComponent } from './midi-config-form/midi-config-form.component';
+import { SettingsPageComponent } from './settings-page/settings-page.component';
+import { ChordListCacheService } from './services/chord-list-cache.service';
 
 @NgModule({
   declarations: [
@@ -42,7 +44,8 @@ import { MidiConfigFormComponent } from './midi-config-form/midi-config-form.com
     NewListDialogComponent,
     ScaleChangeDialogComponent,
     ScaleInfoComponent,
-    MidiConfigFormComponent
+    MidiConfigFormComponent,
+    SettingsPageComponent
   ],
   imports: [
     BrowserModule, 
@@ -55,7 +58,8 @@ import { MidiConfigFormComponent } from './midi-config-form/midi-config-form.com
     HelpTextEmitterService,
     PreferencesService,
     { provide: AudioContext, useClass: AudioContext },
-    ThemeService
+    ThemeService,
+    ChordListCacheService,
   ],
   bootstrap: [AppComponent]
 })

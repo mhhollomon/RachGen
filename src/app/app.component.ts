@@ -29,6 +29,7 @@ export class AppComponent implements OnInit {
         private help_text : HelpTextEmitterService,
         private theme_service : ThemeService,
         ) {
+
     }
 
     ngOnInit(): void {

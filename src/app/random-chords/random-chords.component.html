@@ -97,7 +97,7 @@
 
         -->
 
-        <div class="chord-row-container chord-index-{{i}} ml1 pv2" cdkDrag *ngFor="let c of chords; let i=index">
+        <div class="chord-row-container chord-index-{{i}} ml1 pv2" cdkDrag *ngFor="let c of store.chords | async; let i=index">
             <div class="chord-lock">
                 <button mat-icon-button class="chord-lock" [color]="chord_locked(i) ? 'accent' : ''" 
                         class="material-symbols-outlined" matTooltip="Lock chord" (click)="lock_chord(i)">
@@ -139,7 +139,9 @@
 
             <div class="chord-right-action">
                 <button class="dif material-symbols-outlined"
-                            matTooltip="Edit parts of the chord" (click)="edit_chord_modal(i)" [disabled]="chord_locked(i)" mat-icon-button>
+                            matTooltip="Edit parts of the chord" 
+                            (click)="edit_chord_modal(i)" 
+                            mat-icon-button>
                     <mat-icon>edit</mat-icon>
                 </button>
                 <button class="dif material-symbols-outlined"

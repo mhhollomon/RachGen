@@ -1,5 +1,4 @@
 
-import { throwIfEmpty } from 'rxjs';
 import {capitalize} from '../util-library';
 import { Chord } from './chord';
 import { Note } from "./note";
@@ -116,8 +115,8 @@ export class Scale {
 
     scaleID() : ScaleID { return { key_center : this.root(), type : this.scaleType};}
 
-    isSame(o : Scale) : boolean {
-        return (this.rootNote.equal(o.rootNote) && this.scaleType === o.scaleType);
+    isSame(o : Scale | undefined | null) : boolean {
+        return (o != undefined && this.rootNote.equal(o.rootNote) && this.scaleType === o.scaleType);
     }
 
     notesOfScale() : Note[] {

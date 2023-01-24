@@ -1,0 +1,53 @@
+@use '@angular/material' as mat;
+
+@use '../../theme.scss' as theme;
+
+
+.settings-top-container {
+    display : grid;
+    grid-template-columns: [nav-list] 0.3fr [main-area] 1fr;
+    gap : 1rem;
+
+}
+
+.settings-nav-list {
+    grid-column-start: nav-list;
+    border-right : 1px solid whitesmoke;
+}
+
+.settings-main-area {
+    grid-column-start: main-area;
+}
+
+
+@mixin nav-button-base {
+    display : block;
+    border: 0;
+    text-align: start;
+    font-weight: 500;
+    padding-bottom: 0.5rem;
+    padding-top: 0.5rem;
+    cursor: pointer;
+}
+
+.navButton {
+    font-size : 14pt;
+    @include nav-button-base();
+}
+
+.activeNavButton {
+    font-size : 15pt;
+    padding-left : 0.6rem;
+    background-color : mat.get-color-from-palette(theme.$pewter-blue-palette, lighter);
+    @include nav-button-base();
+}
+
+:host-context(.darkMode) .activeNavButton {
+    background-color : mat.get-color-from-palette(theme.$dartmouth-green-palette, darker);
+}
+
+.bottom-button-container {
+    display : flex;
+    flex-wrap : wrap;
+    gap : 1rem;
+}

@@ -1,10 +1,10 @@
-import { AfterViewInit, Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { filter } from 'rxjs';
 
 import { MatDialog } from '@angular/material/dialog';
 import { MatExpansionPanel } from '@angular/material/expansion';
-import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
+import {CdkDragDrop} from '@angular/cdk/drag-drop';
 
 import { saveAs } from 'file-saver';
 import  * as Midiwriter  from 'midi-writer-js';
@@ -14,7 +14,7 @@ import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
 import {ScaleService } from '../scale.service';
 import { RandomChordService, RandomChordError } from '../random-chord.service';
 import { Chord } from '../utils/music-theory/chord';
-import { CMajorID, Scale, ScaleType } from '../utils/music-theory/scale';
+import { CMajorID, defaultScaleID, Scale, ScaleType } from '../utils/music-theory/scale';
 import { Note } from '../utils/music-theory/note';
 import { AudioService } from '../audio.service';
 import { MidiDialogComponent, MidiConfig, defaultMidiConfig } from '../midi-dialog/midi-dialog.component';
@@ -25,6 +25,7 @@ import { NewListDialogComponent } from '../new-list-dialog/new-list-dialog.compo
 import { ConfirmActionDialogComponent } from '../confirm-action-dialog/confirm-action-dialog.component';
 import { CustomChord } from '../utils/custom-chord';
 import { defaultScaleChangeConfig, ScaleChangeDialogComponent } from '../scale-change-dialog/scale-change-dialog.component';
+import { ChordListCacheService } from '../services/chord-list-cache.service';
 
 
 const octavePlacement : { [ index : string ] : number } = {
@@ -37,27 +38,24 @@ const octavePlacement : { [ index : string ] : number } = {
   templateUrl: './random-chords.component.html',
   styleUrls: ['./random-chords.component.scss']
 })
-export class RandomChordsComponent implements OnInit, AfterViewInit {
+export class RandomChordsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   generateOptions : GeneratorOptions = defaultGeneratorOptions();
 
-  default_scale : Scale | null = null;
-
-
-  chords : Chord[] = [];
-
-  show_key = true;
-  show_scale = false;
   scale_notes : Note[] = [];
 
   all_play_active = false;
 
   midi_config : MidiConfig = defaultMidiConfig();
 
-  generatorOptionsExpanded = true;
+  generatorOptionsExpanded = false;
 
   @ViewChild('expansion') private _expansion_panel! :MatExpansionPanel;
   
+  get default_scale() {
+    return this.store.get_scale();
+  }
+
 
   constructor(private scaleService : ScaleService,
     private randomChordService : RandomChordService,
@@ -65,16 +63,25 @@ export class RandomChordsComponent implements OnInit, AfterViewInit {
     public dialog: MatDialog, 
     @Inject(DOCUMENT) private document : Document,
     private preferences : PreferencesService,
+    public store : ChordListCacheService
 
     ) {
 
+      console.log("Calling random-chord contructor");
+
       // Do this in the constructor to make sure it is set before the view initializes.
-      this.generatorOptionsExpanded = this.preferences.read('gen_opts_panel', true);
+      this.generatorOptionsExpanded = this.preferences.read('gen_opts_panel', false);
       this.generateOptions = this.preferences.read('gen_opts_data', this.generateOptions);
 
   }
 
   ngOnInit(): void {
+
+    console.log("random-chord ngOnInit called")
+
+    if (this.default_scale) {
+      this.scale_notes = this.default_scale.notesOfScale();
+    }
     const midi_pref = this.preferences.read('midi', this.midi_config);
 
     if (! ('fileName' in midi_pref)) {
@@ -87,16 +94,34 @@ export class RandomChordsComponent implements OnInit, AfterViewInit {
     // Snag any changes to the midi preferences.
     this.preferences.prefChange.pipe(filter((k)=> k === 'midi')).subscribe(() => {
       Object.assign(this.midi_config, this.preferences.read('midi', this.midi_config));
+    });
 
-    
+    // Listen for changes in the default_scale
+
+    this.store.scale.subscribe((newScale) => {
+        if (newScale) {
+          this.scale_notes = newScale.notesOfScale();
+          this.generateOptions.scale = newScale.scaleID();
+
+        } else {
+          this.scale_notes = [];
+          this.generateOptions.scale = defaultScaleID();
+        }     
     });
   }
 
   ngAfterViewInit(): void {
-      this._expansion_panel.close();
+    console.log("random-chord afterViewInit called")
+    this._expansion_panel.close();
   }
 
-  get chords_exist() { return this.chords.length > 0; }
+  ngOnDestroy() : void {
+    console.log("random-chord onDestroy called")
+  }
+
+  get chords() { return this.store.chord_array(); }
+
+  get chords_exist() { return this.store.chord_count() > 0; }
 
   get chord_count_max() : number {
     if (this.generateOptions.duplicates !== 'none') {
@@ -152,9 +177,7 @@ export class RandomChordsComponent implements OnInit, AfterViewInit {
 
     dia.afterClosed().subscribe((s) => {
       if (s) {
-        this.default_scale = new Scale(s);
-        this.generateOptions.scale = Object.assign({}, s);
-        this.scale_notes = this.default_scale.notesOfScale();
+        this.store.change_scale(s);
       }
     });
   }
@@ -173,30 +196,32 @@ export class RandomChordsComponent implements OnInit, AfterViewInit {
   }
   
   chord_drop(evnt : CdkDragDrop<string[]>) {
-    moveItemInArray(this.chords, evnt.previousIndex, evnt.currentIndex);
+    this.store.move_chord(evnt.previousIndex, evnt.currentIndex);
   }
 
   edit_chord_modal(chord_index : number, chord? : Chord) {
 
-    // if chord is defined then we are being asked to edit them add
+    // if chord is defined then we are being asked to edit then add.
     // if it is NOT defined, we are being asked to edit the existing chord.
 
     let adding_chord = false;
 
     if (chord == undefined) {
-      chord = this.chords[chord_index].clone()
+      chord = this.store.get_a_chord(chord_index);
     } else {
       adding_chord = true;
     }
+
+    if (!chord) return;
 
     const dia = this.dialog.open(ChordEditDialogComponent, { data : chord });
     
     dia.afterClosed().subscribe((newChord) => {
       if (newChord) {
         if (adding_chord) {
-          this.chords.splice(chord_index, 0, newChord.clone())
+          this.store.add_chord(newChord.clone(), chord_index);
         } else {
-          this.chords[chord_index] = newChord.clone();
+          this.store.replace_chord(newChord.clone(), chord_index);
         }
       }
 
@@ -204,13 +229,16 @@ export class RandomChordsComponent implements OnInit, AfterViewInit {
   }
 
   delete_chord(chord_index : number) {
-
-    this.chords.splice(chord_index, 1);
+    this.store.delete_chord(chord_index);
   }
 
   chordIsCustom(chord : Chord | number) : boolean {
+    let test_chord : Chord | undefined = undefined;
     if (typeof chord === 'number')
-      chord = this.chords[chord];
+      test_chord = this.store.get_a_chord(chord);
+    else {
+      test_chord = chord;
+    }
 
     return (chord instanceof CustomChord);
   }
@@ -233,10 +261,14 @@ export class RandomChordsComponent implements OnInit, AfterViewInit {
   generate_new_chord(chord_index : number) {
     const builder = this.randomChordService.builder();
 
-    let scale : Scale = this.chords[chord_index].scale;
+    let scale : Scale | undefined = this.store.get_a_chord(chord_index)?.scale;
 
     if (this.chordIsCustom(chord_index) && this.default_scale) {
       scale = this.default_scale;
+    }
+
+    if (! scale) {
+      throw Error("Could not figure out a scale");
     }
 
     // override count to just do one.
@@ -245,42 +277,39 @@ export class RandomChordsComponent implements OnInit, AfterViewInit {
       .setKey(scale);
 
     const newChords = builder.generate_chords();
-
-    this.chords[chord_index] = newChords[0];
-
+    this.store.add_chord(newChords[0], chord_index)
 
   }
 
   set_default_scale(chord_index : number) {
 
-    const chord_scale = this.chords[chord_index].scale;
-    if (! this.default_scale?.isSame(chord_scale)) {
-      this.default_scale = chord_scale;
-      this.scale_notes = chord_scale.notesOfScale();
-      this.generateOptions.scale = chord_scale.scaleID();
-    }
+    const chord_scale = this.store.get_a_chord(chord_index)?.scale;
+    this.store.change_scale(chord_scale ? chord_scale : null);
   }
 
   set_to_default_scale(chord_index : number) {
     if (! this.default_scale) return;
 
-    const chord = this.chords[chord_index];
+    const chord = this.store.get_a_chord(chord_index);
+    if (!chord) return;
+
     if (! this.default_scale.isSame(chord.scale)) {
       chord.change_scale(this.default_scale);
+      this.store.replace_chord(chord.clone(), chord_index);
     }
 
 
   }
 
-  async gen_list(fn? : () => void ) {
+  async gen_list(fn? : (data : Chord[]) => void ) {
     const dia = this.dialog.open(NewListDialogComponent, { data : Object.assign({}, this.generateOptions) });
 
     dia.afterClosed().subscribe((opts) => {
       this.generate_options_change(opts);
-      this.generate();
-      this.default_scale = new Scale (this.generateOptions.scale);
-      this.scale_notes = this.default_scale.notesOfScale();
-      if (fn) fn();
+      const chords = this.generate();
+      const s = new Scale (this.generateOptions.scale);
+      this.store.change_scale(s);
+      if (fn) fn(chords);
     });
   }
 
@@ -291,59 +320,66 @@ export class RandomChordsComponent implements OnInit, AfterViewInit {
 
       dia.afterClosed().subscribe((confirm) => {
         if (confirm) {
-          this.chords = [];
           this.generateOptions.key_source = 'Random';
-          this.gen_list();
+          this.gen_list((chords) => {
+            this.store.replace_chord_list(chords);
+          });
         }
       });
     } else {
       // this can't go in gen_list since that is also shared by append_to_list
       this.generateOptions.key_source = 'Random';
-      this.gen_list();
+      this.gen_list((chords) => {
+        this.store.replace_chord_list(chords);
+      });
     }
   }
 
   append_to_list() {
-    const old_chords = this.chords.slice(); // copy away the old chords;
     this.generateOptions.key_source = 'Selected';
     this.generateOptions.center = this.generateOptions.scale.key_center;
     this.generateOptions.tonality = this.generateOptions.scale.type;
-    this.gen_list(() => {
-      this.chords = old_chords.concat(this.chords);
+    this.gen_list((chords) => {
+      this.store.append_chords(chords);
     });
   }
 
   /********   CHORD LOCKING ***************/
 
   lock_chord(index : number) : void {
-    if (this.chords.length > index) {
-      this.chords[index].keep = ! this.chords[index].keep;
+    if (this.store.chord_count() > index) {
+      const c = this.store.get_a_chord(index);
+      if (c) {
+        c.keep = ! c.keep;
+        this.store.replace_chord(c.clone(), index);
+      }
     }
   }
 
   chord_locked(index : number) : boolean {
-    if (this.chords.length > index) {
-      return this.chords[index].keep;
+    if (this.store.chord_count() > index) {
+      const c = this.store.get_a_chord(index);
+      return c != undefined && c.keep;
     }
 
     return false;
   }
 
   unlock_all_chords() {
-    for (const c of this.chords) {
+    for (const c of this.store.chord_list()) {
       c.keep = false;
     }
   }
 
   any_chords_locked() : boolean {
-    for (const c of this.chords) {
+    for (const c of this.store.chord_list()) {
       if (c.keep) return true;
     }
     return false;
   }
 
   all_chords_locked() : boolean {
-    for (const c of this.chords) {
+    for (const c of this.store.chord_list()) {
       if (! c.keep) return false;
     }
     return true;
@@ -353,7 +389,8 @@ export class RandomChordsComponent implements OnInit, AfterViewInit {
   delete_unlocked_chords(do_it? : boolean ) {
 
     if (do_it) {
-      this.chords = this.chords.filter((k) => k.keep);
+      const chords = this.store.chord_list().filter((k) => k.keep);
+      this.store.replace_chord_list(chords);
       return;
     }
 
@@ -372,32 +409,36 @@ export class RandomChordsComponent implements OnInit, AfterViewInit {
     if (! this.any_chords_locked()) {
       const dia = this.dialog.open(ConfirmActionDialogComponent, { data : 'This will replace all chords since none are locked'});
       dia.afterClosed().subscribe((yes) => {
-        if (yes) this.generate();
+        if (yes) {
+           const c = this.generate(true);
+           this.store.replace_chord_list(c);
+        }
       });
 
     } else {
-      this.generate();
+      const c = this.generate();
+      this.store.replace_chord_list(c);
     }
   }
 
-  generate() {
+  generate(use_start_set? : boolean) : Chord[] {
 
     this.all_play_active = false;
 
     if (this.generateOptions.count_range_mode) {
       if (this.generateOptions.count.min > this.chord_count_max || this.generateOptions.count.min < 1) {
-        return;
+        throw Error("icky");
       }
 
       if (this.generateOptions.count.min > this.generateOptions.count.max) {
         this.dialog.open(ErrorDialogComponent, {
           data: "min count must be less than or equal to max chord count",
         });
-        return;
+        throw Error("icky");
       }
     } else {
       if (this.generateOptions.count.min > this.chord_count_max || this.generateOptions.count.min < 1) {
-        return;
+        throw Error("icky");
       }
 
       this.generateOptions.count.max = this.generateOptions.count.min
@@ -425,11 +466,14 @@ export class RandomChordsComponent implements OnInit, AfterViewInit {
 
       builder.setOptions(this.generateOptions);
 
+      if (use_start_set == undefined) {
+        use_start_set = this.any_chords_locked();
+      }
 
-      if (this.any_chords_locked()) {
-        this.chords = builder.generate_chords(this.chords);
+      if (use_start_set) {
+        return builder.generate_chords(this.store.chord_array());
       } else {
-        this.chords = builder.generate_chords();
+        return builder.generate_chords();
       }
 
     } catch(e) {
@@ -448,6 +492,8 @@ export class RandomChordsComponent implements OnInit, AfterViewInit {
       this.dialog.open(ErrorDialogComponent, {
         data: error_msg,
       });
+
+      throw e;
     }
 
   }
@@ -491,7 +537,7 @@ export class RandomChordsComponent implements OnInit, AfterViewInit {
     // If asked to stop, simply stop.
     if (!this.all_play_active) return;
 
-    if (next >=0 && next < this.chords.length) {
+    if (next >=0 && next < this.store.chord_count()) {
       const ellist = this.document.querySelectorAll(`.chord-index-${next}`);
 
       ellist.forEach((el) => {
@@ -508,9 +554,9 @@ export class RandomChordsComponent implements OnInit, AfterViewInit {
 
     const beepLength = 0.5;
 
-    if (next >= 0 && next < this.chords.length) {
+    if (next >= 0 && next < this.store.chord_count()) {
 
-      this.play_chord(this.chords[next], beepLength);
+      this.play_chord(this.store.chord_array()[next], beepLength);
       last = next;
       next += 1;
 
@@ -525,7 +571,7 @@ export class RandomChordsComponent implements OnInit, AfterViewInit {
   private midi_state = 'off';
 
   get midi_disabled():boolean {
-    return this.chords.length < 1;
+    return this.store.chord_count() < 1;
   }
 
   wait_for_midi(source : string, event : Event) {
@@ -578,7 +624,7 @@ export class RandomChordsComponent implements OnInit, AfterViewInit {
   generate_midi(config : MidiConfig) {
     console.log("generating midi data");
 
-    if (this.chords.length < 1) return;
+    if (this.store.chord_count() < 1) return;
 
     const mainTrack = new Midiwriter.Track();
     let bassTrack;
@@ -588,7 +634,7 @@ export class RandomChordsComponent implements OnInit, AfterViewInit {
 
     let trackName = '';
 
-    for (const c of this.chords) {
+    for (const c of this.store.chord_array()) {
       trackName += c.name() + ' ';
     }
 
@@ -601,7 +647,7 @@ export class RandomChordsComponent implements OnInit, AfterViewInit {
       bassTrack.addTrackName(trackName);
     }
 
-    for (const c of this.chords) {
+    for (const c of this.store.chord_array()) {
 
       let isBassNote = true;
   
@@ -684,7 +730,7 @@ export class RandomChordsComponent implements OnInit, AfterViewInit {
       'date' : date.format('YYYYMMDD'),
       'time' : date.format('HHmmss'),
       'scale' : this.default_scale?.fullName() || 'unknown',
-      'count' : this.chords.length,
+      'count' : this.store.chord_count(),
     }
 
 

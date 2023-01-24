@@ -1,5 +1,7 @@
 import { EventEmitter, Injectable, OnInit, Output } from '@angular/core';
 
+import { pref_key_list } from './pref-keys';
+
 const prefix = 'rg';
 
 @Injectable({
@@ -28,6 +30,8 @@ export class PreferencesService implements OnInit {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   write(key : string, data : any) {
 
+    this.test_key(key);
+
     const realkey = prefix + '.' + key;
 
     const realdata = JSON.stringify(data);
@@ -36,10 +40,14 @@ export class PreferencesService implements OnInit {
 
     this.prefChange.emit(key);
 
+
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   read(key : string, fallback : any) : any {
+
+    this.test_key(key);
+
     const realkey = prefix + '.' + key;
 
     const blob = localStorage.getItem(realkey);
@@ -57,6 +65,19 @@ export class PreferencesService implements OnInit {
     return fallback;
 
 
+  }
+
+  test_key(key : string) : boolean {
+    if (! pref_key_list.includes(key)) {
+      throw Error("unknown")
+    }
+    return true;
+  }
+
+  drop (key : string) {
+    this.test_key(key);
+
+    localStorage.removeItem(prefix + '.' + key);
   }
 
   clear_settings() {

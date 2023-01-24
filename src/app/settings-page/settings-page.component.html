@@ -1,0 +1,25 @@
+<div class="settings-top-container">
+    <div class="settings-nav-list">
+        <mat-nav-list>
+            <a mat-button routerLink="/"><mat-icon class="material-symbols-outlined">arrow_back</mat-icon>Back to Main Page</a>
+            <a [className]="anchorClasses(topic_data[topic].name)" mat-list-item (click)="topicChange(topic_data[topic].name)" *ngFor="let topic of topicList">{{topic_data[topic].title}}</a>
+        </mat-nav-list>
+    </div>
+    <div class="settings-main-area">
+        <div *ngIf="currentTopic.name === 'general'">
+            <h3>Clear Setting</h3>
+            <p>This will clear all saved preferences.</p>
+            <button mat-raised-button color="warning" (click)="clear_settings()">Clear All Settings</button>
+        </div>
+        <div *ngIf="currentTopic.name !== 'general'">
+            <div *ngIf="currentTopic.name === 'midi'">
+                <app-midi-config-form [(midiConfig)]="midi_config" (midiConfigChange)="current_config_changed()"></app-midi-config-form>
+            </div>
+            <div class="bottom-button-container">
+                <button mat-stroked-button (click)="save_and_close()">{{config_changed ? 'Save & Close' : 'Close'}}</button>
+                <button mat-stroked-button (click)="apply_settings()" [disabled]="!config_changed">Apply</button>
+                <button mat-stroked-button (click)="reset_to_defaults()">Reset to Defaults</button>
+            </div>
+        </div>
+    </div>
+</div>
