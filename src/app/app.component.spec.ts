@@ -43,6 +43,6 @@ describe('AppComponent', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('mat-toolbar a')?.textContent).toContain("Mark's Musical Miscellany");
+    expect(compiled.querySelector('mat-toolbar a')?.textContent).toContain("Random Chord Generator");
   });
 });

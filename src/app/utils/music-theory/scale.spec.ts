@@ -21,7 +21,7 @@ describe("Scale", () => {
     });
 
     it("returns the correct name", () => {
-        expect(new Scale("F#", 'augmented').name()).toEqual("F# Augmented");
+        expect(new Scale("F#", 'phrygian').name()).toEqual("F# Phrygian");
     });
 
     it("returns correctly for nameUnicode", () => {

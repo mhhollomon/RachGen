@@ -36,17 +36,9 @@ const scaleStepData = {
   } as const;
 
 
-const ScaleTypeEnum = {
-    minor : 'minor',
-    major : 'major',
-    lydian : 'lydian',
-    mixolydian : 'mixolydian',
-    dorian : 'dorian',
-    phrygian : 'phrygian',
-    augmented : 'augmented'
-}
-
-export type ScaleType = keyof typeof ScaleTypeEnum;
+export type ScaleType = 'minor' | 'major' | 
+        'lydian' | 'mixolydian' |
+        'dorian' | 'phrygian' ;
 
 export interface ScaleID {
     root : string;

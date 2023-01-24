@@ -13,7 +13,7 @@ import { PreferenceDialogComponent } from './preference-dialog/preference-dialog
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
-  title = 'music-stuff';
+  title = 'RachGen';
 
   current_help_text = 'None';
   current_help_page = 'Unknown';

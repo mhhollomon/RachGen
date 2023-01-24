@@ -44,19 +44,12 @@ export class ScaleService {
 
     sonority = sonority ? sonority : this.sonorityChooser.choose();
 
-    if (sonority === 'augmented' ) {
-      throw Error("Cannot 'choose' with scale type augmented");
-    }
-
     const keysig = sigChooser.choose();
     const keycenter = sigNames[sonority][keysig + sigOffset];
     return new Scale(keycenter, sonority);
   }
 
   getKeyList(sonority : ScaleType) : string[] {
-    if (sonority === 'augmented' ) {
-      throw Error("Cannot get the key list for scale type augmented");
-    }
 
     return sigChooser.choices.map(v => sigNames[sonority][v.choice+sigOffset])
   }
