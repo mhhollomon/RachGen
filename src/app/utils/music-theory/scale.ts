@@ -1,5 +1,5 @@
 
-import { List, type ValueObject } from 'immutable';
+import { List, Record, type ValueObject } from 'immutable';
 import { stringHash } from '../util-library';
 
 import { capitalize } from '../util-library';
@@ -44,6 +44,9 @@ export interface ScaleID {
     root : string;
     type : ScaleType;
 }
+
+//export const ScaleID = Record({root : 'C', type : <ScaleType>('major')}
+//);
 
 export function defaultScaleID() : ScaleID  { return { root : 'C', type : 'major'}; }
 
