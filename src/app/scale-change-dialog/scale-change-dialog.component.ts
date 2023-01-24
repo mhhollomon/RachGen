@@ -26,13 +26,13 @@ export class ScaleChangeDialogComponent {
   config : ScaleChangeConfig = defaultScaleChangeConfig();
 
   set center(c : string) {
-    this.config.scaleID = { key_center : c, type : this.config.scaleID.type };
+    this.config.scaleID = { root : c, type : this.config.scaleID.type };
   }
 
-  get center() { return this.config.scaleID.key_center; }
+  get center() { return this.config.scaleID.root; }
 
   set scale_type(t : ScaleType) {
-    this.config.scaleID = { key_center : this.config.scaleID.key_center, type : t };
+    this.config.scaleID = { root : this.config.scaleID.root, type : t };
   }
 
   get scale_type() : ScaleType { return this.config.scaleID.type; }

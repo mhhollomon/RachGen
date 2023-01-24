@@ -343,7 +343,7 @@ export class RandomChordsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   append_to_list() {
     this.generateOptions.key_source = 'Selected';
-    this.generateOptions.center = this.generateOptions.scale.key_center;
+    this.generateOptions.center = this.generateOptions.scale.root;
     this.generateOptions.tonality = this.generateOptions.scale.type;
     this.gen_list((chords) => {
       this.store.append_chords(chords);
@@ -457,7 +457,7 @@ export class RandomChordsComponent implements OnInit, AfterViewInit, OnDestroy {
       if (this.generateOptions.center === 'Random') {
         this.generateOptions.scale = this.scaleService.choose(this.generateOptions.tonality as ScaleType).scaleID();
       } else {
-        this.generateOptions.scale = { key_center : this.generateOptions.center, type : this.generateOptions.tonality as ScaleType};
+        this.generateOptions.scale = { root : this.generateOptions.center, type : this.generateOptions.tonality as ScaleType};
       }
     } else {
       this.generateOptions.scale = this.scaleService.choose().scaleID();

@@ -49,15 +49,15 @@ const ScaleTypeEnum = {
 export type ScaleType = keyof typeof ScaleTypeEnum;
 
 export interface ScaleID {
-    key_center : string;
+    root : string;
     type : ScaleType;
 }
 
-export function defaultScaleID() : ScaleID  { return { key_center : 'C', type : 'major'}; }
+export function defaultScaleID() : ScaleID  { return { root : 'C', type : 'major'}; }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isScaleID(obj: any) : obj is ScaleID {
-    return 'key_center' in obj;
+    return 'root' in obj;
 }
 
 export class Scale implements ValueObject {
@@ -82,10 +82,10 @@ export class Scale implements ValueObject {
                 this._root = rootNote;
             } else {
                 // This shouldn't happen if I understand the overload system
-                this._root = Note.fromString(rootNote.key_center)
+                this._root = Note.fromString(rootNote.root)
             }
         } else if (isScaleID(rootNote)) {
-            this._root = Note.fromString(rootNote.key_center);
+            this._root = Note.fromString(rootNote.root);
             this._type = rootNote.type;
         } else {
             throw Error("type Error");
@@ -110,7 +110,7 @@ export class Scale implements ValueObject {
 
     id() { return this.name(); }
 
-    scaleID() : ScaleID { return { key_center : this.rootName(), type : this.type}; }
+    scaleID() : ScaleID { return { root : this.rootName(), type : this.type}; }
 
     equals(o: Scale) { return this.isSame(o); }
 

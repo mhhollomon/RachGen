@@ -21,7 +21,7 @@ export function defaultGeneratorOptions() : GeneratorOptions {
     tonality : 'major',
     center : 'Random',
 
-    scale : {key_center : 'C', type : 'major'}, 
+    scale : {root : 'C', type : 'major'}, 
     count : { min : 4, max : 6}, 
     duplicates : 'none',
     extensions : { 

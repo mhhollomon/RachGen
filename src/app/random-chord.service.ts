@@ -61,7 +61,7 @@ export class ChordSequenceBuilder {
 
   // The options 
   options : RandomChordOptions = { 
-    scale : { key_center : 'C', type : 'major'}, 
+    scale : { root : 'C', type : 'major'}, 
     count : { min : 1, max : 1}, 
     duplicates : 'any',
     extensions : { 
