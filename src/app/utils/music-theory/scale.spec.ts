@@ -6,7 +6,7 @@ describe("Scale", () => {
     it("should properly use string for root note", () => {
 
         const s = new Scale("C#", 'minor');
-        expect(s.rootNote.equal(new Note("C#"))).toBeTruthy();
+        expect(s.rootNote.equal(Note.fromString("C#"))).toBeTruthy();
         expect(s.scaleType).toEqual('minor');
 
     });
@@ -41,13 +41,13 @@ describe("Scale", () => {
 
     it("generates major Key notes correctly", () => {
         expect(new Scale("G#", 'major').notesOfScale()).toEqual(
-            ["G#", "A#", "B#", "C#", "D#", "E#", "Fx"].map(v => new Note(v))
+            ["G#", "A#", "B#", "C#", "D#", "E#", "Fx"].map(v => Note.fromString(v))
         );
     });
 
     it("generates minor key notes correctly", () => {
         expect(new Scale("Cb", 'minor').notesOfScale()).toEqual(
-            ["Cb", "Db", "Ebb", "Fb", "Gb", "Abb", "Bbb"].map(v => new Note(v))
+            ["Cb", "Db", "Ebb", "Fb", "Gb", "Abb", "Bbb"].map(v => Note.fromString(v))
         );
      
     });

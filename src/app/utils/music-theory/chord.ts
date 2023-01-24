@@ -84,7 +84,7 @@ export class Chord {
     }
 
     get root() : Note { return this.rootCache; }
-    getRootName() : string { return this.rootCache.note(); }
+    getRootName() : string { return this.rootCache.name(); }
 
     setRoot(root : Note, degree : number) : this {
       if (degree <= 0 || degree > 7 )
@@ -261,7 +261,7 @@ export class Chord {
 
       const chordalOne = ct[1];
 
-      let name : string = chordalOne.note();
+      let name : string = chordalOne.name();
       let quality = '';
       let sus = '';
       let ext = '';
@@ -403,7 +403,7 @@ export class Chord {
           case 'second' : { chordalBassTone = 5; break; }
         } 
 
-        name += '/' + ct[chordalBassTone].note();
+        name += '/' + ct[chordalBassTone].name();
       }
 
       return name;
@@ -435,7 +435,7 @@ export class Chord {
         if (octavePlacement[simpleNote.noteClass] < last) {
           octave += 1;
         }
-        tones.push(simpleNote.note() + octave);
+        tones.push(simpleNote.name() + octave);
 
         if (isBassNote) {
           octave += 1;

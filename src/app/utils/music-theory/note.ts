@@ -1,7 +1,10 @@
+export type GenericNoteClass = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
+
+
 interface NoteGraphData {
     name : string;
-    nextNote : string;
-    prevNote : string;
+    nextNote : GenericNoteClass;
+    prevNote : GenericNoteClass;
     nextDist : number;
     prevDist : number;
 }
@@ -25,45 +28,63 @@ const accidentalToAlter : { [ index : string ] : number } = {
 
 
 export class Note {
-    noteClass  = 'A';
-    alter  = 0;
+    private _noteClass : GenericNoteClass = 'A';
+    private _alter  = 0;
 
-    constructor(note: string, alter? : number ) {
-
-        if (alter) {
-            if (![-2, -1, 0, 1, 2].includes(alter)) {
-                throw Error("Invalid alter amount : " + alter);
-            }
-            this.alter = alter;
-        }
-
-        if (note.length > 1) {
-            if (alter) {
-                throw Error("Cannot use alter with accidental");
-            }
-            this.test_and_set_note(note.substring(0, 1));
-            const accidental = note.substring(1);
-
-            const computedAlter = accidentalToAlter[accidental];
-
-            if (computedAlter) {
-                this.alter = computedAlter;
-            } else {
-                throw Error("Unknown accidental : " + accidental);
-            }
-        } else if (note.length == 1) {
-            this.test_and_set_note(note);
-        } else {
-            throw Error("Invalid key specifier : " + note );
-        }
+    get noteClass() : GenericNoteClass { return this._noteClass; }
+    get alter() : number { return this._alter; }
+    get accidental() : string {
+        return ['bb', 'b', '', '#', 'x'][this.alter+2];
+    }
+    get accidentalUnicode() : string {
+       return  ['\uD834\uDD2B', '\u266D', '', '\u266F', '\uD834\uDD2A'][this.alter+2];
     }
 
-    note() {
-        return this.noteClass + ['bb', 'b', '', '#', 'x'][this.alter+2];
+    constructor(note: GenericNoteClass, alter  = 0 ) {
+
+        if (![-2, -1, 0, 1, 2].includes(alter)) {
+            throw Error("Invalid alter amount : " + alter);
+        }
+
+        this._alter = alter;
+        this._noteClass = note;
+
     }
 
-    noteDisplay() {
-        return this.noteClass + ['\uD834\uDD2B', '\u266D', '', '\u266F', '\uD834\uDD2A'][this.alter+2];
+    name() {
+        return this.noteClass + this.accidental;
+    }
+
+    nameDisplay() {
+        return this.noteClass + this.accidentalUnicode;
+    }
+
+    flatten(steps  = 1) : Note {
+        if (steps <= 0) {
+            throw new Error("steps to flatten must be >= 1")
+        }
+
+        const newAlter = this.alter - steps;
+        if (newAlter < -2) {
+            throw new Error("too much flattening")
+        }
+
+        return new Note(this._noteClass, newAlter);
+
+    }
+
+    sharpen(steps  = 1) : Note {
+        if (steps <= 0) {
+            throw new Error("steps to sharpen must be >= 1")
+        }
+
+        const newAlter = this.alter + steps;
+        if (newAlter > 2) {
+            throw new Error("too much sharpening")
+        }
+
+        return new Note(this.noteClass, newAlter);
+
     }
 
     simplify() : Note {
@@ -91,13 +112,16 @@ export class Note {
     toSharp() : Note {
         const note = this.simplify();
 
-        while (note.alter < 0) {
-            const gnd = noteGraph[note.noteClass];
-            note.alter -= gnd.prevDist;
-            note.noteClass = gnd.prevNote;
+        let n = note.noteClass;
+        let a = note.alter;
+
+        while (a < 0) {
+            const gnd = noteGraph[n];
+            a -= gnd.prevDist;
+            n = gnd.prevNote;
         }
 
-        return note;
+        return new Note(n, a);
     }
 
     equal(o : Note) : boolean {
@@ -132,16 +156,29 @@ export class Note {
         return interval;
     }
 
-    
 
+    static fromString(input : string) {
 
-    private test_and_set_note(note : string) {
-        note = note.toUpperCase();
+        const noteName = input.substring(0,1).toUpperCase();
 
-        if (['A', 'B', 'C', 'D', 'E', 'F', 'G'].includes(note)) {
-            this.noteClass = note;
-        } else {
-            throw Error("Bad generic note :" + note);
+        if (! ['A', 'B', 'C', 'D', 'E', 'F', 'G'].includes(noteName)) {
+            throw Error("Bad generic note :" + noteName);
         }
+
+        const noteClass = noteName as GenericNoteClass;
+        let computedAlter = 0;
+
+        if (input.length > 1) {
+            const accidental = input.substring(1);
+
+            computedAlter = accidentalToAlter[accidental];
+
+            if (!computedAlter) {
+                throw Error("Unknown accidental : " + accidental);
+            }
+        }
+
+        return new Note(noteClass, computedAlter);
+
     }
 }

@@ -1,16 +1,16 @@
 
 import {capitalize} from '../util-library';
 import { Chord } from './chord';
-import { Note } from "./note";
+import { GenericNoteClass, Note } from "./note";
 
 interface GenericNoteData {
-    name : string,
+    name : GenericNoteClass,
     next : number,
     prev : number
 }
 
   
-function gnd(name: string, prev : number, next : number) : GenericNoteData {
+function gnd(name: GenericNoteClass, prev : number, next : number) : GenericNoteData {
     return {'name' : name, 'next' : next, 'prev' : prev };
 }
   
@@ -75,16 +75,16 @@ export class Scale {
         if (scaleType) {
             this.scaleType = scaleType;
             if (typeof rootNote == 'string') {
-                this.rootNote = new Note(rootNote);
+                this.rootNote = Note.fromString(rootNote);
             } else if (rootNote instanceof Note) {
                 this.rootNote = rootNote;
             } else {
                 // This shouldn't happen if I understand the overload system
-                this.rootNote = new Note(rootNote.key_center)
+                this.rootNote = Note.fromString(rootNote.key_center)
             }
         } else {
             if (isScaleID(rootNote)) {
-                this.rootNote = new Note(rootNote.key_center);
+                this.rootNote = Note.fromString(rootNote.key_center);
                 this.scaleType = rootNote.type;
             } else {
                 throw Error("type Error");
@@ -93,11 +93,11 @@ export class Scale {
     }
 
     root() {
-        return this.rootNote.note();
+        return this.rootNote.name();
     }
 
     rootDisplay() {
-        return this.rootNote.noteDisplay();
+        return this.rootNote.nameDisplay();
     }
 
     isMinor() {

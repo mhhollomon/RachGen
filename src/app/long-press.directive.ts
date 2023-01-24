@@ -9,7 +9,7 @@ import { Observable, Subject, interval } from 'rxjs';
 import { takeUntil,combineLatestWith, map, switchAll, filter, repeat } from 'rxjs/operators';
 
 @Directive({
-    selector: '[longPress]'
+    selector: '[appLongPress]'
 })
 export class LongPressDirective implements OnInit, OnDestroy {
     @Input() public longPress = "500";

@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { Scale, Note } from './utils/music-theory/music-theory';
+import { Note } from './utils/music-theory/note';
+import { Scale } from './utils/music-theory/scale';
 
 import { ScaleService } from './scale.service';
 
@@ -19,7 +20,7 @@ describe('ScaleService', () => {
   it("correctly caches scale notes", () => {
     const scale = new Scale("G", 'major');
 
-    const retval = [ 'G', 'A', 'B', 'C', 'D', 'E', 'F#'].map(v => new Note(v));
+    const retval = [ 'G', 'A', 'B', 'C', 'D', 'E', 'F#'].map(v => Note.fromString(v));
 
     const theSpy = spyOn(scale, 'notesOfScale').and.callThrough();
 

@@ -1,9 +1,9 @@
 import { Note } from "./note";
 
-describe("Note constructor", () => {
+describe("Note.fromString", () => {
     it ('should create instance with simple string note name', () => {
 
-        const note = new Note('C');
+        const note = Note.fromString('C');
 
         expect(note).toBeTruthy();
         expect(note.noteClass).toEqual('C');
@@ -13,7 +13,7 @@ describe("Note constructor", () => {
 
     it ('should handle/parse sharp accidental in string note name', () => {
 
-        const note = new Note('D#');
+        const note = Note.fromString('D#');
 
         expect(note).toBeTruthy();
         expect(note.noteClass).toEqual('D');
@@ -23,7 +23,7 @@ describe("Note constructor", () => {
 
     it ('should handle/parse flat accidental in string note name', () => {
 
-        const note = new Note('Gb');
+        const note = Note.fromString('Gb');
 
         expect(note).toBeTruthy();
         expect(note.noteClass).toEqual('G');
@@ -33,7 +33,7 @@ describe("Note constructor", () => {
 
     it ('should handle/parse double sharp accidental in string note name', () => {
 
-        const note = new Note('Ex');
+        const note = Note.fromString('Ex');
 
         expect(note).toBeTruthy();
         expect(note.noteClass).toEqual('E');
@@ -43,7 +43,7 @@ describe("Note constructor", () => {
 
     it ('should handle/parse double flat accidental in string note name', () => {
 
-        const note = new Note('Abb');
+        const note = Note.fromString('Abb');
 
         expect(note).toBeTruthy();
         expect(note.noteClass).toEqual('A');
@@ -61,46 +61,43 @@ describe("Note constructor", () => {
 
     });
 
-    it('show throw if given blank note name', () => {
-        expect(() => { new Note('')}).toThrowError();
+    it('should throw if given blank note name', () => {
+        expect(() => { Note.fromString('')}).toThrowError();
     });
 
-    it('show throw if given an unknown note name', () => {
-        expect(() => { new Note('R')}).toThrowError();
+    it('should throw if given an unknown note name', () => {
+        expect(() => { Note.fromString('R')}).toThrowError();
     });
 
-    it('show throw if given an unknown accidental', () => {
-        expect(() => { new Note('Ct')}).toThrowError();
+    it('should throw if given an unknown accidental', () => {
+        expect(() => { Note.fromString('Ct')}).toThrowError();
     });
 
     it('show throw if given bad alter amount', () => {
         expect(() => { new Note('C', 20)}).toThrowError();
     });
 
-    it('show throw if alter is used with an accidental', () => {
-        expect(() => { new Note('C#', 2)}).toThrowError();
-    });
 })
 
-describe("Note.note()", () => {
+describe("Note.name()", () => {
     it('should return proper strings', () => {
-        expect(new Note("C").note()).toEqual("C");
-        expect(new Note("Bb").note()).toEqual("Bb");
-        expect(new Note("A#").note()).toEqual("A#");
-        expect(new Note("Gbb").note()).toEqual("Gbb");
-        expect(new Note("Fx").note()).toEqual("Fx");
+        expect(Note.fromString("C").name()).toEqual("C");
+        expect(Note.fromString("Bb").name()).toEqual("Bb");
+        expect(Note.fromString("A#").name()).toEqual("A#");
+        expect(Note.fromString("Gbb").name()).toEqual("Gbb");
+        expect(Note.fromString("Fx").name()).toEqual("Fx");
     });
 
 
 });
 
-describe("Note.noteDisplay()", () => {
+describe("Note.nameDisplay()", () => {
     it('should return proper strings', () => {
-        expect(new Note("C").noteDisplay()).toEqual("C");
-        expect(new Note("Bb").noteDisplay()).toEqual("B\u266D");
-        expect(new Note("A#").noteDisplay()).toEqual("A\u266F");
-        expect(new Note("Gbb").noteDisplay()).toEqual("G\uD834\uDD2B");
-        expect(new Note("Fx").noteDisplay()).toEqual("F\uD834\uDD2A");
+        expect(Note.fromString("C").nameDisplay()).toEqual("C");
+        expect(Note.fromString("Bb").nameDisplay()).toEqual("B\u266D");
+        expect(Note.fromString("A#").nameDisplay()).toEqual("A\u266F");
+        expect(Note.fromString("Gbb").nameDisplay()).toEqual("G\uD834\uDD2B");
+        expect(Note.fromString("Fx").nameDisplay()).toEqual("F\uD834\uDD2A");
     });
 
 
@@ -127,18 +124,18 @@ describe ("Note.equal()", () => {
     it ("Should take into account the alter", () => {
 
         const x = new Note('F', -2);
-        expect(x.equal(new Note('F#'))).toBeFalsy();
-        expect(x.equal(new Note('Fb'))).toBeFalsy();
-        expect(x.equal(new Note('Fbb'))).toBeTruthy();
+        expect(x.equal(Note.fromString('F#'))).toBeFalsy();
+        expect(x.equal(Note.fromString('Fb'))).toBeFalsy();
+        expect(x.equal(Note.fromString('Fbb'))).toBeTruthy();
 
     });
 
     it ("Should take into account the note class", () => {
 
         const x = new Note('F', -2);
-        expect(x.equal(new Note('G'))).toBeFalsy();
-        expect(x.equal(new Note('Gb'))).toBeFalsy();
-        expect(x.equal(new Note('Gbb'))).toBeFalsy();
+        expect(x.equal(Note.fromString('G'))).toBeFalsy();
+        expect(x.equal(Note.fromString('Gb'))).toBeFalsy();
+        expect(x.equal(Note.fromString('Gbb'))).toBeFalsy();
 
     });
 
@@ -153,11 +150,11 @@ describe ("Note.same()", () => {
 
     it ("Should simplify", () => {
 
-        const x = new Note('Ex');
-        expect(x.same(new Note('F#'))).toBeTruthy();
-        expect(x.same(new Note('Gb'))).toBeTruthy();
+        const x = Note.fromString('Ex');
+        expect(x.same(Note.fromString('F#'))).toBeTruthy();
+        expect(x.same(Note.fromString('Gb'))).toBeTruthy();
 
-        expect(x.same(new Note('Fb'))).toBeFalsy();
+        expect(x.same(Note.fromString('Fb'))).toBeFalsy();
 
     });
 
@@ -166,43 +163,43 @@ describe ("Note.same()", () => {
 
 describe("Note.simplify", () => {
     it("should keep unaltered notes the same", () => {
-        const x = new Note('F');
+        const x = new Note('F', 0);
         expect(x.simplify()).toEqual(x);
     });
 
     it("should simplify E# to F", () => {
-        const x = new Note('E#');
-        expect(x.simplify()).toEqual(new Note('F'));
+        const x = new Note('E', 1);
+        expect(x.simplify()).toEqual(new Note('F', 0));
     });
 
     it("should simplify Cb to B", () => {
-        const x = new Note('Cb');
-        expect(x.simplify()).toEqual(new Note('B'));
+        const x = new Note('C', -1);
+        expect(x.simplify()).toEqual(new Note('B', 0));
     });
 
     it("should simplify C# to itself", () => {
-        const x = new Note('C#');
-        expect(x.simplify()).toEqual(new Note('C#'));
+        const x = new Note('C', 1);
+        expect(x.simplify()).toEqual(new Note('C', 1));
     });
 
     it("should simplify Bb to itself", () => {
-        const x = new Note('Bb');
-        expect(x.simplify()).toEqual(new Note('Bb'));
+        const x = new Note('B', -1);
+        expect(x.simplify()).toEqual(new Note('B', -1));
     });
 
     it("should simplify Cx to D", () => {
-        const x = new Note('Cx');
-        expect(x.simplify()).toEqual(new Note('D'));
+        const x = new Note('C', 2);
+        expect(x.simplify()).toEqual(new Note('D', 0));
     });
 
     it("should simplify Ex to F#", () => {
-        const x = new Note('Ex');
-        expect(x.simplify()).toEqual(new Note('F#'));
+        const x = new Note('E', 2);
+        expect(x.simplify()).toEqual(new Note('F', 1));
     });
 
     it("should simplify Cbb to Bb", () => {
-        const x = new Note('Cbb');
-        expect(x.simplify()).toEqual(new Note('Bb'));
+        const x = new Note('C', -2);
+        expect(x.simplify()).toEqual(new Note('B', -1));
     });
 
 
@@ -210,43 +207,43 @@ describe("Note.simplify", () => {
 
 describe("Note.toSharp", () => {
     it("should keep unaltered notes the same", () => {
-        const x = new Note('F');
+        const x = new Note('F', 0);
         expect(x.toSharp()).toEqual(x);
     });
 
     it("should simplify E# to F", () => {
-        const x = new Note('E#');
+        const x = new Note('E', 1);
         expect(x.toSharp()).toEqual(new Note('F'));
     });
 
     it("should simplify Cb to B", () => {
-        const x = new Note('Cb');
+        const x = new Note('C', -1);
         expect(x.toSharp()).toEqual(new Note('B'));
     });
 
     it("should simplify C# to itself", () => {
-        const x = new Note('C#');
-        expect(x.toSharp()).toEqual(new Note('C#'));
+        const x = new Note('C', 1);
+        expect(x.toSharp()).toEqual(x);
     });
 
     it("should simplify Bb to A#", () => {
-        const x = new Note('Bb');
-        expect(x.toSharp()).toEqual(new Note('A#'));
+        const x = new Note('B', -1);
+        expect(x.toSharp()).toEqual(new Note('A', 1));
     });
 
     it("should simplify Cx to D", () => {
-        const x = new Note('Cx');
+        const x = new Note('C', 2);
         expect(x.toSharp()).toEqual(new Note('D'));
     });
 
     it("should simplify Ex to F#", () => {
-        const x = new Note('Ex');
-        expect(x.toSharp()).toEqual(new Note('F#'));
+        const x = new Note('E', 2);
+        expect(x.toSharp()).toEqual(new Note('F', 1));
     });
 
     it("should simplify Cbb to A#", () => {
-        const x = new Note('Cbb');
-        expect(x.toSharp()).toEqual(new Note('A#'));
+        const x = new Note('C', -2);
+        expect(x.toSharp()).toEqual(new Note('A', 1));
     });
 
 
@@ -256,29 +253,62 @@ describe("Note.interval", () => {
 
     it("should be zero if notes are the same", () => {
 
-        expect(new Note("C#").interval(new Note("Db"))).toEqual(0);
-        expect(new Note("E").interval(new Note("Fb"))).toEqual(0);
-        expect(new Note("C#").interval(new Note("Bx"))).toEqual(0);
-        expect(new Note("G").interval(new Note("Abb"))).toEqual(0);
+        expect(Note.fromString("C#").interval(Note.fromString("Db"))).toEqual(0);
+        expect(new Note("E").interval(Note.fromString("Fb"))).toEqual(0);
+        expect(Note.fromString("C#").interval(Note.fromString("Bx"))).toEqual(0);
+        expect(new Note("G").interval(Note.fromString("Abb"))).toEqual(0);
 
     });
 
     it("should handle the alters of the same note", () => {
 
         expect(new Note("C").interval(new Note("G"))).toEqual(7);
-        expect(new Note("Cb").interval(new Note("C#"))).toEqual(2);
-        expect(new Note("E").interval(new Note("Ex"))).toEqual(2);
-        expect(new Note("C#").interval(new Note("Cx"))).toEqual(1);
-        expect(new Note("Gbb").interval(new Note("G"))).toEqual(2);
+        expect(Note.fromString("Cb").interval(Note.fromString("C#"))).toEqual(2);
+        expect(new Note("E").interval(Note.fromString("Ex"))).toEqual(2);
+        expect(Note.fromString("C#").interval(Note.fromString("Cx"))).toEqual(1);
+        expect(Note.fromString("Gbb").interval(new Note("G"))).toEqual(2);
 
     });
 
     it("should handle octave wraps", () => {
 
         expect(new Note("G").interval(new Note("C"))).toEqual(5);
-        expect(new Note("C#").interval(new Note("C"))).toEqual(11);
-        expect(new Note("F").interval(new Note("Eb"))).toEqual(10);
-        expect(new Note("Cx").interval(new Note("Cb"))).toEqual(9);
+        expect(new Note("C", 1).interval(new Note("C"))).toEqual(11);
+        expect(new Note("F").interval(new Note("E", -1))).toEqual(10);
+        expect(new Note("C", 2).interval(new Note("C", -1))).toEqual(9);
 
     });
+});
+
+describe("sharpen/flatten", () => {
+    it ("should fail for 0 or negative moves", () => {
+
+        const note = new Note('C');
+
+        expect(() => { note.sharpen(0); }).toThrowError();
+        expect(() => { note.sharpen(-1); }).toThrowError();
+        expect(() => { note.flatten(0); }).toThrowError();
+        expect(() => { note.flatten(-1); }).toThrowError();
+
+    });
+
+    it ("should fail for over aggressive moves", () => {
+
+        const note = new Note('C', 1);
+
+        expect(() => { note.sharpen(2); }).toThrowError();
+        expect(() => { note.flatten(4); }).toThrowError();
+
+    });
+
+    it ("should return the correct answer", () => {
+
+        const note = new Note('C', 1);
+
+        expect(note.sharpen(1).name()).toEqual("Cx");
+        expect(note.flatten(3).name()).toEqual("Cbb");
+
+    });
+
+
 });

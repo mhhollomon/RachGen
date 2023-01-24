@@ -20,7 +20,7 @@
                     <button class="ml4 ba br2" mat-icon-button class="material-symbols-outlined" 
                             matTooltip="Download midi file for the chords" [disabled]="midi_disabled"
                             (click)="wait_for_midi('click', $event)" 
-                            longPress (LPRelease)="wait_for_midi('lp', $event)" >
+                            appLongPress (LPRelease)="wait_for_midi('lp', $event)" >
                         <mat-icon>download</mat-icon>
                     </button>
                 </div>
@@ -33,7 +33,7 @@
             </div>
             <div class="chord-panel-content-info">
                 <div class="mh2 dib" *ngFor="let n of scale_notes; let index=index">
-                    <span>{{n.noteDisplay()}}</span>
+                    <span>{{n.nameDisplay()}}</span>
                     <br>
                     <span>{{default_scale?.romanForDegree(index+1)}}</span>
                 </div>
@@ -122,7 +122,7 @@
                     <span class="dif">{{c.computeNameDisplay()}}</span>
                 </div>
                 <div class="chord-tones">
-                    <span *ngFor="let t of c.invertedChordTones()" >{{t.noteDisplay()}}</span>
+                    <span *ngFor="let t of c.invertedChordTones()" >{{t.nameDisplay()}}</span>
                 </div>
                 <div class="chord-scale" *ngIf="!chordIsCustom(i)">
                    <a [matMenuTriggerFor]="menu" class="menu-anchor">{{c.scale.fullDisplay()}}

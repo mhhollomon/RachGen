@@ -41,7 +41,7 @@ export class ScaleInfoComponent implements OnInit {
       const degree = i+1;
       return {
         degree : degree,
-        note : n.noteDisplay(),
+        note : n.nameDisplay(),
         triad : this._scale.chordForDegree(degree).computeNameDisplay(),
         roman : this._scale.romanForDegree(degree),
       };

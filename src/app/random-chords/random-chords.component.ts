@@ -698,7 +698,7 @@ export class RandomChordsComponent implements OnInit, AfterViewInit, OnDestroy {
           scale_options = {sequential: true, duration : '4', pitch : []}
           octave += 1;
         }
-        (scale_options.pitch as unknown as string[]).push(simpleNote.note() + octave );
+        (scale_options.pitch as unknown as string[]).push(simpleNote.name() + octave );
         last = octavePlacement[simpleNote.noteClass];
       }
 

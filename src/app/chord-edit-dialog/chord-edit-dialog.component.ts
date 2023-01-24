@@ -59,7 +59,7 @@ export class ChordEditDialogComponent {
   set eleventh(v : boolean) { this.chord.setExtension('11th', v)}
 
   root_note_change(event : MatButtonToggleChange) {
-    const rootDegree = this.chord.scale.notesOfScale().map((v)=> v.note()).indexOf(event.value);
+    const rootDegree = this.chord.scale.notesOfScale().map((v)=> v.name()).indexOf(event.value);
     this.chord.setRoot(this.chord.scale.notesOfScale()[rootDegree], rootDegree+1);
     this.audition_chord();
   }

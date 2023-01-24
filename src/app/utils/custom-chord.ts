@@ -32,10 +32,10 @@ export class CustomChord extends Chord{
     override copy(o : CustomChord) {
         super.copy(o);
         o.nameCache = this.nameCache;
-        o.notes = Object.assign([], this.notes);
+        o.notes = this.notes.slice();
     }
 
     addChordTone(n : string) {
-        this.notes.push(new Note(n));
+        this.notes.push(Note.fromString(n));
     }
 }
