@@ -52,9 +52,7 @@ export class RandomChordsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild('expansion') private _expansion_panel! :MatExpansionPanel;
   
-  get default_scale() {
-    return this.store.get_scale();
-  }
+  default_scale : Scale | null = null;
 
 
   constructor(private scaleService : ScaleService,
@@ -98,12 +96,14 @@ export class RandomChordsComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Listen for changes in the default_scale
 
-    this.store.scale.subscribe((newScale) => {
-        if (newScale) {
-          this.scale_notes = newScale.notesOfScale();
-          this.generateOptions.scale = newScale.scaleID();
+    this.store.scale.subscribe((newScaleID) => {
+        if (newScaleID) {
+          this.default_scale = new Scale(newScaleID);
+          this.scale_notes = this.default_scale.notesOfScale();
+          this.generateOptions.scale = this.default_scale.scaleID();
 
         } else {
+          this.default_scale = null;
           this.scale_notes = [];
           this.generateOptions.scale = defaultScaleID();
         }     
