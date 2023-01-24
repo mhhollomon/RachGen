@@ -17,20 +17,4 @@ describe('ScaleService', () => {
     expect(service).toBeTruthy();
   });
 
-  it("correctly caches scale notes", () => {
-    const scale = new Scale("G", 'major');
-
-    const retval = [ 'G', 'A', 'B', 'C', 'D', 'E', 'F#'].map(v => Note.fromString(v));
-
-    const theSpy = spyOn(scale, 'notesOfScale').and.callThrough();
-
-    expect(service.getScaleNotes(scale)).withContext("first time").toEqual(retval);
-    expect(theSpy).withContext("first time").toHaveBeenCalled();
-    theSpy.calls.reset();
-
-    expect(service.getScaleNotes(scale)).withContext("second time").toEqual(retval);
-    expect(theSpy).withContext("second time").not.toHaveBeenCalled();
-
-  });
-
 });

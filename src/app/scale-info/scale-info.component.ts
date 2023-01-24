@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { CMajorID, Scale, ScaleID } from '../utils/music-theory/scale';
+import { defaultScaleID, Scale, ScaleID } from '../utils/music-theory/scale';
 
 interface scale_note_info {
   degree  : number;
@@ -15,7 +15,7 @@ interface scale_note_info {
 })
 export class ScaleInfoComponent implements OnInit {
 
-  private _scaleID = CMajorID();
+  private _scaleID = defaultScaleID();
   private _scale = new Scale(this._scaleID);
 
   table_data : scale_note_info[] = [];
@@ -37,15 +37,16 @@ export class ScaleInfoComponent implements OnInit {
 
   refresh_data_source() {
 
-    this.table_data = this._scale.notesOfScale().map((n, i) => {
+    this.table_data= [];
+
+    this._scale.notesOfScale().forEach((n, i) => { 
       const degree = i+1;
-      return {
+      this.table_data.push({
         degree : degree,
-        note : n.nameDisplay(),
+        note : n.nameUnicode(),
         triad : this._scale.chordForDegree(degree).computeNameDisplay(),
         roman : this._scale.romanForDegree(degree),
-      };
-    });
+    })})
 
   }
 

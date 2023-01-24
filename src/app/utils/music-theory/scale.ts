@@ -1,5 +1,8 @@
 
-import {capitalize} from '../util-library';
+import { List, type ValueObject } from 'immutable';
+import { stringHash } from '../util-library';
+
+import { capitalize } from '../util-library';
 import { Chord } from './chord';
 import { GenericNoteClass, Note } from "./note";
 
@@ -50,100 +53,97 @@ export interface ScaleID {
     type : ScaleType;
 }
 
-export function CMajorID() : ScaleID {
-    return { key_center : 'C', type : 'major'}
-}
-
-export function defaultScaleID() { return CMajorID(); }
+export function defaultScaleID() : ScaleID  { return { key_center : 'C', type : 'major'}; }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isScaleID(object: any) : object is ScaleID {
-    return 'key_center' in object;
+export function isScaleID(obj: any) : obj is ScaleID {
+    return 'key_center' in obj;
 }
 
-export class Scale {
-    rootNote : Note;
-    scaleType : ScaleType;
+export class Scale implements ValueObject {
+    private _root : Note;
+    private _type : ScaleType;
 
-    private notesCache : Note[] | null = null;
+    get root() { return this._root; }
+    get type() { return this._type; }
+
+    private _notesCache : List<Note> = List<Note>([]);
  
 
     constructor(id : ScaleID )
     constructor(rootNote : string | Note, scaleType : ScaleType )
     constructor(rootNote : string | Note | ScaleID, scaleType? : ScaleType ) {
 
-        if (scaleType) {
-            this.scaleType = scaleType;
+        if (scaleType != undefined ) {
+            this._type = scaleType;
             if (typeof rootNote == 'string') {
-                this.rootNote = Note.fromString(rootNote);
+                this._root = Note.fromString(rootNote);
             } else if (rootNote instanceof Note) {
-                this.rootNote = rootNote;
+                this._root = rootNote;
             } else {
                 // This shouldn't happen if I understand the overload system
-                this.rootNote = Note.fromString(rootNote.key_center)
+                this._root = Note.fromString(rootNote.key_center)
             }
+        } else if (isScaleID(rootNote)) {
+            this._root = Note.fromString(rootNote.key_center);
+            this._type = rootNote.type;
         } else {
-            if (isScaleID(rootNote)) {
-                this.rootNote = Note.fromString(rootNote.key_center);
-                this.scaleType = rootNote.type;
-            } else {
-                throw Error("type Error");
-            }
+            throw Error("type Error");
         }
     }
 
-    root() {
-        return this.rootNote.name();
+    rootName() {
+        return this.root.name();
     }
 
-    rootDisplay() {
-        return this.rootNote.nameDisplay();
+    rootNameUnicode() {
+        return this.root.nameUnicode();
     }
 
-    isMinor() {
-        return (this.scaleType === ScaleTypeEnum.minor );
+    name() {
+        return this.rootName() + ' ' + capitalize(this.type);
     }
 
-    fullName() {
-        return this.root() + ' ' + capitalize(this.scaleType);
+    nameUnicode() {
+        return this.rootNameUnicode() + ' ' + capitalize(this.type);
     }
 
-    fullDisplay() {
-        return this.rootDisplay() + ' ' + capitalize(this.scaleType);
-    }
+    id() { return this.name(); }
 
-    id() { return this.fullName(); }
+    scaleID() : ScaleID { return { key_center : this.rootName(), type : this.type}; }
 
-    scaleID() : ScaleID { return { key_center : this.root(), type : this.scaleType};}
+    equals(o: Scale) { return this.isSame(o); }
+
+    hashCode() :number { return stringHash(this.name()); }
 
     isSame(o : Scale | undefined | null) : boolean {
-        return (o != undefined && this.rootNote.equal(o.rootNote) && this.scaleType === o.scaleType);
+        return (o != undefined && this.root.equals(o.root) && this.type === o.type);
     }
 
-    notesOfScale() : Note[] {
+    notesOfScale() : List<Note> {
 
-        if (this.notesCache)
-            return this.notesCache;
-        
-        const notes :Note[] = [];
+        if (this._notesCache.size > 1)
+            return this._notesCache;
+            
+        const scaleSteps = scaleStepData[this.type];
     
-        const scaleSteps = scaleStepData[this.scaleType];
-    
-        const current_generic_note = this.rootNote.noteClass;
+        const current_generic_note = this.root.noteClass;
         let index = 0;
         while(genericNotes[index].name != current_generic_note) {
           index += 1;
         }
     
-        notes.push(this.rootNote);
+        this._notesCache = this._notesCache.push(this.root);
         
         let scaleDegree = 1;
         while (scaleDegree < 7) {
           index += 1;
-          const stepSize = genericNotes[index].prev;
+
+          const gnd = genericNotes[index];
+          const stepSize = gnd.prev;
           const neededStepSize = scaleSteps[scaleDegree];
     
-          let newAlter = notes[notes.length-1].alter;
+          let newAlter = this._notesCache.get(-1, this.root).alter;
     
           if (stepSize == neededStepSize) {
             // We want this note, but it needs to be altered the same
@@ -158,13 +158,12 @@ export class Scale {
             newAlter -= 1;
           }
     
-          notes.push(new Note(genericNotes[index].name, newAlter));
+          this._notesCache = this._notesCache.push(new Note(gnd.name, newAlter));
           scaleDegree += 1;
         }
 
-        this.notesCache = notes;
         
-        return notes;
+        return this._notesCache;
     
     }
 

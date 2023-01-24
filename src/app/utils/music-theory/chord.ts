@@ -106,7 +106,9 @@ export class Chord {
       // to be recalculated.
       if (degree !== this.rootDegree || this.needChordTones) {
         this.rootDegree = degree;
-        this.rootCache = this.scaleCache.notesOfScale()[degree - 1];
+        const n = this.scaleCache.notesOfScale().get(degree-1);
+        if (n == undefined) { throw Error("That didn't work out well")}
+        this.rootCache =n;
         this.needChordTones = true;
       }
 
@@ -165,7 +167,7 @@ export class Chord {
 
       const newNotes = newScale.notesOfScale();
 
-      const index = newNotes.findIndex((v) => v.same(this.root));
+      const index = newNotes.findIndex((v) => v.isSame(this.root));
 
       this.setScale(newScale);
       if (index >= 0) {
@@ -204,32 +206,42 @@ export class Chord {
       }
     }
 
+    private get_scale_note(chordal_degree : number) : Note {
+      const n = this.scale.notesOfScale().get(degreeToScale(this.rootDegree, chordal_degree));
+
+      if (n) {
+        return n;
+      } else {
+        throw Error(`Could not get degree ${chordal_degree} from scale`)
+      }
+    }
+
     private generate_chord_tones() {
       this.chordTonesCache = {};
 
       const scaleNotes = this.scale.notesOfScale();
 
-      this.addToToneCache(1, scaleNotes[degreeToScale(this.rootDegree, 1)]);
-      this.addToToneCache(5, scaleNotes[degreeToScale(this.rootDegree, 5)]);
+      this.addToToneCache(1, this.get_scale_note(1));
+      this.addToToneCache(5, this.get_scale_note(5));
   
       if (this.chordType === 'sus2') {
-        this.addToToneCache(2, scaleNotes[degreeToScale(this.rootDegree, 2)]);
+        this.addToToneCache(2, this.get_scale_note(2));
       } else if (this.chordType === 'sus4') {
-        this.addToToneCache(4, scaleNotes[degreeToScale(this.rootDegree, 4)]);
+        this.addToToneCache(4, this.get_scale_note(4));
       } else {
-        this.addToToneCache(3, scaleNotes[degreeToScale(this.rootDegree, 3)]);
+        this.addToToneCache(3, this.get_scale_note(3));
       }
 
       if (this.extensions['7th']) {
-        this.addToToneCache(7, scaleNotes[degreeToScale(this.rootDegree, 7)]);
+        this.addToToneCache(7, this.get_scale_note(7));
       }
       
       if (this.extensions['9th']) {
-        this.addToToneCache(9, scaleNotes[degreeToScale(this.rootDegree, 9)]);
+        this.addToToneCache(9, this.get_scale_note(9));
       }
   
       if (this.extensions['11th']) {
-        this.addToToneCache(11, scaleNotes[degreeToScale(this.rootDegree, 11)]);
+        this.addToToneCache(11, this.get_scale_note(11));
       }
   
       this.needChordTones = false;
@@ -335,7 +347,7 @@ export class Chord {
             add.push('9');
           }
         } else if (int1to9 === 3) {
-          if (! ct[9].same(ct[3])) {
+          if (! ct[9].isSame(ct[3])) {
             add.push('#9');
           } else {
             // not actually a  ninth chord, 

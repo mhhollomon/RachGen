@@ -15,7 +15,16 @@ export function range(start : number, end : number) {
 
 export async function  sleep(ms : number)  { return new Promise(r => setTimeout(r, ms)); }
 
-
+export function stringHash(s : string) : number {
+    let hash = 0;
+    if (s.length === 0) return hash;
+    for (let i = 0; i < s.length; i++) {
+        let chr = s.charCodeAt(i);
+        hash = ((hash << 5) - hash) + chr;
+        hash |= 0; // Convert to 32bit integer
+    }
+    return hash;
+}
 
 export function getInheritedBackgroundColor(el : HTMLElement) : string {
     // get default style for current browser

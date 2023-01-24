@@ -46,7 +46,7 @@ export class ScaleChangeDialogComponent {
       return 'Change Default Scale'
     } else {
       const s = new Scale(this.config.scaleID);
-      return s.fullDisplay() + ' Information';
+      return s.nameUnicode() + ' Information';
     }
   }
 

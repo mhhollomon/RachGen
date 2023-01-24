@@ -53,16 +53,6 @@ export class ScaleService {
     return new Scale(keycenter, sonority);
   }
 
-  getScaleNotes(scale: Scale) : Note[] {
-
-    if (! (scale.id() in this.cache)) {
-      this.cache[scale.id()] = scale.notesOfScale();
-    }
-
-    return this.cache[scale.id()];
-  }
-
-
   getKeyList(sonority : ScaleType) : string[] {
     if (sonority === 'augmented' ) {
       throw Error("Cannot get the key list for scale type augmented");

@@ -5,7 +5,7 @@
         <div mat-dialog-content>
             <br>
             <mat-button-toggle-group name="root-note" (change)="root_note_change($event)" [value]="current_root_note()" aria-label="Root Note">
-                <mat-button-toggle value="{{n.name()}}" *ngFor="let n of chord.scale.notesOfScale()"><span class="f7">{{n.nameDisplay()}}</span></mat-button-toggle>
+                <mat-button-toggle value="{{n.name()}}" *ngFor="let n of chord.scale.notesOfScale()"><span class="f7">{{n.nameUnicode()}}</span></mat-button-toggle>
             </mat-button-toggle-group>
 
             <div>

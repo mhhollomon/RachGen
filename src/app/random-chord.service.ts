@@ -4,6 +4,7 @@ import { Chord, ChordType, ExtensionType, InversionType } from './utils/music-th
 import { Scale, ScaleID, ScaleType } from './utils/music-theory/scale';
 import { ScaleService } from './scale.service';
 import { range } from './utils/util-library';
+import { Note } from './utils/music-theory/note';
 
 
 function yesno100(yesWeight : number) : boolean {
@@ -393,7 +394,7 @@ export class ChordSequenceBuilder {
 
     const scale = this.scale.notesOfScale();
     const rootDegree = this.noteChooser.choose();
-    const note = scale[rootDegree-1];
+    const note = scale.get(rootDegree-1, new Note('C'));
 
     chord.setRoot(note, rootDegree);
 

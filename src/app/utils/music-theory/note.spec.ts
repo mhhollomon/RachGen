@@ -93,11 +93,11 @@ describe("Note.name()", () => {
 
 describe("Note.nameDisplay()", () => {
     it('should return proper strings', () => {
-        expect(Note.fromString("C").nameDisplay()).toEqual("C");
-        expect(Note.fromString("Bb").nameDisplay()).toEqual("B\u266D");
-        expect(Note.fromString("A#").nameDisplay()).toEqual("A\u266F");
-        expect(Note.fromString("Gbb").nameDisplay()).toEqual("G\uD834\uDD2B");
-        expect(Note.fromString("Fx").nameDisplay()).toEqual("F\uD834\uDD2A");
+        expect(Note.fromString("C").nameUnicode()).toEqual("C");
+        expect(Note.fromString("Bb").nameUnicode()).toEqual("B\u266D");
+        expect(Note.fromString("A#").nameUnicode()).toEqual("A\u266F");
+        expect(Note.fromString("Gbb").nameUnicode()).toEqual("G\uD834\uDD2B");
+        expect(Note.fromString("Fx").nameUnicode()).toEqual("F\uD834\uDD2A");
     });
 
 
@@ -118,24 +118,24 @@ describe ("Note.equal()", () => {
     it("Should be equal for clones", () => {
         const x = new Note('F', -2);
         
-        expect(x.clone().equal(x)).toBeTruthy();
+        expect(x.clone().equals(x)).toBeTruthy();
     });
 
     it ("Should take into account the alter", () => {
 
         const x = new Note('F', -2);
-        expect(x.equal(Note.fromString('F#'))).toBeFalsy();
-        expect(x.equal(Note.fromString('Fb'))).toBeFalsy();
-        expect(x.equal(Note.fromString('Fbb'))).toBeTruthy();
+        expect(x.equals(Note.fromString('F#'))).toBeFalsy();
+        expect(x.equals(Note.fromString('Fb'))).toBeFalsy();
+        expect(x.equals(Note.fromString('Fbb'))).toBeTruthy();
 
     });
 
     it ("Should take into account the note class", () => {
 
         const x = new Note('F', -2);
-        expect(x.equal(Note.fromString('G'))).toBeFalsy();
-        expect(x.equal(Note.fromString('Gb'))).toBeFalsy();
-        expect(x.equal(Note.fromString('Gbb'))).toBeFalsy();
+        expect(x.equals(Note.fromString('G'))).toBeFalsy();
+        expect(x.equals(Note.fromString('Gb'))).toBeFalsy();
+        expect(x.equals(Note.fromString('Gbb'))).toBeFalsy();
 
     });
 
@@ -145,16 +145,16 @@ describe ("Note.same()", () => {
     it("Should be equal for clones", () => {
         const x = new Note('F', -2);
         
-        expect(x.clone().same(x)).toBeTruthy();
+        expect(x.clone().isSame(x)).toBeTruthy();
     });
 
     it ("Should simplify", () => {
 
         const x = Note.fromString('Ex');
-        expect(x.same(Note.fromString('F#'))).toBeTruthy();
-        expect(x.same(Note.fromString('Gb'))).toBeTruthy();
+        expect(x.isSame(Note.fromString('F#'))).toBeTruthy();
+        expect(x.isSame(Note.fromString('Gb'))).toBeTruthy();
 
-        expect(x.same(Note.fromString('Fb'))).toBeFalsy();
+        expect(x.isSame(Note.fromString('Fb'))).toBeFalsy();
 
     });
 

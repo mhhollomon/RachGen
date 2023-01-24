@@ -1,6 +1,7 @@
 import { AfterViewInit, Component, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { filter } from 'rxjs';
+import { List } from 'immutable';
 
 import { MatDialog } from '@angular/material/dialog';
 import { MatExpansionPanel } from '@angular/material/expansion';
@@ -14,7 +15,7 @@ import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
 import {ScaleService } from '../scale.service';
 import { RandomChordService, RandomChordError } from '../random-chord.service';
 import { Chord } from '../utils/music-theory/chord';
-import { CMajorID, defaultScaleID, Scale, ScaleType } from '../utils/music-theory/scale';
+import { defaultScaleID, Scale, ScaleType } from '../utils/music-theory/scale';
 import { Note } from '../utils/music-theory/note';
 import { AudioService } from '../audio.service';
 import { MidiDialogComponent, MidiConfig, defaultMidiConfig } from '../midi-dialog/midi-dialog.component';
@@ -42,7 +43,7 @@ export class RandomChordsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   generateOptions : GeneratorOptions = defaultGeneratorOptions();
 
-  scale_notes : Note[] = [];
+  scale_notes : List<Note> = List<Note>([]);
 
   all_play_active = false;
 
@@ -104,7 +105,7 @@ export class RandomChordsComponent implements OnInit, AfterViewInit, OnDestroy {
 
         } else {
           this.default_scale = null;
-          this.scale_notes = [];
+          this.scale_notes = this.scale_notes.clear();
           this.generateOptions.scale = defaultScaleID();
         }     
     });
@@ -141,7 +142,7 @@ export class RandomChordsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get panelTitle() : string {
-    return (this.default_scale ? this.default_scale.fullDisplay() :  "No Scale");
+    return (this.default_scale ? this.default_scale.nameUnicode() :  "No Scale");
   }
 
   default_scale_exists() { return this.default_scale != null && this.default_scale instanceof Scale; }
@@ -177,7 +178,7 @@ export class RandomChordsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   change_default_scale() {
     const dia_data = defaultScaleChangeConfig();
-    dia_data.scaleID = (this.default_scale?.scaleID() || CMajorID() );
+    dia_data.scaleID = (this.default_scale?.scaleID() || defaultScaleID() );
     const dia = this.dialog.open(ScaleChangeDialogComponent, { data : dia_data} );
 
     dia.afterClosed().subscribe((s) => {
@@ -641,7 +642,7 @@ export class RandomChordsComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (config.includeScale) {
-      trackName += this.default_scale?.fullName();
+      trackName += this.default_scale?.name();
     }
 
     mainTrack.addTrackName(trackName);
@@ -681,10 +682,10 @@ export class RandomChordsComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (config.includeScale) {
       if (config.includeMarkers) {
-        mainTrack.addMarker(this.default_scale?.fullName() + " Scale")
+        mainTrack.addMarker(this.default_scale?.name() + " Scale")
       }
 
-      let octave = ['G', 'A', 'B'].includes(this.scale_notes[0].toSharp().noteClass) ? 3 : 4;
+      let octave = ['G', 'A', 'B'].includes(this.scale_notes.get(0, new Note('C')).toSharp().noteClass) ? 3 : 4;
       let last  = -1;
       let scale_options : Midiwriter.Options = {sequential: true, duration : '4', pitch : []}
       for (const n of this.scale_notes) {
@@ -732,7 +733,7 @@ export class RandomChordsComponent implements OnInit, AfterViewInit, OnDestroy {
     const value_map : any = {
       'date' : date.format('YYYYMMDD'),
       'time' : date.format('HHmmss'),
-      'scale' : this.default_scale?.fullName() || 'unknown',
+      'scale' : this.default_scale?.name() || 'unknown',
       'count' : this.store.chord_count(),
     }
 

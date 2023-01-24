@@ -6,6 +6,7 @@ import { AudioService } from '../audio.service';
 import { PreferencesService } from '../services/preferences.service';
 import { CustomChord } from '../utils/custom-chord';
 import { Chord } from '../utils/music-theory/chord';
+import { Note } from '../utils/music-theory/note';
 
 const audition_pref_name = 'edit_audition'
 
@@ -60,7 +61,7 @@ export class ChordEditDialogComponent {
 
   root_note_change(event : MatButtonToggleChange) {
     const rootDegree = this.chord.scale.notesOfScale().map((v)=> v.name()).indexOf(event.value);
-    this.chord.setRoot(this.chord.scale.notesOfScale()[rootDegree], rootDegree+1);
+    this.chord.setRoot(this.chord.scale.notesOfScale().get(rootDegree, new Note('C')), rootDegree+1);
     this.audition_chord();
   }
 

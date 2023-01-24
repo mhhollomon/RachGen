@@ -1,4 +1,8 @@
+import type{ ValueObject } from 'immutable';
+import { stringHash } from '../util-library';
+
 export type GenericNoteClass = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
+
 
 
 interface NoteGraphData {
@@ -27,7 +31,7 @@ const accidentalToAlter : { [ index : string ] : number } = {
 }
 
 
-export class Note {
+export class Note implements ValueObject {
     private _noteClass : GenericNoteClass = 'A';
     private _alter  = 0;
 
@@ -55,7 +59,7 @@ export class Note {
         return this.noteClass + this.accidental;
     }
 
-    nameDisplay() {
+    nameUnicode() {
         return this.noteClass + this.accidentalUnicode;
     }
 
@@ -124,13 +128,17 @@ export class Note {
         return new Note(n, a);
     }
 
-    equal(o : Note) : boolean {
+    equals(o : Note) : boolean {
         return this.noteClass === o.noteClass && 
                 this.alter === o.alter;
     }
 
-    same(o : Note) : boolean {
-        return this.toSharp().equal(o.toSharp());
+    hashCode() : number {
+        return stringHash(this.name());
+    }
+
+    isSame(o : Note) : boolean {
+        return this.toSharp().equals(o.toSharp());
     }
 
     clone() : Note {
