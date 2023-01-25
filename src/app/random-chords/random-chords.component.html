@@ -63,7 +63,7 @@
                 <mat-icon>add</mat-icon>
             </button>
             <button mat-icon-button class="material-symbols-outlined" (click)="append_to_list()"
-                     matTooltip="Add new chords to the end of the list">
+                     [disabled]="!default_scale_exists()" matTooltip="Add new chords to the end of the list">
                 <mat-icon>add_box</mat-icon>
             </button>
         </div>

@@ -249,13 +249,11 @@ export class RandomChordsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   add_chord(pos : 'before' | 'after', index : number) {
-    const newChord = new Chord();
 
 
     if (! this.default_scale ) return; 
 
-    newChord.setScale(this.default_scale)
-        .setDegree(1);
+    const newChord = new Chord(this.default_scale, 1);
 
     if (pos === 'after') index += 1;
 
