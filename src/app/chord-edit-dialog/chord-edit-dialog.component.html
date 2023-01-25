@@ -10,7 +10,7 @@
 
             <div>
                 <mat-label class="mr2 mt2 mhh-mat-label">Inversion</mat-label>
-                <mat-radio-group name="inversion-rb" [(ngModel)]="chord.inversion">       
+                <mat-radio-group name="inversion-rb" [(ngModel)]="inversion">       
                     <mat-radio-button name="inversion-rb" value="root"   (click)="audition_chord()" matTooltip="Chord to root position">Root</mat-radio-button>
                     <mat-radio-button name="inversion-rb" value="first"  (click)="audition_chord()" matTooltip="Chord to first inversion">First Inv</mat-radio-button>
                     <mat-radio-button name="inversion-rb" value="second" (click)="audition_chord()" matTooltip="Chord to second inversion">Second Inv</mat-radio-button>
@@ -19,10 +19,10 @@
 
             <div>
                 <mat-label class="mr2 mt2 mhh-mat-label">Type</mat-label>
-                <mat-radio-group name="chord-type-rb" [(ngModel)]="chord.chordType">       
+                <mat-radio-group name="chord-type-rb" [(ngModel)]="chordType">       
                     <mat-radio-button name="chord-type-rb" value="triad" (click)="audition_chord()" matTooltip="Change chord to a triad">Triad</mat-radio-button>
-                    <mat-radio-button name="chord-type-rb" value="sus2"  [disabled]="chord.isDim()" (click)="audition_chord($event)" matTooltip="Change chord to a Sus2">Sus2</mat-radio-button>
-                    <mat-radio-button name="chord-type-rb" value="sus4"  [disabled]="chord.isDim()" (click)="audition_chord($event)" matTooltip="Change chord to a sus4">Sus4</mat-radio-button>
+                    <mat-radio-button name="chord-type-rb" value="sus2"  [disabled]="chord_isDim()" (click)="audition_chord($event)" matTooltip="Change chord to a Sus2">Sus2</mat-radio-button>
+                    <mat-radio-button name="chord-type-rb" value="sus4"  [disabled]="chord_isDim()" (click)="audition_chord($event)" matTooltip="Change chord to a sus4">Sus4</mat-radio-button>
                 </mat-radio-group>
             </div>
 
@@ -36,7 +36,7 @@
             </div>
 
             <div class="mt3">
-                <button mat-raised-button (click)="play_chord()" color="primary" >{{chord.computeNameDisplay()}}</button>
+                <button mat-raised-button (click)="play_chord()" color="primary" >{{chord.nameUnicode()}}</button>
             </div>
             <div>        
                 <mat-checkbox [(ngModel)]="audition"  matTooltip="audition when changing">Audition on Change</mat-checkbox>

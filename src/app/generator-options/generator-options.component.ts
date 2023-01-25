@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatRadioChange } from '@angular/material/radio';
 import { MatSelectChange } from '@angular/material/select';
-import { RandomChordOptions } from '../random-chord.service';
+import { defaultModeList, RandomChordOptions } from '../random-chord.service';
 import { ScaleService } from '../scale.service';
 import { ChordType, InversionType } from '../utils/music-theory/chord';
 import { Scale, ScaleType } from '../utils/music-theory/scale';
@@ -11,6 +11,7 @@ export interface GeneratorOptions extends RandomChordOptions {
   key_source : string;
   tonality : string;
   center : string;
+  modes_on : boolean;
 }
 
 
@@ -38,7 +39,10 @@ export function defaultGeneratorOptions() : GeneratorOptions {
       'triad' : { flag : true,  weight : 3 },
       'sus2'  : { flag : false, weight : 3 },
       'sus4'  : { flag : false, weight : 3 },
-    }  
+    },
+    modes : defaultModeList,
+    mode_percent : 0,  
+    modes_on : false,
   }
 }
 
@@ -219,6 +223,11 @@ export class GeneratorOptionsComponent {
     return (value : number)  => { return this.chord_type_slider_ticks(ct, value); }
   }
 
+  mode_activate_change(event : MatRadioChange) {
+    this.options.modes_on = event.value;
+    this.optionsChange.emit(this.options);
+
+  }
 
   // This is to get around a problem that the value
   // labels (produced by chord_type_slider_ticks)

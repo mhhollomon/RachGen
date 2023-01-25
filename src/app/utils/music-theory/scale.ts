@@ -43,11 +43,6 @@ export type ScaleType = 'minor' | 'major' |
 export const ScaleRecord = Record({center : 'C', type : <ScaleType>('major')}
 );
 
-export const defaultScaleRecord = ScaleRecord();
-
-export type ScaleRecordType = typeof defaultScaleRecord;
-
-
 export class Scale extends ScaleRecord {
     private _root : Note;
 
@@ -55,8 +50,16 @@ export class Scale extends ScaleRecord {
 
     private _notesCache : List<Note> = List<Note>([]);
  
-    constructor(props? : object) {
-        super(props == undefined ? {} : props);
+    constructor(props? : string | object, type? : ScaleType) {
+        let newProps = {};
+        if (props != undefined ) {
+            if (typeof props === 'string') {
+                newProps = { center : props, type : type };
+            } else {
+                newProps = props;
+            }
+        }
+        super(newProps);
 
         this._root = Note.fromString(this.center);
     }
@@ -85,66 +88,80 @@ export class Scale extends ScaleRecord {
         return this.rootNameUnicode() + ' ' + capitalize(this.type);
     }
 
-    id() { return this.name(); }
-
     isSame(o : Scale | undefined | null) : boolean {
         return (o != undefined && this.root.equals(o.root) && this.type === o.type);
     }
 
-    notesOfScale() : List<Note> {
-
+    private fill_note_cache() {
         if (this._notesCache.size > 1)
-            return this._notesCache;
-            
+            return;
+
         const scaleSteps = scaleStepData[this.type];
-    
+
         const current_generic_note = this.root.noteClass;
         let index = 0;
         while(genericNotes[index].name != current_generic_note) {
-          index += 1;
+            index += 1;
         }
     
         this._notesCache = this._notesCache.push(this.root);
         
         let scaleDegree = 1;
         while (scaleDegree < 7) {
-          index += 1;
+            index += 1;
 
-          const gnd = genericNotes[index];
-          const stepSize = gnd.prev;
-          const neededStepSize = scaleSteps[scaleDegree];
+            const gnd = genericNotes[index];
+            const stepSize = gnd.prev;
+            const neededStepSize = scaleSteps[scaleDegree];
     
-          let newAlter = this._notesCache.get(-1, this.root).alter;
+            let newAlter = this._notesCache.get(-1, this.root).alter;
     
-          if (stepSize == neededStepSize) {
+            if (stepSize == neededStepSize) {
             // We want this note, but it needs to be altered the same
             // way that our current note is altered (to preserve the step size)
     
             // So, do nothing.
-          } else if (stepSize < neededStepSize) {
+            } else if (stepSize < neededStepSize) {
             // Need to alter this new note up one from the last;
             newAlter += 1;
-          } else { // stepSize > neededStepSize
+            } else { // stepSize > neededStepSize
             // Need to alter this new note down one from the last;
             newAlter -= 1;
-          }
+            }
     
-          this._notesCache = this._notesCache.push(new Note(gnd.name, newAlter));
-          scaleDegree += 1;
+            this._notesCache = this._notesCache.push(new Note(gnd.name, newAlter));
+            scaleDegree += 1;
         }
-
-        
-        return this._notesCache;
     
     }
 
+    notesOfScale() : List<Note> {
+        this.fill_note_cache();        
+        return this._notesCache;
+    }
+
+    get_note(degree : number) : Note {
+
+        if (degree <= 0) {
+            throw Error(`Degree out of bound : ${degree}`)
+        }
+
+        this.fill_note_cache();
+
+        const index = (degree-1) % 7;
+        
+        const note = this._notesCache.get(index);
+
+        if (note == undefined) {
+            throw Error(`Note undefined for degree ${degree}`)
+        }
+
+        return note;
+
+    }
+
     chordForDegree(degree : number) : Chord {
-        const retval = new Chord();
-
-        retval.setScale(this).setRootFromDegree(degree)
-            .setInversion('root')
-            .setChordType('triad');
-
+        const retval = new Chord(this, degree, 'triad', 'root');
 
         return retval;
     }
@@ -162,7 +179,7 @@ export class Scale extends ScaleRecord {
             case 5 : retval = 'V'; break;
             case 6 : retval = 'VI'; break;
             case 7 : retval = 'VII'; break;
-            default : throw Error("bad degree in romanForDegee");
+            default : throw Error(`bad degree ${degree} in romanForDegee`);
         }
 
         const chord = this.chordForDegree(degree);

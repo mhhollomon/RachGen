@@ -119,10 +119,10 @@
                     <button class="hover-item accent-colors hover-bottom" (click)="add_chord('after', i)">+</button>
                 </div>
                 <div class="chord-name">
-                    <span class="dif">{{c.computeNameDisplay()}}</span>
+                    <span class="dif">{{c.nameUnicode()}}</span>
                 </div>
                 <div class="chord-tones">
-                    <span *ngFor="let t of c.invertedChordTones()" >{{t.nameUnicode()}}</span>
+                    <span *ngFor="let t of c.noteList()" >{{t.nameUnicode()}}</span>
                 </div>
                 <div class="chord-scale" *ngIf="!chordIsCustom(i)">
                    <a [matMenuTriggerFor]="menu" class="menu-anchor">{{c.scale.nameUnicode()}}

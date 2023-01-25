@@ -4,7 +4,7 @@ import { Chord, ChordType, ExtensionType, InversionType } from './utils/music-th
 import { Scale, ScaleType } from './utils/music-theory/scale';
 import { ScaleService } from './scale.service';
 import { range } from './utils/util-library';
-import { Note } from './utils/music-theory/note';
+import { List } from 'immutable';
 
 
 function yesno100(yesWeight : number) : boolean {
@@ -48,6 +48,10 @@ export interface ChordTypeConfig {
   'sus4'  : WeightedFlag;
 }
 
+export const defaultModeList = List<ScaleType>([]);
+
+export type ModeList = typeof defaultModeList;
+
 export interface RandomChordOptions {
   scale : Scale;
   count : RandomChordCountConfig;
@@ -55,7 +59,10 @@ export interface RandomChordOptions {
   extensions : ExtensionConfg;
   inversions : InversionConfg;
   chordTypes : ChordTypeConfig;
+  modes : ModeList;
+  mode_percent : number;
 }
+
 
 export class ChordSequenceBuilder {
 
@@ -78,7 +85,9 @@ export class ChordSequenceBuilder {
       'triad' : { flag : true, weight : 3 },
       'sus2'  : { flag : false, weight : 3 },
       'sus4'  : { flag : false, weight : 3 },
-    }
+    },
+    modes  : defaultModeList,
+    mode_percent : 0,
   }
 
   public chordList : Chord[] = [];
@@ -106,6 +115,7 @@ export class ChordSequenceBuilder {
       .setExtension('11th', cfg.extensions['11th'])
       .setInversions(cfg.inversions)
       .setChordTypes(cfg.chordTypes)
+      .setModes(cfg.modes, cfg.mode_percent)
 
     return this;
   }
@@ -282,6 +292,13 @@ export class ChordSequenceBuilder {
     return this;
 
   }
+
+  setModes(m : ModeList, p : number) : this {
+    this.options.modes = m;
+    this.options.mode_percent = p;
+
+    return this;
+  }
  
   private anyInversion() : boolean {
     let retval = false;
@@ -377,7 +394,7 @@ export class ChordSequenceBuilder {
           try_again = true;
 
         //look to the right
-      } else if (index < this.chordList.length-1 && 
+        } else if (index < this.chordList.length-1 && 
               this.chordList[index+1].keep && this.chordList[index+1].isSame(newChord) ) {
           try_again = true;
         }
@@ -390,31 +407,37 @@ export class ChordSequenceBuilder {
 
   private gen_one_chord() : Chord {
 
-    const chord = new Chord();
 
-    const scale = this.scale.notesOfScale();
+    let my_scale = this.scale;
+
+    // Check on modal interchange
+    if (this.options.mode_percent > 0 && this.options.modes.size > 0) {
+      if (yesno100(this.options.mode_percent)) {
+        const newScaleType = equalWeightedChooser(this.options.modes.toArray()).choose();
+        my_scale = this.scale.setType(newScaleType);
+      }
+    }
+
     const rootDegree = this.noteChooser.choose();
-    const note = scale.get(rootDegree-1, new Note('C'));
 
-    chord.setRoot(note, rootDegree);
+    const chordType = this.chordTypeChooser.choose();
 
-    chord.chordType = this.chordTypeChooser.choose();
+    const chord = new Chord(my_scale, rootDegree, chordType);
 
 
-    return this.mkchord(this.scale, chord);
+    return this.mkchord(chord);
   
   }
 
-  private mkchord(key : Scale, chord : Chord) : Chord {
+  private mkchord(chord : Chord) : Chord {
 
-    chord.setScale(key)
-        .setInversion(this.invertChooser.choose())
+    chord.setInversion(this.invertChooser.choose())
 
 
     // The chord quality is a diminished - can't have a sus chord.
     if ((chord.chordType === 'sus2' || chord.chordType === 'sus4') && 
             chord.isDim()) {
-      chord.chordType = 'triad';
+      chord = chord.setChordType('triad');
     }
 
     if (this.options.extensions['7th'].flag) {

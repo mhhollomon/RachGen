@@ -20,15 +20,6 @@ export class ChordListCacheService {
     return this._chords.getValue();
   }
 
-  chord_array() {
-    const chords : Chord[] = [];
-
-    this.chord_list().forEach(element => {
-      chords.push(element.clone());
-    });
-
-    return chords;
-  }
 
   chord_count() { return this._chords.getValue().size; }
   move_chord(old_index : number, new_index : number) {

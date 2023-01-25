@@ -4,11 +4,11 @@
     <br>
     <mat-form-field>
         <mat-label>Chord Name</mat-label>
-        <input matNativeControl [(ngModel)]="chord.nameCache">
+        <input matNativeControl [(ngModel)]="name">
     </mat-form-field>
 
-    <div *ngFor="let n of chord.notes; let i = index">
-    <mat-button-toggle-group name="root-note" (change)="note_change(i, $event)" [value]="n.name()" aria-label="Root Note">
+    <div *ngFor="let n of chord.noteList(); let i = index">
+    <mat-button-toggle-group name="note-list" (change)="note_change(i, $event)" [value]="n.name()" aria-label="Note List">
         <mat-button-toggle value="{{n}}" *ngFor="let n of chromatic_list()"><span class="f7">{{n}}</span></mat-button-toggle>
     </mat-button-toggle-group>
     </div>

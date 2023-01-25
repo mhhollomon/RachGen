@@ -13,7 +13,7 @@ import * as dayjs from 'dayjs';
 
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
 import {ScaleService } from '../scale.service';
-import { RandomChordService, RandomChordError } from '../random-chord.service';
+import { RandomChordService, RandomChordError, defaultModeList } from '../random-chord.service';
 import { Chord } from '../utils/music-theory/chord';
 import { Scale, ScaleType } from '../utils/music-theory/scale';
 import { Note } from '../utils/music-theory/note';
@@ -43,7 +43,13 @@ export class RandomChordsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   generateOptions : GeneratorOptions = defaultGeneratorOptions();
 
-  scale_notes : List<Note> = List<Note>([]);
+  get scale_notes() : List<Note> {
+    if (this.default_scale != null) {
+      return this.default_scale.notesOfScale();
+    } else {
+      return List<Note>([]);
+    }
+  }
 
   all_play_active = false;
 
@@ -78,9 +84,6 @@ export class RandomChordsComponent implements OnInit, AfterViewInit, OnDestroy {
 
     console.log("random-chord ngOnInit called")
 
-    if (this.default_scale) {
-      this.scale_notes = this.default_scale.notesOfScale();
-    }
     const midi_pref = this.preferences.read('midi', this.midi_config);
 
     if (! ('fileName' in midi_pref)) {
@@ -97,15 +100,13 @@ export class RandomChordsComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Listen for changes in the default_scale
 
-    this.store.scale.subscribe((newScaleID) => {
-        if (newScaleID) {
-          this.default_scale = new Scale(newScaleID);
-          this.scale_notes = this.default_scale.notesOfScale();
+    this.store.scale.subscribe((newScale) => {
+        if (newScale != null) {
+          this.default_scale = newScale;
           this.generateOptions.scale = this.default_scale;
 
         } else {
           this.default_scale = null;
-          this.scale_notes = this.scale_notes.clear();
           this.generateOptions.scale = new Scale();
         }     
     });
@@ -119,8 +120,6 @@ export class RandomChordsComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy() : void {
     console.log("random-chord onDestroy called")
   }
-
-  get chords() { return this.store.chord_array(); }
 
   get chords_exist() { return this.store.chord_count() > 0; }
 
@@ -225,9 +224,9 @@ export class RandomChordsComponent implements OnInit, AfterViewInit, OnDestroy {
     dia.afterClosed().subscribe((newChord) => {
       if (newChord) {
         if (adding_chord) {
-          this.store.add_chord(newChord.clone(), chord_index);
+          this.store.add_chord(newChord, chord_index);
         } else {
-          this.store.replace_chord(newChord.clone(), chord_index);
+          this.store.replace_chord(newChord, chord_index);
         }
       }
 
@@ -256,7 +255,7 @@ export class RandomChordsComponent implements OnInit, AfterViewInit, OnDestroy {
     if (! this.default_scale ) return; 
 
     newChord.setScale(this.default_scale)
-        .setRootFromDegree(1);
+        .setDegree(1);
 
     if (pos === 'after') index += 1;
 
@@ -300,8 +299,7 @@ export class RandomChordsComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!chord) return;
 
     if (! this.default_scale.isSame(chord.scale)) {
-      chord.change_scale(this.default_scale);
-      this.store.replace_chord(chord.clone(), chord_index);
+      this.store.replace_chord(chord.change_scale(this.default_scale), chord_index);
     }
 
 
@@ -357,7 +355,7 @@ export class RandomChordsComponent implements OnInit, AfterViewInit, OnDestroy {
       const c = this.store.get_a_chord(index);
       if (c) {
         c.keep = ! c.keep;
-        this.store.replace_chord(c.clone(), index);
+        this.store.replace_chord(c, index);
       }
     }
   }
@@ -471,12 +469,17 @@ export class RandomChordsComponent implements OnInit, AfterViewInit, OnDestroy {
 
       builder.setOptions(this.generateOptions);
 
+      // for now
+      if (this.generateOptions.modes_on) {
+        builder.setModes(defaultModeList.push('phrygian'), 10);
+      }
+
       if (use_start_set == undefined) {
         use_start_set = this.any_chords_locked();
       }
 
       if (use_start_set) {
-        return builder.generate_chords(this.store.chord_array());
+        return builder.generate_chords(this.store.chord_list().toArray());
       } else {
         return builder.generate_chords();
       }
@@ -561,7 +564,7 @@ export class RandomChordsComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (next >= 0 && next < this.store.chord_count()) {
 
-      this.play_chord(this.store.chord_array()[next], beepLength);
+      this.play_chord(this.store.chord_list().toArray()[next], beepLength);
       last = next;
       next += 1;
 
@@ -639,7 +642,7 @@ export class RandomChordsComponent implements OnInit, AfterViewInit, OnDestroy {
 
     let trackName = '';
 
-    for (const c of this.store.chord_array()) {
+    for (const c of this.store.chord_list()) {
       trackName += c.name() + ' ';
     }
 
@@ -652,7 +655,7 @@ export class RandomChordsComponent implements OnInit, AfterViewInit, OnDestroy {
       bassTrack.addTrackName(trackName);
     }
 
-    for (const c of this.store.chord_array()) {
+    for (const c of this.store.chord_list()) {
 
       let isBassNote = true;
   

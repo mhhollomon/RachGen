@@ -40,7 +40,7 @@ export class ScaleInfoComponent implements OnInit {
       this.table_data.push({
         degree : degree,
         note : n.nameUnicode(),
-        triad : this._scale.chordForDegree(degree).computeNameDisplay(),
+        triad : this._scale.chordForDegree(degree).nameUnicode(),
         roman : this._scale.romanForDegree(degree),
     })})
 

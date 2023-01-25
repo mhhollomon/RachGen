@@ -168,10 +168,10 @@
     </div>
 </div> 
 
-<!-- Key Selection  (Diatonic only) -->
-<div class="ma2" *ngIf="!scale_disabled">
+<!-- Key Selection  -->
+<div class="ma2">
     <label class="mhh-mat-label">Key</label>
-    <mat-radio-group [value]="options.key_source" (change)="scale_source_change($event)">
+    <mat-radio-group name="key_source" [value]="options.key_source" (change)="scale_source_change($event)">
         <mat-radio-button value="Random" matTooltip="Let the computer choose the key">Random</mat-radio-button>
         <mat-radio-button value="Selected" matTooltip="You pick the key">Selected</mat-radio-button>
     </mat-radio-group>
@@ -204,4 +204,14 @@
             </mat-select>
         </mat-form-field>
     </div>
-</div> 
+</div>
+
+<!-- Modal shift -------------->
+<div>
+    <label class="mhh-mat-label">Modal Exchange</label>
+    <mat-radio-group name="model" [value]="options.modes_on" (change)="mode_activate_change($event)">
+        <mat-radio-button value="false" matTooltip="Let the computer choose the key">Off</mat-radio-button>
+        <mat-radio-button value="true" matTooltip="You pick the key">On</mat-radio-button>
+    </mat-radio-group>
+
+</div>

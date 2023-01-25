@@ -1,69 +1,49 @@
-import { Chord } from './chord';
+import { Chord, ExtensionFlags } from './chord';
+import { Note  } from './note';
+import { List  } from 'immutable';
+import { Scale } from './scale';
 
 describe('Chord', () => {
   it('should create an instance', () => {
     expect(new Chord()).toBeTruthy();
   });
 });
-/*
 
-describe('Chord.computeName', () => {
+describe('Chord.name', () => {
   it('should handle major triads', () => {
-    const c = new Chord();
+    const c = new Chord(new Scale('C'), 1, 'triad', 'root');
 
-    c.chordTones = { 1: new Note('C'),  3 : new Note('E'),  5: new Note('G') };
     expect(c.name()).toBe('C');
 
-    c.chordTones = { 1 : new Note('Bb'), 3 : new Note('D'), 5 : new Note('F') };
-    expect(c.name()).toBe('Bb');
+    expect(c.setScale(new Scale('Bb')).name()).toBe('Bb');
 
-    c.chordTones = { 1: new Note('D'), 3 : new Note('F#'), 5 : new Note('A') };
-    expect(c.name()).toBe('D');
+    expect(c.setScale(new Scale('D')).name()).toBe('D');
 
   });
 
   it('should handle minor triads', () => {
     const c = new Chord();
 
-    c.chordTones = { 1: new Note('C'), 3 : new Note('Eb'), 5 : new Note('G') };
-    expect(c.name()).toBe('Cmin');
+    expect(c.setScale(new Scale('C', 'minor')).name()).toBe('Cmin');
 
-    c.chordTones = { 1 : new Note('Bb'), 3 : new Note('Db'), 5 : new Note('F') };
-    expect(c.name()).toBe('Bbmin');
+    expect(c.setScale(new Scale('Bb', 'minor')).name()).toBe('Bbmin');
 
-    c.chordTones = { 1: new Note('D'), 3: new Note('F'), 5 : new Note('A') };
-    expect(c.name()).toBe('Dmin');
+    expect(c.setScale(new Scale('D', 'minor')).name()).toBe('Dmin');
 
   });
 
   it('should handle diminished triads', () => {
-    const c = new Chord();
+    const c = new Chord().setDegree(7);
 
-    c.chordTones = { 1: new Note('C'), 3 : new Note('Eb'), 5 : new Note('Gb') };
-    expect(c.name()).toBe('Cdim');
+    expect(c.setScale(new Scale('Db')).name()).toBe('Cdim');
 
-    c.chordTones = { 1: new Note('Bb'), 3 : new Note('Db'), 5 : new Note('Fb') };
-    expect(c.name()).toBe('Bbdim');
+    expect(c.setScale(new Scale('Cb')).name()).toBe('Bbdim');
 
-    c.chordTones = { 1: new Note('D'), 3 : new Note('F'), 5 : new Note('Ab') };
-    expect(c.name()).toBe('Ddim');
+    expect(c.setScale(new Scale('Eb')).name()).toBe('Ddim');
 
   }); 
 
-  it('should handle augmented triads', () => {
-    const c = new Chord();
-
-    c.chordTones = { 1: new Note('C'), 3 : new Note('E'), 5 : new Note('G#') };
-    expect(c.name()).toBe('Caug');
-
-    c.chordTones = { 1: new Note('Bb'), 3 : new Note('D'), 5 : new Note('F#') };
-    expect(c.name()).toBe('Bbaug');
-
-    c.chordTones = { 1: new Note('D'), 3 : new Note('F#'), 5 : new Note('A#') };
-    expect(c.name()).toBe('Daug');
-
-  }); 
-
+/*
   it('should handle major 7th triads', () => {
     const c = new Chord();
 
@@ -185,25 +165,20 @@ describe('Chord.computeName', () => {
     expect(c.name()).toBe('D(add9)');
 
   }); 
+  */
 
 
 });
 
-describe('Chord.invertedChordTones', () => {
+describe('Chord.noteList', () => {
 
   it('should handle Emaj(add9)/G♯', () => {
-    const c = new Chord();
-    c.inversion = 'first';
-    c.chordType = 'triad';
-    c.extensions = { '7th' : false,  '9th' : true, '11th' : false}
-    c.addChordTone(1, new Note('E') ).addChordTone(3, new Note("G#"))
-          .addChordTone(5, new Note("B"))
-          .addChordTone(9, new Note("F#"))
+    const c = new Chord(new Scale('E', 'major'), 1, 'triad', 'first')
+      .setExtensions(ExtensionFlags({ '7th' : false,  '9th' : true, '11th' : false}));
 
-    expect(c.invertedChordTones()).toEqual(
-      [new Note("G#"), new Note("E"), new Note('B'), new Note("F#")]
+    expect(c.noteList()).toEqual(
+      List<Note>([new Note("G", 1), new Note("E"), new Note('B'), new Note("F", 1)])
     )
 
   });
 });
-*/

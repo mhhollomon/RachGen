@@ -5,10 +5,8 @@ import { MatTabChangeEvent } from '@angular/material/tabs';
 import { AudioService } from '../audio.service';
 import { PreferencesService } from '../services/preferences.service';
 import { CustomChord } from '../utils/custom-chord';
-import { Chord } from '../utils/music-theory/chord';
-import { Note } from '../utils/music-theory/note';
-
-const audition_pref_name = 'edit_audition'
+import { Chord, ChordType, InversionType, NamedNoteList } from '../utils/music-theory/chord';
+import { audition_pref } from '../services/pref-keys';
 
 @Component({
   selector: 'app-chord-edit-dialog',
@@ -18,50 +16,61 @@ const audition_pref_name = 'edit_audition'
 export class ChordEditDialogComponent {
 
   startTab : number;
+
+  chord : Chord = new Chord();
   customChord : CustomChord = new CustomChord();
 
-  customNotValid = true;
+  private _audition : boolean;
+
+  private _customNotValid = true;
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public chord : Chord,
+    @Inject(MAT_DIALOG_DATA) public input_chord : NamedNoteList,
     private audioService : AudioService,
     private preferences : PreferencesService
       ) {
 
-        if (this.chord instanceof CustomChord) {
-          console.log("This is a custom chord");
-          (this.chord as CustomChord).copy(this.customChord);
-          this.customNotValid = false;
-          this.startTab = 1;
-        } else {
-          console.log("This is a standard chord");
-          this.startTab = 0;
-        }
+    if (this.input_chord instanceof CustomChord) {
+      console.log("This is a custom chord");
+      this.customChord = (this.input_chord as CustomChord);
+      this._customNotValid = false;
+      this.startTab = 1;
+      this.chord = new Chord();
+    } else {
+      console.log("This is a standard chord");
+      this.startTab = 0;
+      this.chord = (this.input_chord as Chord);
+    }
 
-        this.auditionCache = this.preferences.read(audition_pref_name, true);
+    this._audition = this.preferences.read(audition_pref, true);
 
   }
 
-  auditionCache : boolean;
 
-  get audition() { return this.auditionCache; }
+  get audition() { return this._audition; }
   set audition(v : boolean) {
-    this.auditionCache =v;
-    this.preferences.write(audition_pref_name, v);
+    this._audition =v;
+    this.preferences.write(audition_pref, v);
   }
+
+  get inversion() { return this.chord.inversion; }
+  set inversion(inv : InversionType) {this.chord = this.chord.set('inversion', inv)}
+
+  get chordType() { return this.chord.chordType; }
+  set chordType(ct : ChordType) {this.chord = this.chord.set('chordType', ct)}
 
   get seventh() { return this.chord.extensions['7th']; }
-  set seventh(v : boolean) { this.chord.setExtension('7th', v)}
+  set seventh(v : boolean) { this.chord = this.chord.setExtension('7th', v)}
 
   get ninth() { return this.chord.extensions['9th']; }
-  set ninth(v : boolean) { this.chord.setExtension('9th', v)}
+  set ninth(v : boolean) {this.chord =  this.chord.setExtension('9th', v)}
 
   get eleventh() { return this.chord.extensions['11th']; }
-  set eleventh(v : boolean) { this.chord.setExtension('11th', v)}
+  set eleventh(v : boolean) { this.chord = this.chord.setExtension('11th', v)}
 
   root_note_change(event : MatButtonToggleChange) {
     const rootDegree = this.chord.scale.notesOfScale().map((v)=> v.name()).indexOf(event.value);
-    this.chord.setRoot(this.chord.scale.notesOfScale().get(rootDegree, new Note('C')), rootDegree+1);
+    this.chord = this.chord.setDegree(rootDegree+1);
     this.audition_chord();
   }
 
@@ -69,10 +78,12 @@ export class ChordEditDialogComponent {
     return this.chord.getRootName();
   }
 
+  chord_isDim() : boolean { return this.chord.isDim(); }
+
   change_tabs(event : MatTabChangeEvent) {
-    if (event.index === 1 && this.customNotValid) {
-      this.customChord = new CustomChord(this.chord.clone()); 
-      this.customNotValid = false;     
+    if (event.index === 1 && this._customNotValid) {
+      this.customChord = new CustomChord(this.chord); 
+      this._customNotValid = false;     
 
     }
 
