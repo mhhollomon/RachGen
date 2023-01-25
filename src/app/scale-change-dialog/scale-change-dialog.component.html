@@ -30,9 +30,9 @@
     </div>
 </div>
 
-<app-scale-info [scaleID]="scaleID"></app-scale-info>
+<app-scale-info [scale]="config.scale"></app-scale-info>
 
 <div mat-dialog-actions align="end">
     <button mat-button mat-dialog-close><span class="material-symbols-outlined">cancel</span></button>
-    <button mat-button [mat-dialog-close]="scaleID" *ngIf="allow_change"><span class="material-symbols-outlined" >check</span></button>
+    <button mat-button [mat-dialog-close]="config.scale" *ngIf="allow_change"><span class="material-symbols-outlined" >check</span></button>
 </div>

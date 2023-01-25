@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { List } from 'immutable';
 import { Chord } from '../utils/music-theory/chord';
-import { Scale, ScaleID } from '../utils/music-theory/scale';
+import { Scale } from '../utils/music-theory/scale';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +10,7 @@ import { Scale, ScaleID } from '../utils/music-theory/scale';
 export class ChordListCacheService {
 
   private _chords: BehaviorSubject<List<Chord>> = new BehaviorSubject(List<Chord>([]));
-  private _scale : BehaviorSubject<ScaleID|null> = new BehaviorSubject(<ScaleID|null>null);
+  private _scale : BehaviorSubject<Scale|null> = new BehaviorSubject(<Scale|null>null);
 
   get chords() {
     return this._chords.asObservable();
@@ -77,12 +77,8 @@ export class ChordListCacheService {
   get scale() { return this._scale.asObservable(); }
 
   get_scale() { return this._scale.getValue() }
-  change_scale(s : Scale | ScaleID | null ) {
-    if (s instanceof Scale) {
-      this._scale.next(s.scaleID());
-    } else {
-      this._scale.next(s);
-    }
+  change_scale(s : Scale | null ) {
+    this._scale.next(s);
   }
 
   constructor() { 

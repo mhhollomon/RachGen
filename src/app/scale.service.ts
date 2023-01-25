@@ -46,7 +46,7 @@ export class ScaleService {
 
     const keysig = sigChooser.choose();
     const keycenter = sigNames[sonority][keysig + sigOffset];
-    return new Scale(keycenter, sonority);
+    return new Scale({ center : keycenter, type : sonority });
   }
 
   getKeyList(sonority : ScaleType) : string[] {

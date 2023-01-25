@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { defaultScaleID, Scale, ScaleID } from '../utils/music-theory/scale';
+import { Scale } from '../utils/music-theory/scale';
 
 interface scale_note_info {
   degree  : number;
@@ -15,8 +15,7 @@ interface scale_note_info {
 })
 export class ScaleInfoComponent implements OnInit {
 
-  private _scaleID = defaultScaleID();
-  private _scale = new Scale(this._scaleID);
+  private _scale = new Scale([]);
 
   table_data : scale_note_info[] = [];
   displayedColumns: string[] = ['degree', 'note', 'triad', 'roman'];
@@ -25,15 +24,12 @@ export class ScaleInfoComponent implements OnInit {
     this.refresh_data_source();
   }
 
-  @Input() set scaleID(sid : ScaleID) {
-    this._scaleID = sid;
-    this._scale = new Scale(sid);
+  @Input() set scale(s : Scale) {
+    this._scale = s;
 
     this.refresh_data_source();
 
   }
-
-  get scaleID() { return this._scaleID; }
 
   refresh_data_source() {
 
@@ -51,6 +47,6 @@ export class ScaleInfoComponent implements OnInit {
   }
 
 
-  get scaleNotes() { return new Scale(this.scaleID).notesOfScale(); }
+  get scaleNotes() { return this.scale.notesOfScale(); }
 
 }

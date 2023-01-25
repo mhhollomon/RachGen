@@ -1,17 +1,17 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ScaleService } from '../scale.service';
-import { defaultScaleID, Scale, ScaleID, ScaleType } from '../utils/music-theory/scale';
+import {  Scale, ScaleType } from '../utils/music-theory/scale';
 
 export interface ScaleChangeConfig {
-  scaleID : ScaleID;
+  scale : Scale;
   allow_change : boolean;
 
 }
 
 export function defaultScaleChangeConfig() : ScaleChangeConfig {
   return { 
-    scaleID : defaultScaleID(), 
+    scale : new Scale(), 
     allow_change : true 
   };
 }
@@ -26,27 +26,24 @@ export class ScaleChangeDialogComponent {
   config : ScaleChangeConfig = defaultScaleChangeConfig();
 
   set center(c : string) {
-    this.config.scaleID = { root : c, type : this.config.scaleID.type };
+    this.config.scale = this.config.scale.setCenter(c);
   }
 
-  get center() { return this.config.scaleID.root; }
+  get center() { return this.config.scale.center; }
 
   set scale_type(t : ScaleType) {
-    this.config.scaleID = { root : this.config.scaleID.root, type : t };
+    this.config.scale  = this.config.scale.setType(t);
   }
 
-  get scale_type() : ScaleType { return this.config.scaleID.type; }
+  get scale_type() : ScaleType { return this.config.scale.type; }
 
   get allow_change() : boolean { return this.config.allow_change; }
-
-  get scaleID() : ScaleID { return this.config.scaleID; }
 
   get dialog_title() : string {
     if (this.allow_change) {
       return 'Change Default Scale'
     } else {
-      const s = new Scale(this.config.scaleID);
-      return s.nameUnicode() + ' Information';
+      return this.config.scale.nameUnicode() + ' Information';
     }
   }
 
@@ -60,10 +57,8 @@ export class ScaleChangeDialogComponent {
 
   }
 
-
-
   getKeyList() : string[] {
-    return this.scaleService.getKeyList(this.config.scaleID.type as ScaleType);
+    return this.scaleService.getKeyList(this.config.scale.type as ScaleType);
   }
 
 }

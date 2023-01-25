@@ -35,7 +35,7 @@ export class Chord {
     extensions : ExtensionFlags = {'7th' : false, '9th' : false, '11th' : false};
 
     // used for SCALE property;
-    private scaleCache : Scale = new Scale("C", 'major')
+    private scaleCache : Scale = new Scale( { center :"C", type: 'major' })
 
     // not used interally by the class. up to the UI to handle
     keep = false;
@@ -218,8 +218,6 @@ export class Chord {
 
     private generate_chord_tones() {
       this.chordTonesCache = {};
-
-      const scaleNotes = this.scale.notesOfScale();
 
       this.addToToneCache(1, this.get_scale_note(1));
       this.addToToneCache(5, this.get_scale_note(5));

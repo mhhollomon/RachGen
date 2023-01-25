@@ -4,7 +4,7 @@ import { MatSelectChange } from '@angular/material/select';
 import { RandomChordOptions } from '../random-chord.service';
 import { ScaleService } from '../scale.service';
 import { ChordType, InversionType } from '../utils/music-theory/chord';
-import { ScaleType } from '../utils/music-theory/scale';
+import { Scale, ScaleType } from '../utils/music-theory/scale';
 
 export interface GeneratorOptions extends RandomChordOptions {
   count_range_mode : boolean;
@@ -21,7 +21,7 @@ export function defaultGeneratorOptions() : GeneratorOptions {
     tonality : 'major',
     center : 'Random',
 
-    scale : {root : 'C', type : 'major'}, 
+    scale : new Scale(), 
     count : { min : 4, max : 6}, 
     duplicates : 'none',
     extensions : { 

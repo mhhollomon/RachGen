@@ -1,6 +1,4 @@
 import { TestBed } from '@angular/core/testing';
-import { Note } from './utils/music-theory/note';
-import { Scale } from './utils/music-theory/scale';
 
 import { ScaleService } from './scale.service';
 

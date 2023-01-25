@@ -1,6 +1,5 @@
 
-import { List, Record, type ValueObject } from 'immutable';
-import { stringHash } from '../util-library';
+import { List, Record } from 'immutable';
 
 import { capitalize } from '../util-library';
 import { Chord } from './chord';
@@ -40,51 +39,34 @@ export type ScaleType = 'minor' | 'major' |
         'lydian' | 'mixolydian' |
         'dorian' | 'phrygian' ;
 
-export interface ScaleID {
-    root : string;
-    type : ScaleType;
-}
 
-//export const ScaleID = Record({root : 'C', type : <ScaleType>('major')}
-//);
+export const ScaleRecord = Record({center : 'C', type : <ScaleType>('major')}
+);
 
-export function defaultScaleID() : ScaleID  { return { root : 'C', type : 'major'}; }
+export const defaultScaleRecord = ScaleRecord();
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isScaleID(obj: any) : obj is ScaleID {
-    return 'root' in obj;
-}
+export type ScaleRecordType = typeof defaultScaleRecord;
 
-export class Scale implements ValueObject {
+
+export class Scale extends ScaleRecord {
     private _root : Note;
-    private _type : ScaleType;
 
     get root() { return this._root; }
-    get type() { return this._type; }
 
     private _notesCache : List<Note> = List<Note>([]);
  
+    constructor(props? : object) {
+        super(props == undefined ? {} : props);
 
-    constructor(id : ScaleID )
-    constructor(rootNote : string | Note, scaleType : ScaleType )
-    constructor(rootNote : string | Note | ScaleID, scaleType? : ScaleType ) {
+        this._root = Note.fromString(this.center);
+    }
 
-        if (scaleType != undefined ) {
-            this._type = scaleType;
-            if (typeof rootNote == 'string') {
-                this._root = Note.fromString(rootNote);
-            } else if (rootNote instanceof Note) {
-                this._root = rootNote;
-            } else {
-                // This shouldn't happen if I understand the overload system
-                this._root = Note.fromString(rootNote.root)
-            }
-        } else if (isScaleID(rootNote)) {
-            this._root = Note.fromString(rootNote.root);
-            this._type = rootNote.type;
-        } else {
-            throw Error("type Error");
-        }
+    setCenter(newCenter : string) : Scale {
+        return new Scale({center : newCenter, type : this.type });
+    }
+
+    setType(newType : ScaleType) : Scale {
+        return new Scale({center : this.center, type : newType });
     }
 
     rootName() {
@@ -104,12 +86,6 @@ export class Scale implements ValueObject {
     }
 
     id() { return this.name(); }
-
-    scaleID() : ScaleID { return { root : this.rootName(), type : this.type}; }
-
-    equals(o: Scale) { return this.isSame(o); }
-
-    hashCode() :number { return stringHash(this.name()); }
 
     isSame(o : Scale | undefined | null) : boolean {
         return (o != undefined && this.root.equals(o.root) && this.type === o.type);

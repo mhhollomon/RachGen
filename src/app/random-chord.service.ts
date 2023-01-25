@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Chooser, equalWeightedChooser, mkch, yesno } from './utils/chooser';
 import { Chord, ChordType, ExtensionType, InversionType } from './utils/music-theory/chord';
-import { Scale, ScaleID, ScaleType } from './utils/music-theory/scale';
+import { Scale, ScaleType } from './utils/music-theory/scale';
 import { ScaleService } from './scale.service';
 import { range } from './utils/util-library';
 import { Note } from './utils/music-theory/note';
@@ -49,7 +49,7 @@ export interface ChordTypeConfig {
 }
 
 export interface RandomChordOptions {
-  scale : ScaleID;
+  scale : Scale;
   count : RandomChordCountConfig;
   duplicates : DuplicateControl;
   extensions : ExtensionConfg;
@@ -61,7 +61,7 @@ export class ChordSequenceBuilder {
 
   // The options 
   options : RandomChordOptions = { 
-    scale : { root : 'C', type : 'major'}, 
+    scale : new Scale(), 
     count : { min : 1, max : 1}, 
     duplicates : 'any',
     extensions : { 
@@ -83,7 +83,7 @@ export class ChordSequenceBuilder {
 
   public chordList : Chord[] = [];
 
-  private scale = new Scale(this.options.scale);
+  private scale = this.options.scale;
 
 
   private invertChooser = new Chooser<InversionType>([]);
@@ -110,22 +110,22 @@ export class ChordSequenceBuilder {
     return this;
   }
 
-  setKey(newKey : Scale | ScaleID ) : ChordSequenceBuilder;
+  setKey(newKey : Scale ) : ChordSequenceBuilder;
   setKey(newKey : string, scaleType : ScaleType) : ChordSequenceBuilder;
-  setKey(newKey : string | Scale | ScaleID, scaleType? : ScaleType) : ChordSequenceBuilder {
+  setKey(newKey : string | Scale, scaleType? : ScaleType) : ChordSequenceBuilder {
 
     if (typeof newKey === 'string') {
       if (! scaleType) { 
         throw new RandomChordError("No scale Type given with key name")
       }
-      this.scale = new Scale(newKey, scaleType);
+      this.scale = new Scale({ center : newKey, type : scaleType});
     } else if (newKey instanceof Scale) {
       this.scale = newKey;
     } else {
       this.scale = new Scale(newKey);
     }
 
-    this.options.scale = this.scale.scaleID();
+    this.options.scale = this.scale;
 
     return this;
   }
