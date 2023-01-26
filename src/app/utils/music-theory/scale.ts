@@ -34,10 +34,13 @@ const scaleStepData = {
     augmented : [0, 2, 2, 2, 2, 1, 2 ],
   } as const;
 
+export const ALL_SCALE_TYPES = ['major', 'minor', 'mixolydian', 'dorian', 'lydian', 'phrygian' ] as const;
+type ScaleTypeTuple = typeof ALL_SCALE_TYPES; 
+export type ScaleType = ScaleTypeTuple[number];
 
-export type ScaleType = 'minor' | 'major' | 
-        'lydian' | 'mixolydian' |
-        'dorian' | 'phrygian' ;
+// export type ScaleType = 'minor' | 'major' | 
+//         'lydian' | 'mixolydian' |
+//         'dorian' | 'phrygian' ;
 
 
 export const ScaleRecord = Record({center : 'C', type : <ScaleType>('major')}

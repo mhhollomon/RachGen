@@ -26,6 +26,7 @@ import { ScaleInfoComponent } from './scale-info/scale-info.component';
 import { MidiConfigFormComponent } from './midi-config-form/midi-config-form.component';
 import { SettingsPageComponent } from './settings-page/settings-page.component';
 import { ChordListCacheService } from './services/chord-list-cache.service';
+import { CapitalizePipe } from './capitalize.pipe';
 
 @NgModule({
   declarations: [
@@ -45,7 +46,8 @@ import { ChordListCacheService } from './services/chord-list-cache.service';
     ScaleChangeDialogComponent,
     ScaleInfoComponent,
     MidiConfigFormComponent,
-    SettingsPageComponent
+    SettingsPageComponent,
+    CapitalizePipe
   ],
   imports: [
     BrowserModule, 
