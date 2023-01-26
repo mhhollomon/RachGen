@@ -8,7 +8,7 @@ import { MatExpansionPanel } from '@angular/material/expansion';
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
 
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
-import {ScaleService } from '../scale.service';
+import { ScaleService } from '../scale.service';
 import { RandomChordService, RandomChordError, defaultModeList } from '../random-chord.service';
 import { Chord, NamedNoteList, voiceChord } from '../utils/music-theory/chord';
 import { Scale, ScaleType } from '../utils/music-theory/scale';
@@ -26,6 +26,10 @@ import { MainPageStore } from '../store/main-page-store';
 import { Midi } from '../utils/midi';
 
 
+interface genListReturn {
+  nl : NamedNoteList[];
+  scale : Scale;
+}
 
 @Component({
   selector: 'app-main-page',
@@ -283,15 +287,16 @@ export class MainPageComponent implements OnInit, AfterViewInit {
 
   }
 
-  async gen_list(fn? : (data : NamedNoteList[]) => void ) {
+
+  async gen_list(fn? : (data : genListReturn) => void ) {
     const dia = this.dialog.open(NewListDialogComponent, { data : Object.assign({}, this.generateOptions) });
 
     dia.afterClosed().pipe(filter((o) => !!o)).subscribe((opts) => {
+      this.all_play_active = false;
       this.generate_options_change(opts);
-      const chords = this.generate();
-      const s = new Scale (this.generateOptions.scale);
-      this.mainPageStore.change_scale(s);
-      if (fn) fn(chords);
+      const retval = this.generate(this.generateOptions);
+      this.mainPageStore.change_scale(retval.scale);
+      if (fn) fn(retval);
     });
   }
 
@@ -303,26 +308,30 @@ export class MainPageComponent implements OnInit, AfterViewInit {
       dia.afterClosed().subscribe((confirm) => {
         if (confirm) {
           this.generateOptions.key_source = 'Random';
-          this.gen_list((chords) => {
-            this.mainPageStore.replace_chord_list(chords);
+          this.gen_list((genret) => {
+            this.mainPageStore.replace_chord_list(genret.nl);
+            this.mainPageStore.change_scale(genret.scale);
           });
         }
       });
     } else {
       // this can't go in gen_list since that is also shared by append_to_list
       this.generateOptions.key_source = 'Random';
-      this.gen_list((chords) => {
-        this.mainPageStore.replace_chord_list(chords);
+      this.gen_list((genret) => {
+        this.mainPageStore.replace_chord_list(genret.nl);
+        this.mainPageStore.change_scale(genret.scale);
       });
     }
   }
 
   append_to_list() {
     this.generateOptions.key_source = 'Selected';
-    this.generateOptions.center = this.generateOptions.scale.center;
-    this.generateOptions.tonality = this.generateOptions.scale.type;
-    this.gen_list((chords) => {
-      this.mainPageStore.append_chords(chords);
+    if (this.default_scale) {
+      this.generateOptions.center = this.default_scale.center;
+      this.generateOptions.tonality = this.default_scale.type;
+    }
+    this.gen_list((genret) => {
+      this.mainPageStore.append_chords(genret.nl);
     });
   }
 
@@ -357,75 +366,98 @@ export class MainPageComponent implements OnInit, AfterViewInit {
       const dia = this.dialog.open(ConfirmActionDialogComponent, { data : 'This will replace all chords since none are locked'});
       dia.afterClosed().subscribe((yes) => {
         if (yes) {
-           const c = this.generate(true);
-           this.mainPageStore.replace_chord_list(c);
+          this.all_play_active = false;
+          const opts = Object.assign({}, this.generateOptions);
+          if (this.default_scale) {
+            opts.key_source = 'Selected';
+            opts.center = this.default_scale.center;
+            opts.tonality = this.default_scale.type;
+          }
+          const retval = this.generate(opts);
+          this.mainPageStore.replace_chord_list(retval.nl);
         }
       });
 
     } else {
-      const c = this.generate();
-      this.mainPageStore.replace_chord_list(c);
-    }
+      this.all_play_active = false;
+      this.run_generator_with_nl(this.generateOptions, undefined, retval => 
+        { this.mainPageStore.replace_chord_list(retval.nl); })
+}
   }
 
-  generate(use_start_set? : boolean) : NamedNoteList[] {
+  // ------- RUN THE GENERATOR -------------------------------------
 
-    this.all_play_active = false;
+  run_generator_with_nl(opts: GeneratorOptions, 
+      prefn? : (cl : NamedNoteList[]) => void, 
+      postfn?  : (glr : genListReturn) => void) {
 
-    if (this.generateOptions.count_range_mode) {
-      if (this.generateOptions.count.min > this.chord_count_max || this.generateOptions.count.min < 1) {
+    this.chord_list$.pipe(take(1)).subscribe(cl => {
+      prefn ? prefn(cl) : '';
+      const retval = this.generate(this.generateOptions, cl);
+      postfn ? postfn(retval) : '';
+    })
+
+
+  }
+  // ------- GENERATE A RANDOM LIST -------------------------------------
+
+  generate(opts: GeneratorOptions,  start_set? : NamedNoteList[]) : genListReturn {
+
+    if (opts.count_range_mode) {
+      if (opts.count.min > this.chord_count_max || opts.count.min < 1) {
         throw Error("icky");
       }
 
-      if (this.generateOptions.count.min > this.generateOptions.count.max) {
+      if (opts.count.min > opts.count.max) {
         this.dialog.open(ErrorDialogComponent, {
           data: "min count must be less than or equal to max chord count",
         });
         throw Error("icky");
       }
     } else {
-      if (this.generateOptions.count.min > this.chord_count_max || this.generateOptions.count.min < 1) {
+      if (opts.count.min > this.chord_count_max || opts.count.min < 1) {
         throw Error("icky");
       }
 
-      this.generateOptions.count.max = this.generateOptions.count.min
+      opts.count.max = opts.count.min
 
     }
 
-    this.preferences.write('gen_opts_data', this.generateOptions);
+    this.preferences.write('gen_opts_data', opts);
 
-    if (this.generateOptions.key_source === "Selected") {
-      if (this.generateOptions.center === 'Random') {
-        this.generateOptions.scale = this.scaleService.choose(this.generateOptions.tonality as ScaleType);
+    let scale : Scale;
+    if (opts.key_source === "Selected") {
+      if (opts.center === 'Random') {
+        scale = this.scaleService.choose(opts.tonality as ScaleType);
       } else {
-        this.generateOptions.scale = new Scale({ 
-              center : this.generateOptions.center, 
-              type : this.generateOptions.tonality as ScaleType});
+       scale = new Scale({ 
+              center : opts.center, 
+              type : opts.tonality as ScaleType});
       }
     } else {
-      this.generateOptions.scale = this.scaleService.choose();
+      scale = this.scaleService.choose();
     }
 
 
     try {
       const builder = this.randomChordService.builder();
 
-      builder.setOptions(this.generateOptions);
+      builder.setOptions(opts).setKey(scale);
 
       // for now
-      if (this.generateOptions.modes_on) {
+      if (opts.modes_on) {
         builder.setModes(defaultModeList.push('phrygian'), 10);
       }
 
-      if (use_start_set == undefined) {
-        use_start_set = this.any_chords_locked;
+      let nl : NamedNoteList[];
+
+      if (start_set) {
+        nl = builder.generate_chords(start_set);
+      } else {
+        nl = builder.generate_chords();
       }
 
-      if (use_start_set) {
-        return builder.generate_chords(this.current_chords$.getValue());
-      } else {
-        return builder.generate_chords();
-      }
+      return { nl : nl, scale : scale };
 
     } catch(e) {
       let error_msg = 'oopsy - unknown error';
