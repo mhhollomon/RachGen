@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Chooser, equalWeightedChooser, mkch, yesno } from './utils/chooser';
-import { Chord, ChordType, ExtensionType, InversionType } from './utils/music-theory/chord';
+import { Chord, ChordType, ExtensionType, InversionType, NamedNoteList } from './utils/music-theory/chord';
 import { Scale, ScaleType } from './utils/music-theory/scale';
 import { ScaleService } from './scale.service';
 import { range } from './utils/util-library';
@@ -90,7 +90,7 @@ export class ChordSequenceBuilder {
     mode_percent : 0,
   }
 
-  public chordList : Chord[] = [];
+  public chordList : NamedNoteList[] = [];
 
   private scale = this.options.scale;
 
@@ -318,7 +318,7 @@ export class ChordSequenceBuilder {
     return retval;
   }
 
-  generate_chords(inputChords? : Chord[]) : Chord[] {
+  generate_chords(inputChords? : NamedNoteList[]) : NamedNoteList[] {
 
 
     if (! this.anyChordType()) {

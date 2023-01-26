@@ -29,10 +29,44 @@ function degreeToScale(rootDegree: number, chordal: number) {
 }
 
 export interface NamedNoteList {
-  name(): string,
-  nameUnicode(): string,
-  noteList(): List<Note>,
+  keep : boolean;
+  name(): string;
+  nameUnicode(): string;
+  noteList(): List<Note>;
+  isSame( nl : NamedNoteList) : boolean;
+  
 }
+
+export function voiceChord(notelist : NamedNoteList ): string[] {
+  const tones: string[] = [];
+  let octave = 3;
+  let last = -1;
+  let isBassNote = true;
+
+  for (const c of notelist.noteList()) {
+
+    const simpleNote = c.toSharp();
+
+    if (octavePlacement[simpleNote.noteClass] < last) {
+      octave += 1;
+    }
+    tones.push(simpleNote.name() + octave);
+
+    if (isBassNote) {
+      octave += 1;
+      isBassNote = false;
+    } else {
+      last = octavePlacement[simpleNote.noteClass];
+    }
+
+  }
+
+  return tones;
+
+}
+
+
+
 
 const ChordRecord = Record({
   scale: new Scale(),
@@ -393,34 +427,6 @@ export class Chord extends ChordRecord implements NamedNoteList {
     return n;
   }
 
-
-  voiceChord(): string[] {
-    const tones: string[] = [];
-    let octave = 3;
-    let last = -1;
-    let isBassNote = true;
-
-    for (const c of this.noteList()) {
-
-      const simpleNote = c.toSharp();
-
-      if (octavePlacement[simpleNote.noteClass] < last) {
-        octave += 1;
-      }
-      tones.push(simpleNote.name() + octave);
-
-      if (isBassNote) {
-        octave += 1;
-        isBassNote = false;
-      } else {
-        last = octavePlacement[simpleNote.noteClass];
-      }
-
-    }
-
-    return tones;
-
-  }
 
   noteList(): List<Note> {
 

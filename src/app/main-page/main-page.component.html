@@ -130,7 +130,7 @@
                     <span *ngFor="let t of c.noteList()" >{{t.nameUnicode()}}</span>
                 </div>
                 <div class="chord-scale" *ngIf="!chordIsCustom(c)">
-                   <a [matMenuTriggerFor]="menu" class="menu-anchor">{{c.scale.nameUnicode()}}
+                   <a [matMenuTriggerFor]="menu" class="menu-anchor">{{get_scale_name(c)}}
                         <mat-menu #menu="matMenu">
                             <button mat-menu-item (click)="show_chord_scale_info(c)">Scale info</button>
                             <button mat-menu-item (click)="set_default_scale(c)">Set default to this</button>

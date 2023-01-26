@@ -2,13 +2,13 @@ import { Injectable } from "@angular/core";
 import { ComponentStore } from "@ngrx/component-store";
 import { Observable } from "rxjs";
 
-import { Chord } from "../utils/music-theory/chord";
+import { NamedNoteList } from "../utils/music-theory/chord";
 import { Scale } from "../utils/music-theory/scale";
 
 
 export interface MainPageState {
     default_scale : Scale | null;
-    chord_list : Chord[];
+    chord_list : NamedNoteList[];
 }
 
 @Injectable()
@@ -22,7 +22,7 @@ export class MainPageStore extends ComponentStore<MainPageState> {
     // --------- SELECTORS -------------------------
     readonly default_scale$: Observable<Scale | null> = this.select(state => state.default_scale);
 
-    readonly chord_list$: Observable<Chord[]> = this.select(state => state.chord_list);
+    readonly chord_list$: Observable<NamedNoteList[]> = this.select(state => state.chord_list);
 
     // -------- UPDATERS ----------------------------
     readonly change_scale = this.updater((state, scale : Scale ) => ({
@@ -30,8 +30,8 @@ export class MainPageStore extends ComponentStore<MainPageState> {
         default_scale : scale,
       }));
 
-    readonly replace_chord = this.updater<{chord : Chord, index : number}>((state, v ) => {
-        const newList : Chord[] = [...state.chord_list];
+    readonly replace_chord = this.updater<{chord : NamedNoteList, index : number}>((state, v ) => {
+        const newList : NamedNoteList[] = [...state.chord_list];
         newList[v.index] = v.chord;
         return {
             ...state,
@@ -39,8 +39,8 @@ export class MainPageStore extends ComponentStore<MainPageState> {
         }
     });
        
-    readonly insert_chord = this.updater<{chord : Chord, index : number}>((state, v ) => {
-        const newList : Chord[] = [...state.chord_list];
+    readonly insert_chord = this.updater<{chord : NamedNoteList, index : number}>((state, v ) => {
+        const newList : NamedNoteList[] = [...state.chord_list];
         newList.splice(v.index, 0, v.chord);
         return {
             ...state,
@@ -49,7 +49,7 @@ export class MainPageStore extends ComponentStore<MainPageState> {
     });
 
     readonly move_chord = this.updater<{before : number, after : number}>((state, v ) => {
-        const newList : Chord[] = [...state.chord_list];
+        const newList : NamedNoteList[] = [...state.chord_list];
         const deleted = newList.splice(v.before, 1);
         newList.splice(v.after, 0, deleted[0]);
         return {
@@ -59,7 +59,7 @@ export class MainPageStore extends ComponentStore<MainPageState> {
     });
 
     readonly delete_chord = this.updater((state, index : number) => {
-        const newList : Chord[] = [...state.chord_list];
+        const newList : NamedNoteList[] = [...state.chord_list];
         newList.splice(index, 1);
         return {
             ...state,
@@ -67,13 +67,13 @@ export class MainPageStore extends ComponentStore<MainPageState> {
         }    
     });
 
-    readonly append_chords = this.updater((state, newList : Chord[]) => ({
+    readonly append_chords = this.updater((state, newList : NamedNoteList[]) => ({
         ...state,
         chord_list : [...state.chord_list, ...newList],
 
     }));
 
-    readonly replace_chord_list = this.updater((state, newList : Chord[]) => ({
+    readonly replace_chord_list = this.updater((state, newList : NamedNoteList[]) => ({
         ...state,
         chord_list : [...newList],
 

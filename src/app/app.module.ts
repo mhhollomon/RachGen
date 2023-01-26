@@ -26,6 +26,7 @@ import { ScaleInfoComponent } from './scale-info/scale-info.component';
 import { MidiConfigFormComponent } from './midi-config-form/midi-config-form.component';
 import { SettingsPageComponent } from './settings-page/settings-page.component';
 import { CapitalizePipe } from './capitalize.pipe';
+import { MainPageStore } from './store/main-page-store';
 
 @NgModule({
   declarations: [
@@ -60,6 +61,7 @@ import { CapitalizePipe } from './capitalize.pipe';
     PreferencesService,
     { provide: AudioContext, useClass: AudioContext },
     ThemeService,
+    MainPageStore,
   ],
   bootstrap: [AppComponent]
 })

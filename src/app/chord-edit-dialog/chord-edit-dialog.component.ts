@@ -5,7 +5,7 @@ import { MatTabChangeEvent } from '@angular/material/tabs';
 import { AudioService } from '../audio.service';
 import { PreferencesService } from '../services/preferences.service';
 import { CustomChord } from '../utils/custom-chord';
-import { Chord, ChordType, InversionType, NamedNoteList } from '../utils/music-theory/chord';
+import { Chord, ChordType, InversionType, NamedNoteList, voiceChord } from '../utils/music-theory/chord';
 import { audition_pref } from '../services/pref-keys';
 
 @Component({
@@ -113,7 +113,7 @@ export class ChordEditDialogComponent {
 
   async play_chord() {
 
-    const tones = this.chord.voiceChord();
+    const tones = voiceChord(this.chord);
   
     this.audioService.play_chord(tones, 0.5);
 

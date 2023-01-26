@@ -1,20 +1,16 @@
 import { AfterViewInit, Component, Inject, OnInit, ViewChild } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import { BehaviorSubject, filter, map } from 'rxjs';
+import { BehaviorSubject, filter, map, take } from 'rxjs';
 import { List } from 'immutable';
 
 import { MatDialog } from '@angular/material/dialog';
 import { MatExpansionPanel } from '@angular/material/expansion';
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
 
-import { saveAs } from 'file-saver';
-import  * as Midiwriter  from 'midi-writer-js';
-import * as dayjs from 'dayjs';
-
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
 import {ScaleService } from '../scale.service';
 import { RandomChordService, RandomChordError, defaultModeList } from '../random-chord.service';
-import { Chord } from '../utils/music-theory/chord';
+import { Chord, NamedNoteList, voiceChord } from '../utils/music-theory/chord';
 import { Scale, ScaleType } from '../utils/music-theory/scale';
 import { Note } from '../utils/music-theory/note';
 import { AudioService } from '../audio.service';
@@ -27,18 +23,14 @@ import { ConfirmActionDialogComponent } from '../confirm-action-dialog/confirm-a
 import { CustomChord } from '../utils/custom-chord';
 import { defaultScaleChangeConfig, ScaleChangeDialogComponent } from '../scale-change-dialog/scale-change-dialog.component';
 import { MainPageStore } from '../store/main-page-store';
+import { Midi } from '../utils/midi';
 
-
-const octavePlacement : { [ index : string ] : number } = {
-  'C' : 0, 'D' : 1, 'E' : 2, 'F' : 3, 'G' : 4, 'A' : 5, 'B' : 6 
-}
 
 
 @Component({
   selector: 'app-main-page',
   templateUrl: './main-page.component.html',
   styleUrls: ['./main-page.component.scss'],
-  providers: [MainPageStore]
 })
 export class MainPageComponent implements OnInit, AfterViewInit {
 
@@ -52,7 +44,7 @@ export class MainPageComponent implements OnInit, AfterViewInit {
   all_chords_locked$ = this.mainPageStore.chord_list$.pipe(map(cl => cl.filter(c => !c.keep ).length == 0  ));
   scale_notes$ = this.default_scale$.pipe(map(ds => (ds == null ? List<Note>([]) : ds.notesOfScale() )));
 
-  current_chords$ = new BehaviorSubject<Chord[]>([]);
+  current_chords$ = new BehaviorSubject<NamedNoteList[]>([]);
 
   default_scale : Scale | null = null;
   any_chords_locked = false;
@@ -159,9 +151,15 @@ export class MainPageComponent implements OnInit, AfterViewInit {
     return Object.assign({}, this.generateOptions);
   }
 
+  get_scale_name(c : NamedNoteList) : string {
+    return (c instanceof Chord) ? c.scale.nameUnicode() : 'unknown-scale';
+  }
+
   /************* EVENT HANDLERS   *************************/
 
-  show_chord_scale_info(chord : Chord) {
+  show_chord_scale_info(chord : NamedNoteList) {
+
+    if (! (chord instanceof Chord)) return;
 
     this.dialog.open(ScaleChangeDialogComponent, { data : {allow_change : false, scale : chord.scale}});
 
@@ -204,7 +202,7 @@ export class MainPageComponent implements OnInit, AfterViewInit {
     this.mainPageStore.move_chord({ before : evnt.previousIndex, after : evnt.currentIndex});
   }
 
-  edit_chord_modal(chord_index : number, chord : Chord, operation : string) {
+  edit_chord_modal(chord_index : number, chord : NamedNoteList, operation : string) {
 
     const adding_chord = (operation === 'insert');
 
@@ -227,7 +225,7 @@ export class MainPageComponent implements OnInit, AfterViewInit {
     this.mainPageStore.delete_chord(chord_index);
   }
 
-  chordIsCustom(chord : Chord) : boolean {
+  chordIsCustom(chord : NamedNoteList) : boolean {
     return (chord instanceof CustomChord);
   }
 
@@ -244,15 +242,17 @@ export class MainPageComponent implements OnInit, AfterViewInit {
   }
 
 
-  generate_new_chord(chord : Chord, chord_index : number) {
+  generate_new_chord(chord : NamedNoteList, chord_index : number) {
     const builder = this.randomChordService.builder();
 
     let scale : Scale;
 
     if (this.chordIsCustom(chord) && this.default_scale) {
       scale = this.default_scale;
-    } else {
+    } else if (chord instanceof Chord ) {
       scale = chord.scale;
+    } else {
+      throw Error("Could not calculate a scale");
     }
 
 
@@ -266,12 +266,15 @@ export class MainPageComponent implements OnInit, AfterViewInit {
 
   }
 
-  set_default_scale(chord : Chord) {
-      this.mainPageStore.change_scale(chord.scale);
+  set_default_scale(chord : NamedNoteList) {
+    if (! (chord instanceof Chord)) return;
+
+    this.mainPageStore.change_scale(chord.scale);
   }
 
-  set_to_default_scale(chord : Chord, chord_index : number) {
+  set_to_default_scale(chord : NamedNoteList, chord_index : number) {
     if (! this.default_scale) return;
+    if (! (chord instanceof Chord)) return;
 
     if (! this.default_scale.isSame(chord.scale)) {
       this.mainPageStore.replace_chord( { chord : chord.change_scale(this.default_scale), index : chord_index});
@@ -280,7 +283,7 @@ export class MainPageComponent implements OnInit, AfterViewInit {
 
   }
 
-  async gen_list(fn? : (data : Chord[]) => void ) {
+  async gen_list(fn? : (data : NamedNoteList[]) => void ) {
     const dia = this.dialog.open(NewListDialogComponent, { data : Object.assign({}, this.generateOptions) });
 
     dia.afterClosed().pipe(filter((o) => !!o)).subscribe((opts) => {
@@ -325,7 +328,7 @@ export class MainPageComponent implements OnInit, AfterViewInit {
 
   /********   CHORD LOCKING ***************/
 
-  lock_chord(chord : Chord, index : number) : void {
+  lock_chord(chord : NamedNoteList, index : number) : void {
       chord.keep = ! chord.keep;
       this.mainPageStore.replace_chord({ chord : chord , index : index});
   }
@@ -365,7 +368,7 @@ export class MainPageComponent implements OnInit, AfterViewInit {
     }
   }
 
-  generate(use_start_set? : boolean) : Chord[] {
+  generate(use_start_set? : boolean) : NamedNoteList[] {
 
     this.all_play_active = false;
 
@@ -448,9 +451,9 @@ export class MainPageComponent implements OnInit, AfterViewInit {
 
   /************** AUDIO  **************/
 
-  async play_chord(chord : Chord, seconds? : number) {
+  async play_chord(chord : NamedNoteList, seconds? : number) {
 
-    const tones = chord.voiceChord();
+    const tones = voiceChord(chord);
   
     await this.audioService.play_chord(tones, seconds);
 
@@ -537,7 +540,13 @@ export class MainPageComponent implements OnInit, AfterViewInit {
         setTimeout(() => {
           if (this.midi_state === 'debounce') {
             this.midi_state = 'generating';
-            this.generate_midi(this.midi_config);
+
+            this.chord_list$.pipe(take(1)).subscribe(cl => {
+              (new Midi(this.midi_config))
+                  .generate(cl, this.default_scale ? this.default_scale : undefined );
+              this.midi_state = 'off';
+            })
+
           }
         }, 20);
       } else if (source === 'lp') {
@@ -561,136 +570,14 @@ export class MainPageComponent implements OnInit, AfterViewInit {
       console.log(`dialog = ${result}`);
 
       if (result) {
-        this.generate_midi(result);
-      } else {
-        this.midi_state = 'off';
+        this.chord_list$.pipe(take(1)).subscribe(cl => {
+          (new Midi(result))
+              .generate(cl, this.default_scale ? this.default_scale : undefined );
+        })
       }
+      this.midi_state = 'off';
     });
 
-  }
-
-  generate_midi(config : MidiConfig) {
-    console.log("generating midi data");
-
-    if (this.chord_count < 1) return;
-
-    const mainTrack = new Midiwriter.Track();
-    let bassTrack;
-    if (config.separateBass) {
-      bassTrack = new Midiwriter.Track();
-    }
-
-    let trackName = '';
-
-    for (const c of this.chord_list) {
-      trackName += c.name() + ' ';
-    }
-
-    if (config.includeScale) {
-      trackName += this.default_scale?.name();
-    }
-
-    mainTrack.addTrackName(trackName);
-    if (bassTrack) {
-      bassTrack.addTrackName(trackName);
-    }
-
-    for (const c of this.chord_list) {
-
-      let isBassNote = true;
-  
-      const mainOptions : Midiwriter.Options = {sequential: false, duration : '1', pitch : []}
-      const bassOptions : Midiwriter.Options = {sequential: false, duration : '1', pitch : []}
-
-      for (const n of c.voiceChord()) {
-
-        if (isBassNote) {
-          if (bassTrack) {
-            (bassOptions.pitch as unknown as string[]).push(n);
-          } else {
-            (mainOptions.pitch as unknown as string[]).push(n);
-          }
-          isBassNote = false;
-        } else {
-          (mainOptions.pitch as unknown as string[]).push(n);
-        }  
-      }
-
-      if (config.includeMarkers) {
-        mainTrack.addMarker(c.name());
-      }
-      mainTrack.addEvent(new Midiwriter.NoteEvent(mainOptions))
-      if (bassTrack) {
-        bassTrack.addEvent(new Midiwriter.NoteEvent(bassOptions))
-      }
-    }
-
-    if (config.includeScale) {
-      if (config.includeMarkers) {
-        mainTrack.addMarker(this.default_scale?.name() + " Scale")
-      }
-
-      let octave = ['G', 'A', 'B'].includes(this.scale_notes.get(0, new Note('C')).toSharp().noteClass) ? 3 : 4;
-      let last  = -1;
-      let scale_options : Midiwriter.Options = {sequential: true, duration : '4', pitch : []}
-      for (const n of this.scale_notes) {
-
-        const simpleNote = n.toSharp();
-
-
-        if (octavePlacement[simpleNote.noteClass] < last) {
-          // write what we have and start a new sequence
-          mainTrack.addEvent(new Midiwriter.NoteEvent(scale_options))
-          scale_options = {sequential: true, duration : '4', pitch : []}
-          octave += 1;
-        }
-        (scale_options.pitch as unknown as string[]).push(simpleNote.name() + octave );
-        last = octavePlacement[simpleNote.noteClass];
-      }
-
-      mainTrack.addEvent(new Midiwriter.NoteEvent(scale_options))
-
-    }
-
-    const tracks = [ mainTrack];
-    if (bassTrack) {
-      tracks.push(bassTrack);
-    }
-
-    const midi_writer = new Midiwriter.Writer(tracks);
-
-    const filename = this.interpolate_midi_filename(config.fileName) + ".mid";
-
-    const  blob = new Blob([midi_writer.buildFile()], {type: "audio/midi"});
-    saveAs(blob, filename);
-
-    this.midi_state = 'off';
-
-   }
-
-  interpolate_midi_filename(input_string : string) : string {
-    const re = /(?<varname>\${\w+})/g;
-
-    const date = dayjs();
-
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const value_map : any = {
-      'date' : date.format('YYYYMMDD'),
-      'time' : date.format('HHmmss'),
-      'scale' : this.default_scale?.name() || 'unknown',
-      'count' : this.chord_count,
-    }
-
-
-    return input_string.replaceAll(re, (s) => {
-      const varname = s.substring(2, s.length-1);
-      if (varname in value_map) {
-        return value_map[varname];
-      } else {
-        return '???';
-      }
-    });
   }
 
 
