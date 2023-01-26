@@ -1,6 +1,6 @@
-import { AfterViewInit, Component, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, Inject, OnInit, ViewChild } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import { filter } from 'rxjs';
+import { BehaviorSubject, filter, map } from 'rxjs';
 import { List } from 'immutable';
 
 import { MatDialog } from '@angular/material/dialog';
@@ -26,7 +26,7 @@ import { NewListDialogComponent } from '../new-list-dialog/new-list-dialog.compo
 import { ConfirmActionDialogComponent } from '../confirm-action-dialog/confirm-action-dialog.component';
 import { CustomChord } from '../utils/custom-chord';
 import { defaultScaleChangeConfig, ScaleChangeDialogComponent } from '../scale-change-dialog/scale-change-dialog.component';
-import { ChordListCacheService } from '../services/chord-list-cache.service';
+import { MainPageStore } from '../store/main-page-store';
 
 
 const octavePlacement : { [ index : string ] : number } = {
@@ -37,11 +37,26 @@ const octavePlacement : { [ index : string ] : number } = {
 @Component({
   selector: 'app-main-page',
   templateUrl: './main-page.component.html',
-  styleUrls: ['./main-page.component.scss']
+  styleUrls: ['./main-page.component.scss'],
+  providers: [MainPageStore]
 })
-export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
+export class MainPageComponent implements OnInit, AfterViewInit {
 
   generateOptions : GeneratorOptions = defaultGeneratorOptions();
+
+  default_scale$ = this.mainPageStore.default_scale$;
+  chord_list$ = this.mainPageStore.chord_list$;
+
+  chords_exist$ = this.mainPageStore.chord_list$.pipe(map(cl => cl.length > 0 ))
+  any_chords_locked$ = this.mainPageStore.chord_list$.pipe(map(cl => cl.filter(c => c.keep ).length > 0  ));
+  all_chords_locked$ = this.mainPageStore.chord_list$.pipe(map(cl => cl.filter(c => !c.keep ).length == 0  ));
+  scale_notes$ = this.default_scale$.pipe(map(ds => (ds == null ? List<Note>([]) : ds.notesOfScale() )));
+
+  current_chords$ = new BehaviorSubject<Chord[]>([]);
+
+  default_scale : Scale | null = null;
+  any_chords_locked = false;
+  chord_count = 0;
 
   get scale_notes() : List<Note> {
     if (this.default_scale != null) {
@@ -49,6 +64,10 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       return List<Note>([]);
     }
+  }
+
+  private get chord_list() {
+    return this.current_chords$.getValue();
   }
 
   all_play_active = false;
@@ -59,8 +78,6 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild('expansion') private _expansion_panel! :MatExpansionPanel;
   
-  default_scale : Scale | null = null;
-
 
   constructor(private scaleService : ScaleService,
     private randomChordService : RandomChordService,
@@ -68,11 +85,11 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
     public dialog: MatDialog, 
     @Inject(DOCUMENT) private document : Document,
     private preferences : PreferencesService,
-    public store : ChordListCacheService
+    public mainPageStore : MainPageStore,
 
     ) {
 
-      console.log("Calling random-chord contructor");
+      console.log("main-page contructor");
 
       // Do this in the constructor to make sure it is set before the view initializes.
       this.generatorOptionsExpanded = this.preferences.read('gen_opts_panel', false);
@@ -82,7 +99,7 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void {
 
-    console.log("random-chord ngOnInit called")
+    console.log("main-page ngOnInit called")
 
     const midi_pref = this.preferences.read('midi', this.midi_config);
 
@@ -99,29 +116,21 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     // Listen for changes in the default_scale
-
-    this.store.scale.subscribe((newScale) => {
-        if (newScale != null) {
+    this.default_scale$.subscribe((newScale) => {
           this.default_scale = newScale;
-          this.generateOptions.scale = this.default_scale;
-
-        } else {
-          this.default_scale = null;
-          this.generateOptions.scale = new Scale();
-        }     
     });
+
+    this.any_chords_locked$.subscribe((v) => { this.any_chords_locked = v; })
+
+    this.chord_list$.subscribe(this.current_chords$);
+    this.chord_list$.pipe(map(cl => cl.length)).subscribe(num => { this.chord_count = num; });
+
   }
 
   ngAfterViewInit(): void {
     console.log("random-chord afterViewInit called")
     this._expansion_panel.close();
   }
-
-  ngOnDestroy() : void {
-    console.log("random-chord onDestroy called")
-  }
-
-  get chords_exist() { return this.store.chord_count() > 0; }
 
   get chord_count_max() : number {
     if (this.generateOptions.duplicates !== 'none') {
@@ -152,16 +161,9 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /************* EVENT HANDLERS   *************************/
 
-  show_chord_scale_info(chord_index : number) {
-    const dia_data = defaultScaleChangeConfig();
-    dia_data.allow_change = false;
+  show_chord_scale_info(chord : Chord) {
 
-    const chord = this.store.get_a_chord(chord_index);
-    if (chord) {
-      dia_data.scale = chord.scale;
-    }
-
-    this.dialog.open(ScaleChangeDialogComponent, { data : dia_data});
+    this.dialog.open(ScaleChangeDialogComponent, { data : {allow_change : false, scale : chord.scale}});
 
   }
 
@@ -180,10 +182,8 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
     dia_data.scale = (this.default_scale || new Scale() );
     const dia = this.dialog.open(ScaleChangeDialogComponent, { data : dia_data} );
 
-    dia.afterClosed().subscribe((s) => {
-      if (s) {
-        this.store.change_scale(s);
-      }
+    dia.afterClosed().pipe(filter((s) => !!s)).subscribe((s) => {
+        this.mainPageStore.change_scale(s);
     });
   }
 
@@ -201,32 +201,22 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
   }
   
   chord_drop(evnt : CdkDragDrop<string[]>) {
-    this.store.move_chord(evnt.previousIndex, evnt.currentIndex);
+    this.mainPageStore.move_chord({ before : evnt.previousIndex, after : evnt.currentIndex});
   }
 
-  edit_chord_modal(chord_index : number, chord? : Chord) {
+  edit_chord_modal(chord_index : number, chord : Chord, operation : string) {
 
-    // if chord is defined then we are being asked to edit then add.
-    // if it is NOT defined, we are being asked to edit the existing chord.
+    const adding_chord = (operation === 'insert');
 
-    let adding_chord = false;
-
-    if (chord == undefined) {
-      chord = this.store.get_a_chord(chord_index);
-    } else {
-      adding_chord = true;
-    }
-
-    if (!chord) return;
 
     const dia = this.dialog.open(ChordEditDialogComponent, { data : chord });
     
     dia.afterClosed().subscribe((newChord) => {
       if (newChord) {
         if (adding_chord) {
-          this.store.add_chord(newChord, chord_index);
+          this.mainPageStore.insert_chord({ chord : newChord, index : chord_index});
         } else {
-          this.store.replace_chord(newChord, chord_index);
+          this.mainPageStore.replace_chord({ chord : newChord, index : chord_index});
         }
       }
 
@@ -234,18 +224,11 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   delete_chord(chord_index : number) {
-    this.store.delete_chord(chord_index);
+    this.mainPageStore.delete_chord(chord_index);
   }
 
-  chordIsCustom(chord : Chord | number) : boolean {
-    let test_chord : Chord | undefined = undefined;
-    if (typeof chord === 'number')
-      test_chord = this.store.get_a_chord(chord);
-    else {
-      test_chord = chord;
-    }
-
-    return (test_chord instanceof CustomChord);
+  chordIsCustom(chord : Chord) : boolean {
+    return (chord instanceof CustomChord);
   }
 
   add_chord(pos : 'before' | 'after', index : number) {
@@ -257,22 +240,21 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (pos === 'after') index += 1;
 
-    this.edit_chord_modal(index, newChord);
+    this.edit_chord_modal(index, newChord, 'insert');
   }
 
 
-  generate_new_chord(chord_index : number) {
+  generate_new_chord(chord : Chord, chord_index : number) {
     const builder = this.randomChordService.builder();
 
-    let scale : Scale | undefined = this.store.get_a_chord(chord_index)?.scale;
+    let scale : Scale;
 
-    if (this.chordIsCustom(chord_index) && this.default_scale) {
+    if (this.chordIsCustom(chord) && this.default_scale) {
       scale = this.default_scale;
+    } else {
+      scale = chord.scale;
     }
 
-    if (! scale) {
-      throw Error("Could not figure out a scale");
-    }
 
     // override count to just do one.
     builder.setOptions(this.generateOptions)
@@ -280,24 +262,19 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
       .setKey(scale);
 
     const newChords = builder.generate_chords();
-    this.store.replace_chord(newChords[0], chord_index)
+    this.mainPageStore.replace_chord({ chord : newChords[0],  index : chord_index})
 
   }
 
-  set_default_scale(chord_index : number) {
-
-    const chord_scale = this.store.get_a_chord(chord_index)?.scale;
-    this.store.change_scale(chord_scale ? chord_scale : null);
+  set_default_scale(chord : Chord) {
+      this.mainPageStore.change_scale(chord.scale);
   }
 
-  set_to_default_scale(chord_index : number) {
+  set_to_default_scale(chord : Chord, chord_index : number) {
     if (! this.default_scale) return;
 
-    const chord = this.store.get_a_chord(chord_index);
-    if (!chord) return;
-
     if (! this.default_scale.isSame(chord.scale)) {
-      this.store.replace_chord(chord.change_scale(this.default_scale), chord_index);
+      this.mainPageStore.replace_chord( { chord : chord.change_scale(this.default_scale), index : chord_index});
     }
 
 
@@ -306,25 +283,25 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
   async gen_list(fn? : (data : Chord[]) => void ) {
     const dia = this.dialog.open(NewListDialogComponent, { data : Object.assign({}, this.generateOptions) });
 
-    dia.afterClosed().subscribe((opts) => {
+    dia.afterClosed().pipe(filter((o) => !!o)).subscribe((opts) => {
       this.generate_options_change(opts);
       const chords = this.generate();
       const s = new Scale (this.generateOptions.scale);
-      this.store.change_scale(s);
+      this.mainPageStore.change_scale(s);
       if (fn) fn(chords);
     });
   }
 
-  start_new_list() {
-    if (this.chords_exist) {
+  start_new_list(chords_exist : boolean) {
+    if (chords_exist) {
       const dia = this.dialog.open(ConfirmActionDialogComponent, 
-          { data: "Removing All Existing Chords"});
+          { data: "This Will Remove All Existing Chords"});
 
       dia.afterClosed().subscribe((confirm) => {
         if (confirm) {
           this.generateOptions.key_source = 'Random';
           this.gen_list((chords) => {
-            this.store.replace_chord_list(chords);
+            this.mainPageStore.replace_chord_list(chords);
           });
         }
       });
@@ -332,7 +309,7 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
       // this can't go in gen_list since that is also shared by append_to_list
       this.generateOptions.key_source = 'Random';
       this.gen_list((chords) => {
-        this.store.replace_chord_list(chords);
+        this.mainPageStore.replace_chord_list(chords);
       });
     }
   }
@@ -342,84 +319,49 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
     this.generateOptions.center = this.generateOptions.scale.center;
     this.generateOptions.tonality = this.generateOptions.scale.type;
     this.gen_list((chords) => {
-      this.store.append_chords(chords);
+      this.mainPageStore.append_chords(chords);
     });
   }
 
   /********   CHORD LOCKING ***************/
 
-  lock_chord(index : number) : void {
-    if (this.store.chord_count() > index) {
-      const c = this.store.get_a_chord(index);
-      if (c) {
-        c.keep = ! c.keep;
-        this.store.replace_chord(c, index);
-      }
-    }
-  }
-
-  chord_locked(index : number) : boolean {
-    if (this.store.chord_count() > index) {
-      const c = this.store.get_a_chord(index);
-      return c != undefined && c.keep;
-    }
-
-    return false;
+  lock_chord(chord : Chord, index : number) : void {
+      chord.keep = ! chord.keep;
+      this.mainPageStore.replace_chord({ chord : chord , index : index});
   }
 
   unlock_all_chords() {
-    for (const c of this.store.chord_list()) {
-      c.keep = false;
-    }
-  }
-
-  any_chords_locked() : boolean {
-    for (const c of this.store.chord_list()) {
-      if (c.keep) return true;
-    }
-    return false;
-  }
-
-  all_chords_locked() : boolean {
-    for (const c of this.store.chord_list()) {
-      if (! c.keep) return false;
-    }
-    return true;
+    this.mainPageStore.unlock_all_chords();
   }
    
 
-  delete_unlocked_chords(do_it? : boolean ) {
+  delete_unlocked_chords() {
 
-    if (do_it) {
-      const chords = this.store.chord_list().filter((k) => k.keep);
-      this.store.replace_chord_list(chords);
-      return;
-    }
 
-    if (! this.any_chords_locked() ) {
+    if (! this.any_chords_locked ) {
       const dia = this.dialog.open(ConfirmActionDialogComponent, { data : 'This will delete all chords since none are locked'});
       dia.afterClosed().subscribe((yes) => {
-        if (yes) this.delete_unlocked_chords(true);
+        if (yes) this.mainPageStore.delete_unlocked_chords();
       });
 
     } else {
-      this.delete_unlocked_chords(true);
+      this.mainPageStore.delete_unlocked_chords();
     }
   }
 
   replace_unlocked_chords() {
-    if (! this.any_chords_locked()) {
+    if (! this.any_chords_locked) {
       const dia = this.dialog.open(ConfirmActionDialogComponent, { data : 'This will replace all chords since none are locked'});
       dia.afterClosed().subscribe((yes) => {
         if (yes) {
            const c = this.generate(true);
-           this.store.replace_chord_list(c);
+           this.mainPageStore.replace_chord_list(c);
         }
       });
 
     } else {
       const c = this.generate();
-      this.store.replace_chord_list(c);
+      this.mainPageStore.replace_chord_list(c);
     }
   }
 
@@ -473,11 +415,11 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       if (use_start_set == undefined) {
-        use_start_set = this.any_chords_locked();
+        use_start_set = this.any_chords_locked;
       }
 
       if (use_start_set) {
-        return builder.generate_chords(this.store.chord_list().toArray());
+        return builder.generate_chords(this.current_chords$.getValue());
       } else {
         return builder.generate_chords();
       }
@@ -543,7 +485,7 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
     // If asked to stop, simply stop.
     if (!this.all_play_active) return;
 
-    if (next >=0 && next < this.store.chord_count()) {
+    if (next >=0 && next < this.chord_count) {
       const ellist = this.document.querySelectorAll(`.chord-index-${next}`);
 
       ellist.forEach((el) => {
@@ -560,9 +502,9 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const beepLength = 0.5;
 
-    if (next >= 0 && next < this.store.chord_count()) {
+    if (next >= 0 && next < this.chord_count) {
 
-      this.play_chord(this.store.chord_list().toArray()[next], beepLength);
+      this.play_chord(this.current_chords$.getValue()[next], beepLength);
       last = next;
       next += 1;
 
@@ -577,7 +519,7 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
   private midi_state = 'off';
 
   get midi_disabled():boolean {
-    return this.store.chord_count() < 1;
+    return this.chord_count < 1;
   }
 
   wait_for_midi(source : string, event : Event) {
@@ -630,7 +572,7 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
   generate_midi(config : MidiConfig) {
     console.log("generating midi data");
 
-    if (this.store.chord_count() < 1) return;
+    if (this.chord_count < 1) return;
 
     const mainTrack = new Midiwriter.Track();
     let bassTrack;
@@ -640,7 +582,7 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
 
     let trackName = '';
 
-    for (const c of this.store.chord_list()) {
+    for (const c of this.chord_list) {
       trackName += c.name() + ' ';
     }
 
@@ -653,7 +595,7 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
       bassTrack.addTrackName(trackName);
     }
 
-    for (const c of this.store.chord_list()) {
+    for (const c of this.chord_list) {
 
       let isBassNote = true;
   
@@ -724,7 +666,7 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.midi_state = 'off';
 
-  }
+   }
 
   interpolate_midi_filename(input_string : string) : string {
     const re = /(?<varname>\${\w+})/g;
@@ -737,7 +679,7 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
       'date' : date.format('YYYYMMDD'),
       'time' : date.format('HHmmss'),
       'scale' : this.default_scale?.name() || 'unknown',
-      'count' : this.store.chord_count(),
+      'count' : this.chord_count,
     }
 
 

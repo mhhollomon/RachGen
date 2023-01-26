@@ -2,7 +2,12 @@
 
 <!--------- Start New List Button ------------->
 <div class="db mv4 br2 ma2">
-    <button  mat-raised-button id="generate_chords_button" color="primary" (click)="start_new_list()">Start New List</button>
+    <ng-template [ngIf]="chords_exist$ | async" [ngIfElse]="nochords">
+        <button  mat-raised-button color="primary" (click)="start_new_list(true)">Start New List</button>
+    </ng-template>
+    <ng-template #nochords>
+        <button  mat-raised-button color="primary" (click)="start_new_list(false)">Start New List</button>
+    </ng-template>
 </div>
 <!--
     --------------------------- OUTPUT ------------------------------------
@@ -32,7 +37,7 @@
                 <button mat-stroked-button color="accent" (click)="change_default_scale()">Change Scale</button>
             </div>
             <div class="chord-panel-content-info">
-                <div class="mh2 dib" *ngFor="let n of scale_notes; let index=index">
+                <div class="mh2 dib" *ngFor="let n of (scale_notes$ | async); let index=index">
                     <span>{{n.nameUnicode()}}</span>
                     <br>
                     <span>{{default_scale?.romanForDegree(index+1)}}</span>
@@ -47,13 +52,13 @@
     <div class="chord-action-header-container ml1 pv2">
         <div class="chord-header-lock">
             <button mat-icon-button class="material-symbols-outlined" (click)="unlock_all_chords()"
-                [disabled]="!chords_exist || !any_chords_locked()" matTooltip="Unlock all chords">
+                [disabled]="((chords_exist$ | async) === false) || ((any_chords_locked$ | async) === false)" matTooltip="Unlock all chords">
                 <mat-icon>lock_reset</mat-icon>
             </button>
         </div>
         <div class="chord-header-play">
             <button mat-icon-button class="material-symbols-outlined" (click)="play_all_chords()"
-                    [disabled]="!chords_exist" matTooltip="play all chords">
+                    [disabled]="((chords_exist$ | async) === false)" matTooltip="play all chords">
                 <mat-icon>{{all_play_active ? 'stop' : 'fast_forward'}}</mat-icon>
             </button>
         </div>
@@ -69,11 +74,11 @@
         </div>
         <div class="header-right-action">
             <button class="dif material-symbols-outlined"
-                        matTooltip="replace all unlocked chords" (click)="replace_unlocked_chords()" [disabled]="all_chords_locked()" mat-icon-button>
+                        matTooltip="replace all unlocked chords" (click)="replace_unlocked_chords()" [disabled]="all_chords_locked$ | async" mat-icon-button>
                 <mat-icon>casino</mat-icon>
             </button>
             <button class="dif material-symbols-outlined"
-                        matTooltip="Delete all unlocked chords" (click)="delete_unlocked_chords()" [disabled]="all_chords_locked()" mat-icon-button>
+                        matTooltip="Delete all unlocked chords" (click)="delete_unlocked_chords()" [disabled]="all_chords_locked$ | async" mat-icon-button>
                 <mat-icon>delete</mat-icon>
             </button>
         </div>
@@ -97,11 +102,11 @@
 
         -->
 
-        <div class="chord-row-container chord-index-{{i}} ml1 pv2" cdkDrag *ngFor="let c of store.chords | async; let i=index">
+        <div class="chord-row-container chord-index-{{i}} ml1 pv2" cdkDrag *ngFor="let c of (chord_list$ | async); let i=index">
             <div class="chord-lock">
-                <button mat-icon-button class="chord-lock" [color]="chord_locked(i) ? 'accent' : ''" 
-                        class="material-symbols-outlined" matTooltip="Lock chord" (click)="lock_chord(i)">
-                    <mat-icon>{{chord_locked(i) ? 'lock' : 'lock_open'}}</mat-icon>
+                <button mat-icon-button class="chord-lock" [color]="c.keep ? 'accent' : ''" 
+                        class="material-symbols-outlined" matTooltip="Lock chord" (click)="lock_chord(c, i)">
+                    <mat-icon>{{c.keep ? 'lock' : 'lock_open'}}</mat-icon>
                 </button>
             </div>
             <div class="chord-play">
@@ -124,12 +129,12 @@
                 <div class="chord-tones">
                     <span *ngFor="let t of c.noteList()" >{{t.nameUnicode()}}</span>
                 </div>
-                <div class="chord-scale" *ngIf="!chordIsCustom(i)">
+                <div class="chord-scale" *ngIf="!chordIsCustom(c)">
                    <a [matMenuTriggerFor]="menu" class="menu-anchor">{{c.scale.nameUnicode()}}
                         <mat-menu #menu="matMenu">
-                            <button mat-menu-item (click)="show_chord_scale_info(i)">Scale info</button>
-                            <button mat-menu-item (click)="set_default_scale(i)">Set default to this</button>
-                            <button mat-menu-item (click)="set_to_default_scale(i)">Set this to default</button>
+                            <button mat-menu-item (click)="show_chord_scale_info(c)">Scale info</button>
+                            <button mat-menu-item (click)="set_default_scale(c)">Set default to this</button>
+                            <button mat-menu-item (click)="set_to_default_scale(c, i)">Set this to default</button>
                         </mat-menu>
                     </a>
 
@@ -140,16 +145,16 @@
             <div class="chord-right-action">
                 <button class="dif material-symbols-outlined"
                             matTooltip="Edit parts of the chord" 
-                            (click)="edit_chord_modal(i)" 
+                            (click)="edit_chord_modal(i, c, 'replace')" 
                             mat-icon-button>
                     <mat-icon>edit</mat-icon>
                 </button>
                 <button class="dif material-symbols-outlined"
-                            matTooltip="generate a new chord" (click)="generate_new_chord(i)" [disabled]="chord_locked(i)" mat-icon-button>
+                            matTooltip="generate a new chord" (click)="generate_new_chord(c, i)" [disabled]="c.keep" mat-icon-button>
                     <mat-icon>casino</mat-icon>
                 </button>
                 <button class="dif material-symbols-outlined"
-                            matTooltip="Delete chord" (click)="delete_chord(i)" [disabled]="chord_locked(i)" mat-icon-button>
+                            matTooltip="Delete chord" (click)="delete_chord(i)" [disabled]="c.keep" mat-icon-button>
                     <mat-icon>delete</mat-icon>
                 </button>
             </div>
