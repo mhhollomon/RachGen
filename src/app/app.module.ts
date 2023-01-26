@@ -5,7 +5,7 @@ import { MaterialModule } from './material.module';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 
-import { RandomChordsComponent } from './random-chords/random-chords.component';
+import { MainPageComponent } from './main-page/main-page.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 import { HelpDialogComponent } from './help-dialog/help-dialog.component';
 
@@ -31,7 +31,7 @@ import { CapitalizePipe } from './capitalize.pipe';
 @NgModule({
   declarations: [
     AppComponent,
-    RandomChordsComponent,
+    MainPageComponent,
     PageNotFoundComponent,
     HelpDialogComponent,
     ErrorDialogComponent,

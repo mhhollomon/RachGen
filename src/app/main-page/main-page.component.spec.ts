@@ -13,12 +13,12 @@ import {MatGridListModule} from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSliderModule } from '@angular/material/slider';
-import { RandomChordsComponent } from './random-chords.component';
+import { MainPageComponent } from './main-page.component';
 import { AudioService } from '../audio.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
 describe('RandomChordsComponent', () => {
-  let component: RandomChordsComponent;
-  let fixture: ComponentFixture<RandomChordsComponent>;
+  let component: MainPageComponent;
+  let fixture: ComponentFixture<MainPageComponent>;
 
   let audioServiceSpy : jasmine.SpyObj<AudioService>;
 
@@ -41,12 +41,12 @@ describe('RandomChordsComponent', () => {
         MatTooltipModule,
         NoopAnimationsModule,
       ],
-      declarations: [ RandomChordsComponent ],
+      declarations: [ MainPageComponent ],
       providers: [{provide : AudioService, useValue : audioServiceSpy }]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(RandomChordsComponent);
+    fixture = TestBed.createComponent(MainPageComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

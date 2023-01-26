@@ -35,11 +35,11 @@ const octavePlacement : { [ index : string ] : number } = {
 
 
 @Component({
-  selector: 'app-random-chords',
-  templateUrl: './random-chords.component.html',
-  styleUrls: ['./random-chords.component.scss']
+  selector: 'app-main-page',
+  templateUrl: './main-page.component.html',
+  styleUrls: ['./main-page.component.scss']
 })
-export class RandomChordsComponent implements OnInit, AfterViewInit, OnDestroy {
+export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   generateOptions : GeneratorOptions = defaultGeneratorOptions();
 
