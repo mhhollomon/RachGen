@@ -3,7 +3,7 @@ import { saveAs } from 'file-saver';
 import * as Midiwriter from 'midi-writer-js';
 
 import { MidiConfig } from "../midi-dialog/midi-dialog.component";
-import { Chord, NamedNoteList, voiceChord } from "./music-theory/chord";
+import { NamedNoteList, voiceChord } from "./music-theory/chord";
 import { Note } from './music-theory/note';
 import { Scale } from './music-theory/scale';
 

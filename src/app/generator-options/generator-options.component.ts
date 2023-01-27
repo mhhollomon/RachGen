@@ -1,10 +1,11 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatRadioChange } from '@angular/material/radio';
 import { MatSelectChange } from '@angular/material/select';
-import { defaultModeList, RandomChordOptions } from '../random-chord.service';
+import { defaultModeDegreeList, defaultModeList, RandomChordOptions } from '../random-chord.service';
 import { ScaleService } from '../scale.service';
 import { ChordType, InversionType } from '../utils/music-theory/chord';
-import { Scale, ScaleType } from '../utils/music-theory/scale';
+import { ALL_SCALE_TYPES, Scale, ScaleType } from '../utils/music-theory/scale';
+import { range } from '../utils/util-library';
 
 export interface GeneratorOptions extends RandomChordOptions {
   count_range_mode : boolean;
@@ -43,6 +44,7 @@ export function defaultGeneratorOptions() : GeneratorOptions {
     modes : defaultModeList,
     mode_percent : 0,  
     modes_on : false,
+    mode_degrees : defaultModeDegreeList,
   }
 }
 
@@ -61,6 +63,8 @@ export class GeneratorOptionsComponent {
   get scale_disabled() : boolean {
     return false;
   }
+
+  get chord_type_list() { return ALL_SCALE_TYPES; }
 
 
   get chord_count_max() : number {
@@ -224,10 +228,48 @@ export class GeneratorOptionsComponent {
   }
 
   mode_activate_change(event : MatRadioChange) {
-    this.options.modes_on = event.value;
+    this.options.modes_on = (event.value === 'true');
     this.optionsChange.emit(this.options);
 
   }
+
+  mode_list_change(mode : string, flag : boolean ) {
+    const m = mode as ScaleType;
+
+    if (flag) {
+      if (!this.options.modes.includes(m)) {
+        this.options.modes = this.options.modes.push(m);
+      }
+    } else {
+      this.options.modes = this.options.modes.filter(v => v !== m);
+    }
+    this.optionsChange.emit(this.options);
+
+  }
+
+  mode_degree_list_change(d : number, flag : boolean ) {
+
+    if (flag) {
+      if (!this.options.mode_degrees.includes(d)) {
+        this.options.mode_degrees = this.options.mode_degrees.push(d);
+      }
+    } else {
+      this.options.mode_degrees = this.options.mode_degrees.filter(v => v !== d);
+    }
+    this.optionsChange.emit(this.options);
+
+  }
+
+  mode_is_on(mode : string) : boolean {
+    return this.options.modes.includes(mode as ScaleType);
+  }
+
+  mode_degree_is_on(d : number) : boolean {
+    return this.options.mode_degrees.includes(d);
+  }
+
+
+  mode_degree_list()  { return range(1,8); }
 
   // This is to get around a problem that the value
   // labels (produced by chord_type_slider_ticks)

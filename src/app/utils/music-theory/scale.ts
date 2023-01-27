@@ -38,11 +38,6 @@ export const ALL_SCALE_TYPES = ['major', 'minor', 'mixolydian', 'dorian', 'lydia
 type ScaleTypeTuple = typeof ALL_SCALE_TYPES; 
 export type ScaleType = ScaleTypeTuple[number];
 
-// export type ScaleType = 'minor' | 'major' | 
-//         'lydian' | 'mixolydian' |
-//         'dorian' | 'phrygian' ;
-
-
 export const ScaleRecord = Record({center : 'C', type : <ScaleType>('major')}
 );
 

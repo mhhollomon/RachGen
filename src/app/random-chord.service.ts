@@ -52,6 +52,10 @@ export const defaultModeList = List<ScaleType>([]);
 
 export type ModeList = typeof defaultModeList;
 
+export const defaultModeDegreeList = List<number>([]);
+
+export type ModeDegreeList = typeof defaultModeDegreeList;
+
 export interface RandomChordOptions {
   scale : Scale;
   count : RandomChordCountConfig;
@@ -61,6 +65,7 @@ export interface RandomChordOptions {
   chordTypes : ChordTypeConfig;
   modes : ModeList;
   mode_percent : number;
+  mode_degrees : ModeDegreeList
 }
 
 
@@ -88,6 +93,7 @@ export class ChordSequenceBuilder {
     },
     modes  : defaultModeList,
     mode_percent : 0,
+    mode_degrees : defaultModeDegreeList,
   }
 
   public chordList : NamedNoteList[] = [];
@@ -115,7 +121,7 @@ export class ChordSequenceBuilder {
       .setExtension('11th', cfg.extensions['11th'])
       .setInversions(cfg.inversions)
       .setChordTypes(cfg.chordTypes)
-      .setModes(cfg.modes, cfg.mode_percent)
+      .setModes(cfg.modes, cfg.mode_degrees, cfg.mode_percent)
 
     return this;
   }
@@ -293,9 +299,10 @@ export class ChordSequenceBuilder {
 
   }
 
-  setModes(m : ModeList, p : number) : this {
+  setModes(m : ModeList, d : ModeDegreeList, p : number) : this {
     this.options.modes = m;
     this.options.mode_percent = p;
+    this.options.mode_degrees = d;
 
     return this;
   }
@@ -410,15 +417,15 @@ export class ChordSequenceBuilder {
 
     let my_scale = this.scale;
 
+    const rootDegree = this.noteChooser.choose();
+
     // Check on modal interchange
-    if (this.options.mode_percent > 0 && this.options.modes.size > 0) {
+    if (this.options.mode_percent > 0 && this.options.modes.size > 0 && this.options.mode_degrees.includes(rootDegree)) {
       if (yesno100(this.options.mode_percent)) {
         const newScaleType = equalWeightedChooser(this.options.modes.toArray()).choose();
         my_scale = this.scale.setType(newScaleType);
       }
     }
-
-    const rootDegree = this.noteChooser.choose();
 
     const chordType = this.chordTypeChooser.choose();
 

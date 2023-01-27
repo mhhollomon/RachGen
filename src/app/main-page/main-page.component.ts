@@ -9,7 +9,7 @@ import {CdkDragDrop} from '@angular/cdk/drag-drop';
 
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
 import { ScaleService } from '../scale.service';
-import { RandomChordService, RandomChordError, defaultModeList } from '../random-chord.service';
+import { RandomChordService, RandomChordError } from '../random-chord.service';
 import { Chord, NamedNoteList, voiceChord } from '../utils/music-theory/chord';
 import { Scale, ScaleType } from '../utils/music-theory/scale';
 import { Note } from '../utils/music-theory/note';
@@ -89,7 +89,13 @@ export class MainPageComponent implements OnInit, AfterViewInit {
 
       // Do this in the constructor to make sure it is set before the view initializes.
       this.generatorOptionsExpanded = this.preferences.read('gen_opts_panel', false);
+
       this.generateOptions = this.preferences.read('gen_opts_data', this.generateOptions);
+      if (! ('mode_degrees' in this.generateOptions) || (typeof this.generateOptions.mode_degrees === 'number')) {
+        // Saved data is old - ignore it and refresh
+        this.generateOptions  = defaultGeneratorOptions();
+        this.preferences.write('gen_opts_data', this.generateOptions);
+      }
 
   }
 
@@ -264,6 +270,7 @@ export class MainPageComponent implements OnInit, AfterViewInit {
     builder.setOptions(this.generateOptions)
       .setCount({min : 1, max : 1})
       .setKey(scale);
+      
 
     const newChords = builder.generate_chords();
     this.mainPageStore.replace_chord({ chord : newChords[0],  index : chord_index})
@@ -334,6 +341,7 @@ export class MainPageComponent implements OnInit, AfterViewInit {
       this.mainPageStore.append_chords(genret.nl);
     });
   }
+
 
   /********   CHORD LOCKING ***************/
 
@@ -444,9 +452,8 @@ export class MainPageComponent implements OnInit, AfterViewInit {
 
       builder.setOptions(opts).setKey(scale);
 
-      // for now
       if (opts.modes_on) {
-        builder.setModes(defaultModeList.push('phrygian'), 10);
+        builder.setModes(opts.modes, opts.mode_degrees, opts.mode_percent);
       }
 
       let nl : NamedNoteList[];

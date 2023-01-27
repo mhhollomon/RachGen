@@ -207,11 +207,32 @@
 </div>
 
 <!-- Modal shift -------------->
-<div>
+<div class="ma2">
     <label class="mhh-mat-label">Modal Exchange</label>
-    <mat-radio-group name="model" [value]="options.modes_on" (change)="mode_activate_change($event)">
-        <mat-radio-button value="false" matTooltip="Let the computer choose the key">Off</mat-radio-button>
-        <mat-radio-button value="true" matTooltip="You pick the key">On</mat-radio-button>
+    <mat-radio-group name="modal"  [value]="options.modes_on ? 'true' : 'false'" (change)="mode_activate_change($event)">
+        <mat-radio-button value="false" matTooltip="Stay in your lane">Off</mat-radio-button>
+        <mat-radio-button value="true" matTooltip="Walk on the wild side">On</mat-radio-button>
     </mat-radio-group>
+    <div *ngIf="options.modes_on">
+        <br>
+        <label>Mode Shift Probability</label>
+        <mat-slider min="1" max="30" step="1" *ngIf="options.modes_on" [disabled]="!options.modes_on" discrete [displayWith]="yesno_slider_ticks" 
+                matTooltip="set probability for mode shift">
+            <input matSliderThumb [(ngModel)]="options.mode_percent">
+        </mat-slider>
+        <div>
+            <label>Modes</label>
+            <mat-checkbox value="{{t}}" [checked]="mode_is_on(t)"   (change)="mode_list_change(t, $event.checked)"  
+                    *ngFor="let t of chord_type_list">{{t | capitalize }}</mat-checkbox>
+        </div>
+
+
+        <div>
+            <label>Degrees</label>
+            <mat-checkbox value="{{n}}" [checked]="mode_degree_is_on(n)"  (change)="mode_degree_list_change(n, $event.checked)"    
+                    *ngFor="let n of mode_degree_list()">{{n}}</mat-checkbox>
+        </div>
+    </div>
+
 
 </div>

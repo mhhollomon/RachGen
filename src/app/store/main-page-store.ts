@@ -1,4 +1,4 @@
-import { Injectable, OnInit } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { ComponentStore } from "@ngrx/component-store";
 import { Observable } from "rxjs";
 import { CustomChord } from "../utils/custom-chord";
@@ -19,7 +19,7 @@ function defaultState() {
 const store_key = 'rg.MainPageStore';
 
 @Injectable()
-export class MainPageStore extends ComponentStore<MainPageState> implements OnInit {
+export class MainPageStore extends ComponentStore<MainPageState> {
 
     // for now
     constructor() {
@@ -34,7 +34,7 @@ export class MainPageStore extends ComponentStore<MainPageState> implements OnIn
                 if (key === '.s.c.' ) return new Chord(v['scale'], v['degree'], v['chordType'], v['inversion']);
                 if (key === '.c.c.') return new CustomChord(v['_notes'], v['_name']);
                 if (key === 'chord_list') {
-                    return v.map((item : any) => {for (let ik in item) {return item[ik]}});
+                    return v.map((item : any) => {for (const ik in item) {return item[ik]}});
                 }
                 if (key === '_notes') {
                     return v.map((item : any) => { return new Note(item['_noteClass'], item['_alter']) });
@@ -43,7 +43,7 @@ export class MainPageStore extends ComponentStore<MainPageState> implements OnIn
             });
 
             for (const k in blob_obj) {
-                if (props.hasOwnProperty(k)) {
+                if (Object.hasOwn(props, k)) {
                     (props as any)[k] = blob_obj[k];
                 }
             }
@@ -61,10 +61,6 @@ export class MainPageStore extends ComponentStore<MainPageState> implements OnIn
             localStorage.setItem(store_key, JSON.stringify(stored_state));
         })
 
-    }
-
-    ngOnInit() {
-        console.log("main-page-store oninit called")
     }
 
     // --------- SELECTORS -------------------------
