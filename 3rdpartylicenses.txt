@@ -66,6 +66,9 @@ MIT
 @angular/router
 MIT
 
+@ngrx/component-store
+MIT
+
 dayjs
 MIT
 MIT License
