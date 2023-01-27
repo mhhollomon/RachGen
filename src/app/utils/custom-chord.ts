@@ -1,4 +1,5 @@
-import { NamedNoteList, Chord } from "./music-theory/chord";
+import { Chord } from "./music-theory/chord";
+import { NamedNoteList } from "./music-theory/NamedNoteList";
 import { Note } from "./music-theory/note";
 import { List } from "immutable";
 
@@ -59,5 +60,23 @@ export class CustomChord implements NamedNoteList {
 
         return true;    
     }
+
+    freeze() : Array<any> {
+        return [ CustomChord.classTag, this._name, this._notes ];
+    }
+
+    toJSON() : any {
+        return this.freeze();
+    }
+
+    static thaw(p : Array<any>) : CustomChord {
+        if (p.length !== 3)
+            throw Error(`failed to thaw a CustomChord : ${p}`)
+
+        return new CustomChord(p[2], p[1]);
+    }
+
+    static get classTag() { return ':cc'; }
+
 
 }

@@ -1,10 +1,8 @@
 import { Note } from "./note";
 import { Scale } from "./scale";
-import { List, Record, Map } from 'immutable'
+import { List, Record } from 'immutable'
+import { NamedNoteList } from "./NamedNoteList";
 
-const octavePlacement: { [index: string]: number } = {
-  'C': 0, 'D': 1, 'E': 2, 'F': 3, 'G': 4, 'A': 5, 'B': 6
-}
 
 export type ChordType = 'triad' | 'sus2' | 'sus4';
 
@@ -20,7 +18,7 @@ export const ExtensionFlags = Record({
 
 });
 
-const defaultExtensionFlags = ExtensionFlags();
+const defaultExtensionFlags = ExtensionFlags({'7th' : false });
 
 export type ExtensionFlagsType = typeof defaultExtensionFlags;
 
@@ -28,116 +26,109 @@ function degreeToScale(rootDegree: number, chordal: number) {
   return (chordal + rootDegree - 1);
 }
 
-export interface NamedNoteList {
-  keep : boolean;
-  name(): string;
-  nameUnicode(): string;
-  noteList(): List<Note>;
-  isSame( nl : NamedNoteList) : boolean;
-  
+export interface ChordProps {
+  scale : Scale;
+  degree : number;
+  chordType : ChordType;
+  inversion : InversionType;
+  extensions : ExtensionFlagsType;
+}
+export type ChordPropsType = keyof ChordProps;
+
+function defaultChordProps() : ChordProps {
+    return {
+      scale: new Scale(),
+      degree: 1,
+      chordType: 'triad',
+      inversion: 'root',
+      extensions: defaultExtensionFlags,
+    };
 }
 
-export function voiceChord(notelist : NamedNoteList ): string[] {
-  const tones: string[] = [];
-  let octave = 3;
-  let last = -1;
-  let isBassNote = true;
-
-  for (const c of notelist.noteList()) {
-
-    const simpleNote = c.toSharp();
-
-    if (octavePlacement[simpleNote.noteClass] < last) {
-      octave += 1;
-    }
-    tones.push(simpleNote.name() + octave);
-
-    if (isBassNote) {
-      octave += 1;
-      isBassNote = false;
-    } else {
-      last = octavePlacement[simpleNote.noteClass];
-    }
-
-  }
-
-  return tones;
-
-}
+const propKeys = Object.keys(defaultChordProps()).sort();
 
 
 
 
-const ChordRecord = Record({
-  scale: new Scale(),
-  degree: 1,
-  chordType: <ChordType>'triad',
-  inversion: <InversionType>'root',
-  extensions: ExtensionFlags(),
-})
+export class Chord  implements ChordProps, NamedNoteList {
 
+  private _props : ChordProps = defaultChordProps();
+  get scale()      { return this._props.scale; }
+  get degree()     { return this._props.degree; }
+  get chordType()  { return this._props.chordType; }
+  get inversion()  { return this._props.inversion; }
+  get extensions() { return this._props.extensions; }
 
-export class Chord extends ChordRecord implements NamedNoteList {
-
-  private _tones = Map<number, Note>([]);
+  private _tones = new Map<number, Note>();
 
   get root() { return this.scale.get_note(this.degree); }
 
   // not used interally by the class. up to the UI to handle
   keep = false;
 
-  constructor(scale: Scale | object = new Scale(), degree = 1, chordType: ChordType = 'triad', inversion: InversionType = 'root') {
-    if (degree <= 0 || degree > 7)
-      throw Error('Note.constructor : degree is out of range (1-7)');
+  constructor();
+  constructor(props : Partial<ChordProps>);
+  constructor(scale: Scale, degree? :number, chordType? : ChordType, inversion? : InversionType);
+  constructor(props?: Scale | Partial<ChordProps>, degree? : number, chordType?: ChordType, inversion?: InversionType) {
+    
+    let newProps : Partial<ChordProps> = {};
 
-    let props;
-    if (scale instanceof Scale) {
-      props = { scale: scale, degree: degree, chordType: chordType, inversion: inversion };
+    if (props == undefined) {
+      // do nothing - takes the initialized defaults
+    } else if (props instanceof Scale) {
+      if ((degree != undefined) && (degree <= 0 || degree > 7))
+        throw Error('Note.constructor : degree is out of range (1-7)');
+
+      newProps.scale = props;
+      if (degree != undefined) newProps.degree = degree;
+      if (chordType != undefined) newProps.chordType = chordType;
+      if (inversion != undefined) newProps.inversion = inversion;
+
     } else {
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const obj = scale as any;
-      if ('degree' in obj) {
-        if (obj['degree'] <= 0 || obj['degree'] > 7)
+      if ('degree' in props) {
+        if (props['degree'] == undefined) {
+          delete props['degree'];
+        } else  if (props['degree'] <= 0 || props['degree'] > 7) {
           throw Error('Note.constructor : degree is out of range (1-7)');
+        }
       }
 
-      props = scale;
+      newProps = props;
     }
 
-    super(props);
+    this._props = { ...this._props, ...newProps }
+
 
   }
 
-
-  setScale(s: Scale): this {
-    return this.set('scale', s);
+  setScale(s: Scale): Chord {
+    return new Chord({ ...this._props, scale : s } );
   }
 
 
-  setChordType(t: ChordType): this {
-    return this.set('chordType', t);
+  setChordType(t: ChordType): Chord {
+    return new Chord({ ...this._props, chordType : t } );
   }
 
 
-  setDegree(degree: number): this {
+  setDegree(degree: number): Chord {
     if (degree <= 0 || degree > 7)
       throw Error('Note.setRootFromDegree : degree is out of range (1-7)');
 
-    return this.set('degree', degree);
-
+    return new Chord({ ...this._props, degree : degree } );
   }
 
-  setInversion(inv: InversionType): this {
-    return this.set('inversion', inv);
+  setInversion(inv: InversionType): Chord {
+    return new Chord({ ...this._props, inversion : inv } );
   }
 
-  setExtension(ext: ExtensionType, value: boolean): this {
-    return this.setIn(['extensions', ext], value);
+  setExtension(ext: ExtensionType, value: boolean): Chord {
+    const newExt = this._props.extensions.set(ext, value);
+    return new Chord({ ...this._props, extensions : newExt })
   }
 
-  setExtensions(flags: ExtensionFlagsType): this {
-    return this.set('extensions', flags);
+  setExtensions(flags: ExtensionFlagsType): Chord {
+    return new Chord({ ...this._props, extensions : flags } );
   }
 
   getRootName(): string { return this.root.name(); }
@@ -162,7 +153,7 @@ export class Chord extends ChordRecord implements NamedNoteList {
   }
 
 
-  change_scale(newScale: Scale): this {
+  change_scale(newScale: Scale): Chord {
     // first try to protect the pitch, 
     // then go for scale degree.
 
@@ -194,13 +185,13 @@ export class Chord extends ChordRecord implements NamedNoteList {
 
     if (this._tones != undefined && this._tones.size > 0) return this._tones;
 
-    let tones = Map<number, Note>([]);
+    let tones = new Map<number, Note>();
 
     const degree = this.degree;
     const scale = this.scale;
 
     function add_tone(t: number) {
-      tones = tones.set(t, scale.get_note(degreeToScale(degree, t)));
+      tones.set(t, scale.get_note(degreeToScale(degree, t)));
     }
 
     add_tone(1);
@@ -430,7 +421,12 @@ export class Chord extends ChordRecord implements NamedNoteList {
 
   noteList(): List<Note> {
 
-    let retval = this.chordTones.toList();
+    
+    const ctl = [...this.chordTones.keys()].sort()
+        .map(k => this.chordTones.get(k) || new Note('C'));
+
+
+    let retval = ctl;
 
     if (this.inversion !== 'root') {
 
@@ -443,14 +439,51 @@ export class Chord extends ChordRecord implements NamedNoteList {
         case 'second': { offset = 2; break; }
       }
 
-      retval = retval.slice(offset, 1)
-        .concat(retval.slice(0, offset))
-        .concat(retval.slice(offset + 1))
+      const root = ctl.slice(offset, offset+1);
+      const bottom = ctl.slice(0, offset);
+      const top = ctl.slice(offset + 1);
+
+      retval = root.concat(bottom, top);
 
     }
 
-    return retval;
+    return List<Note>(retval);
   }
+
+  freeze() : Array<any> {
+
+    const p = this._props;
+
+    return [
+      Chord.classTag,
+      p.scale, p.degree,
+      p.chordType, p.inversion, p.extensions
+    ];
+    
+  }
+
+  toJSON() : any {
+      return this.freeze();
+  }
+
+  static thaw(p : Array<any>) : Chord {
+
+    if (p.length !== propKeys.length+1)
+        throw Error(`failed to thaw a Chord : ${p}`)
+
+    return new Chord({
+      scale: p[1],
+      degree: p[2],
+      chordType: p[3],
+      inversion: p[4],
+      extensions: ExtensionFlags(p[5]),
+    });
+
+
+  }
+
+  static get classTag() { return ':c'; }
+
 
 }
 

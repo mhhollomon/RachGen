@@ -5,7 +5,8 @@ import { MatTabChangeEvent } from '@angular/material/tabs';
 import { AudioService } from '../audio.service';
 import { PreferencesService } from '../services/preferences.service';
 import { CustomChord } from '../utils/custom-chord';
-import { Chord, ChordType, InversionType, NamedNoteList, voiceChord } from '../utils/music-theory/chord';
+import { Chord, ChordType, InversionType } from '../utils/music-theory/chord';
+import { NamedNoteList, voiceChord } from "../utils/music-theory/NamedNoteList";
 import { audition_pref } from '../services/pref-keys';
 
 @Component({
@@ -54,10 +55,10 @@ export class ChordEditDialogComponent {
   }
 
   get inversion() { return this.chord.inversion; }
-  set inversion(inv : InversionType) {this.chord = this.chord.set('inversion', inv)}
+  set inversion(inv : InversionType) {this.chord = this.chord.setInversion(inv)}
 
   get chordType() { return this.chord.chordType; }
-  set chordType(ct : ChordType) {this.chord = this.chord.set('chordType', ct)}
+  set chordType(ct : ChordType) {this.chord = this.chord.setChordType(ct)}
 
   get seventh() { return this.chord.extensions['7th']; }
   set seventh(v : boolean) { this.chord = this.chord.setExtension('7th', v)}

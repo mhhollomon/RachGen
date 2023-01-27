@@ -38,36 +38,56 @@ export const ALL_SCALE_TYPES = ['major', 'minor', 'mixolydian', 'dorian', 'lydia
 type ScaleTypeTuple = typeof ALL_SCALE_TYPES; 
 export type ScaleType = ScaleTypeTuple[number];
 
-export const ScaleRecord = Record({center : 'C', type : <ScaleType>('major')}
-);
 
-export class Scale extends ScaleRecord {
+export interface ScaleProps {
+    center : string,
+    type : ScaleType,
+}
+
+function defaultScaleProps() : ScaleProps {
+    return {center : 'C', type : 'major'}
+}
+
+export class Scale implements ScaleProps {
+    private _props : ScaleProps = defaultScaleProps();
+
+    get center() { return this._props.center; }
+    get type()   { return this._props.type; }
+
     private _root : Note;
-
     get root() { return this._root; }
 
-    private _notesCache : List<Note> = List<Note>([]);
+    private _notesCache : Note[] = [];
  
-    constructor(props? : string | object, type? : ScaleType) {
-        let newProps = {};
-        if (props != undefined ) {
-            if (typeof props === 'string') {
-                newProps = { center : props, type : type };
-            } else {
-                newProps = props;
-            }
+    constructor();
+    constructor(scale : Scale);
+    constructor(props : Partial<ScaleProps>);
+    constructor(center : string, type : ScaleType )
+    constructor(props? : string | Scale | Partial<ScaleProps>, type? : ScaleType) {
+        let newProps : Partial<ScaleProps> = {};
+
+        if (props == undefined) {
+        // take all defaults
+        } else if (typeof props === 'string' ) {
+            newProps.center = props;
+            if (type != undefined) newProps.type = type;
+        } else if (props instanceof Scale ) {
+            newProps = { center : props.center, type : props.type }
+        } else {
+            newProps = props;
         }
-        super(newProps);
+
+        this._props = { ...this._props, ...newProps };
 
         this._root = Note.fromString(this.center);
     }
 
     setCenter(newCenter : string) : Scale {
-        return new Scale({center : newCenter, type : this.type });
+        return new Scale({...this._props, center : newCenter  });
     }
 
     setType(newType : ScaleType) : Scale {
-        return new Scale({center : this.center, type : newType });
+        return new Scale({...this._props, type : newType });
     }
 
     rootName() {
@@ -91,7 +111,7 @@ export class Scale extends ScaleRecord {
     }
 
     private fill_note_cache() {
-        if (this._notesCache.size > 1)
+        if (this._notesCache.length > 1)
             return;
 
         const scaleSteps = scaleStepData[this.type];
@@ -102,7 +122,7 @@ export class Scale extends ScaleRecord {
             index += 1;
         }
     
-        this._notesCache = this._notesCache.push(this.root);
+        this._notesCache.push(this.root);
         
         let scaleDegree = 1;
         while (scaleDegree < 7) {
@@ -112,22 +132,22 @@ export class Scale extends ScaleRecord {
             const stepSize = gnd.prev;
             const neededStepSize = scaleSteps[scaleDegree];
     
-            let newAlter = this._notesCache.get(-1, this.root).alter;
+            let newAlter = this._notesCache.slice(-1)[0].alter;
     
             if (stepSize == neededStepSize) {
-            // We want this note, but it needs to be altered the same
-            // way that our current note is altered (to preserve the step size)
-    
-            // So, do nothing.
+                // We want this note, but it needs to be altered the same
+                // way that our current note is altered (to preserve the step size)
+        
+                // So, do nothing.
             } else if (stepSize < neededStepSize) {
-            // Need to alter this new note up one from the last;
-            newAlter += 1;
+                // Need to alter this new note up one from the last;
+                newAlter += 1;
             } else { // stepSize > neededStepSize
-            // Need to alter this new note down one from the last;
-            newAlter -= 1;
+                // Need to alter this new note down one from the last;
+                newAlter -= 1;
             }
     
-            this._notesCache = this._notesCache.push(new Note(gnd.name, newAlter));
+            this._notesCache.push(new Note(gnd.name, newAlter));
             scaleDegree += 1;
         }
     
@@ -135,7 +155,7 @@ export class Scale extends ScaleRecord {
 
     notesOfScale() : List<Note> {
         this.fill_note_cache();        
-        return this._notesCache;
+        return List<Note>(this._notesCache);
     }
 
     get_note(degree : number) : Note {
@@ -148,12 +168,7 @@ export class Scale extends ScaleRecord {
 
         const index = (degree-1) % 7;
         
-        const note = this._notesCache.get(index);
-
-        if (note == undefined) {
-            throw Error(`Note undefined for degree ${degree}`)
-        }
-
+        const note = this._notesCache[index];
         return note;
 
     }
@@ -190,5 +205,22 @@ export class Scale extends ScaleRecord {
 
         return retval;
     }
+
+    freeze() : Array<any> {
+        return [ Scale.classTag, this._props.center, this._props.type ];
+    }
+
+    toJSON() : any {
+        return this.freeze();
+    }
+
+    static thaw(p : Array<any>) : Scale {
+        if (p.length !== 3)
+            throw Error(`failed to thaw a Scale : ${p}`)
+
+        return new Scale({ center : p[1], type : p[2]});
+    }
+
+    static get classTag() { return ':s'; }
 
 }

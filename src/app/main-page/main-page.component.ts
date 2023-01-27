@@ -1,6 +1,6 @@
-import { AfterViewInit, Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import { BehaviorSubject, filter, map, take } from 'rxjs';
+import { BehaviorSubject, filter, map, mergeMap, Subject, take, takeUntil } from 'rxjs';
 import { List } from 'immutable';
 
 import { MatDialog } from '@angular/material/dialog';
@@ -10,11 +10,13 @@ import {CdkDragDrop} from '@angular/cdk/drag-drop';
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
 import { ScaleService } from '../scale.service';
 import { RandomChordService, RandomChordError } from '../random-chord.service';
-import { Chord, NamedNoteList, voiceChord } from '../utils/music-theory/chord';
+import { Chord } from '../utils/music-theory/chord';
+import { NamedNoteList, voiceChord } from "../utils/music-theory/NamedNoteList";
 import { Scale, ScaleType } from '../utils/music-theory/scale';
 import { Note } from '../utils/music-theory/note';
 import { AudioService } from '../audio.service';
-import { MidiDialogComponent, MidiConfig, defaultMidiConfig } from '../midi-dialog/midi-dialog.component';
+import { MidiDialogComponent } from '../midi-dialog/midi-dialog.component';
+import { MidiConfig, defaultMidiConfig } from "../models/MidiConfig";
 import { PreferencesService } from '../services/preferences.service';
 import { ChordEditDialogComponent } from '../chord-edit-dialog/chord-edit-dialog.component';
 import { GeneratorOptions, defaultGeneratorOptions } from '../generator-options/generator-options.component';
@@ -31,12 +33,14 @@ interface genListReturn {
   scale : Scale;
 }
 
+const weDied$ : Subject<boolean> = new Subject<boolean>();
+
 @Component({
   selector: 'app-main-page',
   templateUrl: './main-page.component.html',
   styleUrls: ['./main-page.component.scss'],
 })
-export class MainPageComponent implements OnInit, AfterViewInit {
+export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   generateOptions : GeneratorOptions = defaultGeneratorOptions();
 
@@ -103,35 +107,32 @@ export class MainPageComponent implements OnInit, AfterViewInit {
 
     console.log("main-page ngOnInit called")
 
-    const midi_pref = this.preferences.read('midi', this.midi_config);
-
-    if (! ('fileName' in midi_pref)) {
-      midi_pref['fileName'] = defaultMidiConfig().fileName; 
-    }
-
-    this.midi_config = midi_pref as MidiConfig;
-
 
     // Snag any changes to the midi preferences.
-    this.preferences.prefChange.pipe(filter((k)=> k === 'midi')).subscribe(() => {
-      Object.assign(this.midi_config, this.preferences.read('midi', this.midi_config));
+    this.mainPageStore.midi_config$.pipe(takeUntil(weDied$)).subscribe( m => {
+      this.midi_config = { ...m};
     });
 
     // Listen for changes in the default_scale
-    this.default_scale$.subscribe((newScale) => {
+    this.default_scale$.pipe(takeUntil(weDied$)).subscribe((newScale) => {
           this.default_scale = newScale;
     });
 
-    this.any_chords_locked$.subscribe((v) => { this.any_chords_locked = v; })
+    this.any_chords_locked$.pipe(takeUntil(weDied$)).subscribe((v) => { this.any_chords_locked = v; })
 
-    this.chord_list$.subscribe(this.current_chords$);
-    this.chord_list$.pipe(map(cl => cl.length)).subscribe(num => { this.chord_count = num; });
+    this.chord_list$.pipe(takeUntil(weDied$)).subscribe(this.current_chords$);
+    this.chord_list$.pipe(takeUntil(weDied$)).pipe(map(cl => cl.length)).subscribe(num => { this.chord_count = num; });
 
   }
 
   ngAfterViewInit(): void {
-    console.log("random-chord afterViewInit called")
+    console.log("main-page afterViewInit called")
     this._expansion_panel.close();
+  }
+
+  ngOnDestroy() {
+    console.log("main-page onDestroy called")
+    weDied$.next(true);
   }
 
   get chord_count_max() : number {
@@ -603,9 +604,11 @@ export class MainPageComponent implements OnInit, AfterViewInit {
   show_midi_dialog() {
     console.log("Showing midi dialog");
 
-    const dialogRef = this.dialog.open(MidiDialogComponent, {data : Object.assign({}, this.midi_config)});
 
-    dialogRef.afterClosed().subscribe(result => {
+    this.mainPageStore.midi_config$.pipe(
+      take(1), 
+      mergeMap(m => this.dialog.open(MidiDialogComponent, {data : m }).afterClosed()
+    )).subscribe(result => {
       console.log(`dialog = ${result}`);
 
       if (result) {

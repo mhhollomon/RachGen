@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { defaultMidiConfig, MidiConfig } from '../midi-dialog/midi-dialog.component';
+import { defaultMidiConfig, MidiConfig } from "../models/MidiConfig";
 
 @Component({
   selector: 'app-midi-config-form',

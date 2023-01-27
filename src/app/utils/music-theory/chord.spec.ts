@@ -11,13 +11,13 @@ describe('Chord', () => {
 
 describe('Chord.name', () => {
   it('should handle major triads', () => {
-    const c = new Chord(new Scale('C'), 1, 'triad', 'root');
+    const c = new Chord(new Scale('C', 'major'), 1, 'triad', 'root');
 
     expect(c.name()).toBe('C');
 
-    expect(c.setScale(new Scale('Bb')).name()).toBe('Bb');
+    expect(c.setScale(new Scale('Bb', 'major')).name()).toBe('Bb');
 
-    expect(c.setScale(new Scale('D')).name()).toBe('D');
+    expect(c.setScale(new Scale('D', 'major')).name()).toBe('D');
 
   });
 
@@ -35,11 +35,11 @@ describe('Chord.name', () => {
   it('should handle diminished triads', () => {
     const c = new Chord().setDegree(7);
 
-    expect(c.setScale(new Scale('Db')).name()).toBe('Cdim');
+    expect(c.setScale(new Scale('Db', 'major')).name()).toBe('Cdim');
 
-    expect(c.setScale(new Scale('Cb')).name()).toBe('Bbdim');
+    expect(c.setScale(new Scale('Cb', 'major')).name()).toBe('Bbdim');
 
-    expect(c.setScale(new Scale('Eb')).name()).toBe('Ddim');
+    expect(c.setScale(new Scale('Eb', 'major')).name()).toBe('Ddim');
 
   }); 
 
@@ -176,9 +176,11 @@ describe('Chord.noteList', () => {
     const c = new Chord(new Scale('E', 'major'), 1, 'triad', 'first')
       .setExtensions(ExtensionFlags({ '7th' : false,  '9th' : true, '11th' : false}));
 
-    expect(c.noteList()).toEqual(
-      List<Note>([new Note("G", 1), new Note("E"), new Note('B'), new Note("F", 1)])
-    )
+    const expected = List<Note>([new Note("G", 1), 
+        new Note("E"), new Note('B'), new Note("F", 1)]);
+
+
+    expect(c.noteList().equals(expected)).toBeTrue();
 
   });
 });

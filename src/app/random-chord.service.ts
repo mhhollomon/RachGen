@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Chooser, equalWeightedChooser, mkch, yesno } from './utils/chooser';
-import { Chord, ChordType, ExtensionType, InversionType, NamedNoteList } from './utils/music-theory/chord';
+import { Chord, ChordType, ExtensionType, InversionType } from './utils/music-theory/chord';
+import { NamedNoteList } from "./utils/music-theory/NamedNoteList";
 import { Scale, ScaleType } from './utils/music-theory/scale';
 import { ScaleService } from './scale.service';
 import { range } from './utils/util-library';

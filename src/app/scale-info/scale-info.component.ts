@@ -15,7 +15,7 @@ interface scale_note_info {
 })
 export class ScaleInfoComponent implements OnInit {
 
-  private _scale = new Scale([]);
+  private _scale = new Scale();
 
   table_data : scale_note_info[] = [];
   displayedColumns: string[] = ['degree', 'note', 'triad', 'roman'];

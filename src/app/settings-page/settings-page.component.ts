@@ -1,10 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ConfirmActionDialogComponent } from '../confirm-action-dialog/confirm-action-dialog.component';
-import { defaultMidiConfig, MidiConfig } from '../midi-dialog/midi-dialog.component';
-import { PreferencesService } from '../services/preferences.service';
-import { midi_key } from '../services/pref-keys';
+import { defaultMidiConfig, MidiConfig } from "../models/MidiConfig";
+import { MainPageStore } from '../store/main-page-store';
+import {  Subscription, take } from 'rxjs';
 
 
 interface TopicData {
@@ -15,7 +15,7 @@ interface TopicData {
 
 const topics : { [ index : string ] : TopicData } = {
   'general' : { name : 'general', title : 'General'  },
-  'midi'    : { name : 'midi',    title : 'Midi', pref : midi_key  },
+  'midi'    : { name : 'midi',    title : 'Midi'     },
 }
 
 const topicList = Object.keys(topics);
@@ -25,27 +25,34 @@ const topicList = Object.keys(topics);
   templateUrl: './settings-page.component.html',
   styleUrls: ['./settings-page.component.scss']
 })
-export class SettingsPageComponent implements OnInit {
+export class SettingsPageComponent implements OnInit, OnDestroy {
 
   currentTopic : TopicData = { name : 'bad-link', title : 'bad Link'};
   topicList = topicList;
   topic_data = topics;
 
-  public midi_config : MidiConfig;
+  public midi_config : MidiConfig = defaultMidiConfig();
   config_changed = false;
+
+
+  private subscriptions : Subscription[] = [];
 
   constructor(
     private activeRoute: ActivatedRoute, 
     private router : Router,
     public dialog: MatDialog, 
-    private prefs : PreferencesService,
+    private prefStore : MainPageStore,
   ){
 
-    this.midi_config = this.prefs.read(midi_key, defaultMidiConfig());
   }
 
   ngOnInit() {
-    this.activeRoute.params.subscribe((params) => {
+
+    this.prefStore.midi_config$.pipe(take(1)).subscribe(
+      m => { this.midi_config = { ...m }; }
+    );
+
+    const sub = this.activeRoute.params.subscribe((params) => {
       const input_topic = params['topic'];
       let topic = input_topic;
 
@@ -62,8 +69,14 @@ export class SettingsPageComponent implements OnInit {
         }
       }
 
+    this.subscriptions.push(sub);
+
 
     });
+  }
+
+  ngOnDestroy(): void {
+      this.subscriptions.forEach(s => s.unsubscribe() )
   }
 
 
@@ -90,7 +103,7 @@ export class SettingsPageComponent implements OnInit {
 
     dia.afterClosed().subscribe((data) => {
       if (data) {
-        this.prefs.clear_settings();
+        this.prefStore.clear_settings();
       }
     });
 
@@ -99,7 +112,7 @@ export class SettingsPageComponent implements OnInit {
   reset_to_defaults() {
     switch(this.currentTopic.name) {
       case 'midi' : 
-        this.prefs.drop(midi_key);
+        this.prefStore.update_midi_config(defaultMidiConfig());
         this.midi_config = defaultMidiConfig();
         break;
 
@@ -110,13 +123,14 @@ export class SettingsPageComponent implements OnInit {
   }
 
   reset_to_prefs() {
-    if (! this.currentTopic.pref) return;
 
     this.config_changed = false;
 
     switch(this.currentTopic.name) {
       case 'midi' : 
-        this.midi_config = this.prefs.read(this.currentTopic.pref, defaultMidiConfig());
+        this.prefStore.midi_config$.pipe(take(1)).subscribe(
+          m => {this.midi_config = { ...m}}
+        ) 
         break;
 
       default :
@@ -132,10 +146,9 @@ export class SettingsPageComponent implements OnInit {
 
   apply_settings() {
     if (! this.config_changed) return;
-    if (! this.currentTopic.pref) return;
     switch(this.currentTopic.name) {
       case 'midi' : 
-        this.prefs.write(this.currentTopic.pref, this.midi_config);
+        this.prefStore.update_midi_config(this.midi_config);
         this.config_changed = false;
         break;
 

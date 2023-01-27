@@ -189,4 +189,23 @@ export class Note implements ValueObject {
         return new Note(noteClass, computedAlter);
 
     }
+
+    freeze() : Array<any> {
+        return [ Note.classTag, this._noteClass, this._alter ];
+    }
+
+    toJSON() : any {
+        return this.freeze();
+    }
+
+    static thaw(p : Array<any>) : Note {
+        if (p.length !== 3)
+            throw Error(`failed to thaw a Note : ${p}`)
+
+        return new Note(p[1], p[2]);
+    }
+
+    static get classTag() { return ':n'; }
+
+
 }
