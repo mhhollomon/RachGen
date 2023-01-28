@@ -216,7 +216,7 @@
     <div *ngIf="options.modes_on">
         <br>
         <label>Mode Shift Probability</label>
-        <mat-slider min="1" max="30" step="1" *ngIf="options.modes_on" [disabled]="!options.modes_on" discrete [displayWith]="yesno_slider_ticks" 
+        <mat-slider min="10" max="100" step="5" *ngIf="options.modes_on" [disabled]="!options.modes_on" discrete [displayWith]="yesno_slider_ticks" 
                 matTooltip="set probability for mode shift">
             <input matSliderThumb [(ngModel)]="options.mode_percent">
         </mat-slider>

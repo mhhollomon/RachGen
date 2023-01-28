@@ -297,7 +297,7 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
   async gen_list(fn? : (data : genListReturn) => void ) {
-    const dia = this.dialog.open(NewListDialogComponent, { data : Object.assign({}, this.generateOptions) });
+    const dia = this.dialog.open(NewListDialogComponent, {maxHeight : "95vh", data : Object.assign({}, this.generateOptions) });
 
     dia.afterClosed().pipe(filter((o) => !!o)).subscribe((opts) => {
       this.all_play_active = false;

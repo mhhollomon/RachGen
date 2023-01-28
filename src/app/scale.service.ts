@@ -21,12 +21,13 @@ const sigChooser = new Chooser<number>([
 const sigOffset = 4;
 
 const sigNames = {
-  lydian :      [ 'Db', 'Ab', 'Eb', 'Bb', 'F', 'C', 'G',  'D',  'A'  ],
-  major  :      [ 'Ab', 'Eb', 'Bb', 'F',  'C', 'G', 'D',  'A',  'E'  ],
-  mixolydian  : [ 'Eb', 'Bb', 'F',  'C',  'G', 'D', 'A',  'E',  'B'  ],
-  dorian      : [ 'Bb', 'F',  'C',  'G',  'D', 'A', 'E',  'B',  'F#' ],
-  minor  :      [ 'F',  'C',  'G',  'D',  'A', 'E', 'B',  'F#', 'Db' ],
-  phrygian    : [ 'C',  'G',  'D',  'A',  'E', 'B', 'F#', 'Db', 'Ab' ],
+  lydian     : [ 'Db', 'Ab', 'Eb', 'Bb', 'F', 'C',  'G',  'D',  'A'  ],
+  major      : [ 'Ab', 'Eb', 'Bb', 'F',  'C', 'G',  'D',  'A',  'E'  ],
+  mixolydian : [ 'Eb', 'Bb', 'F',  'C',  'G', 'D',  'A',  'E',  'B'  ],
+  dorian     : [ 'Bb', 'F',  'C',  'G',  'D', 'A',  'E',  'B',  'F#' ],
+  minor      : [ 'F',  'C',  'G',  'D',  'A', 'E',  'B',  'F#', 'Db' ],
+  phrygian   : [ 'C',  'G',  'D',  'A',  'E', 'B',  'F#', 'Db', 'Ab' ],
+  locrian    : [ 'G',  'D',  'A',  'E',  'B', 'F#', 'Db', 'Ab', 'Eb' ],
 
 }
 

@@ -1,5 +1,5 @@
 
-import { List, Record } from 'immutable';
+import { List } from 'immutable';
 
 import { capitalize } from '../util-library';
 import { Chord } from './chord';
@@ -25,16 +25,17 @@ const genericNotes : GenericNoteData[] = [
 
 /* number of semi-tones between notes */
 const scaleStepData = {
-    major :     [0, 2, 2, 1, 2, 2, 2 ],
     lydian :    [0, 2, 2, 2, 1, 2, 2 ],
+    major :     [0, 2, 2, 1, 2, 2, 2 ],
     mixolydian: [0, 2, 2, 1, 2, 2, 1 ],
     dorian :    [0, 2, 1, 2, 2, 2, 1 ],
     minor :     [0, 2, 1, 2, 2, 1, 2 ],
-    phrygian :  [0, 1, 2, 2, 1, 2, 2 ],
+    phrygian :  [0, 1, 2, 2, 2, 1, 2 ],
+    locrian :   [0, 1, 2, 2, 1, 2, 2 ],
     augmented : [0, 2, 2, 2, 2, 1, 2 ],
   } as const;
 
-export const ALL_SCALE_TYPES = ['major', 'minor', 'mixolydian', 'dorian', 'lydian', 'phrygian' ] as const;
+export const ALL_SCALE_TYPES = ['major', 'minor', 'mixolydian', 'dorian', 'lydian', 'phrygian', 'locrian' ] as const;
 type ScaleTypeTuple = typeof ALL_SCALE_TYPES; 
 export type ScaleType = ScaleTypeTuple[number];
 
