@@ -1,7 +1,7 @@
 import { Injectable, Inject, EventEmitter } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { PreferencesService } from './preferences.service';
-import { filter } from 'rxjs';
+import { BehaviorSubject, filter } from 'rxjs';
 
 
 export type ThemeType = 'dark' | 'light';
@@ -15,7 +15,7 @@ const default_theme : ThemeType = 'light';
 export class ThemeService {
 
   private theme : ThemeType = 'light';
-  public themeChange = new EventEmitter();
+  public themeChange = new BehaviorSubject<string>('light');
 
   constructor(
     @Inject(DOCUMENT) private document: Document,
@@ -46,7 +46,7 @@ export class ThemeService {
       }
 
       this.theme = newTheme;
-      this.themeChange.emit(newTheme);
+      this.themeChange.next(newTheme);
       this.prefs.write(prefs_key, newTheme)
     }
 

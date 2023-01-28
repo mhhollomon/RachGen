@@ -6,9 +6,13 @@
 .small-input {
     // This is tuned to make two of them 
     // the same size as one "normal"
-    max-width: 106px;
+    max-width: 80px;
+    margin-right : 10px;
 }
 
+.small-form-field {
+    max-width : 10rem;
+}
 
 .param-container {
     display: flex;
@@ -16,16 +20,105 @@
     gap : 1rem;
 }
 
-.chord-type-container {
-    display : flex;
-    flex-direction: row;
+.selection-group-container {
+    display : grid;
+    grid-template-columns: [name-column] 8rem [value-column] 1fr;
+    margin : 0.5rem 0.5rem 1rem;
 }
 
-.chord-type-checkbox-container {
+.modal-group-container {
+    display : grid;
+    grid-template-columns: [name-column] 4rem [value-column] 1fr;
+    margin-top : 0.5rem;
+    align-items : center;
+}
+
+.key-group-container {
+    display : grid;
+    grid-template-columns: [name-column] 8rem [value-column] 1fr;
+    margin : 0.5rem;
+}
+
+
+.settings-label {
+    grid-column-start : name-column;
+}
+
+.single-setting {
+    grid-column-start: value-column;
+}
+
+$column-width : 11rem;
+
+.selection-setting-container {
+    display : grid;
+    grid-template-columns: $column-width;
+}
+
+@media only screen and (min-width : 550px ) {
+    .selection-setting-container {
+        grid-template-columns: repeat(2, $column-width);
+    }
+}
+
+@media only screen and (min-width : 750px ) {
+    .selection-setting-container {
+        grid-template-columns: repeat(3, $column-width);
+    }
+}
+
+.skinny-label {
+    margin-top : 0.5rem;
+}
+
+
+
+.key-setting {
+    grid-column-start: value-column;
     display : flex;
-    flex-direction: row;
     flex-wrap: wrap;
-    gap : 0.5rem;
+}
+
+.key-checkbox {
+    height : 8 rem;
+}
+
+@media only screen and (min-width : 750px ) {
+
+    .key-checkbox {
+        height : 5.5rem;
+    }
+
+}
+
+.modal-setting {
+    grid-column-start: value-column;
+    display : flex;
+    flex-wrap: wrap;
+}
+
+@media only screen and (min-width : 750px ) {
+    .modal-setting {
+        flex-wrap: nowrap;
+        margin-left : 0.5rem;
+    }
+}
+
+
+.mode-checkbox {
+    height : 5.5rem;
+}
+
+@media only screen and (min-width : 750px ) {
+
+    .mode-checkbox {
+        height : 8rem;
+    }
+
+}
+
+.all-mode-settings {
+    margin-top : 0.25rem;
 }
 
 .general-params-container {
@@ -75,4 +168,23 @@
 
 .config-action-button {
     margin-right : 0.5rem;
+}
+
+
+.check-box-container {
+    display : flex;
+    align-items: center;
+    justify-items : center;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    border-right : 1px solid gray;
+}
+
+
+.check-box-container:last-child {
+    border-right : none;
+}
+
+.check-box-label {
+    width: 3rem;
 }

@@ -5,7 +5,7 @@
 
         <!-- Duplicates -->
         <div class="general-params-item">
-            <mat-form-field>
+            <mat-form-field class="small-form-field">
                 <mat-label>Duplicates</mat-label>
                 <mat-select matNativeControl [value]="duplicates" (selectionChange)="duplicate_change($event)" >
                     <mat-option value="none">None</mat-option>
@@ -19,32 +19,28 @@
         <!-- Two different modes "ranged" and "single" -->
         <div class="general-params-item chord-count-container">
 
+            <!--   Raange Count Mode -->
             <ng-template [ngIf]="count_range_mode" [ngIfElse]="singleRangeMode">
-            <div class="chord-count-input">
-                <mat-form-field  class="small-input">
-                    <mat-label>Min Count</mat-label>
-                    <input name="chord_count" matNativeControl type="number" [disabled]="any_chords_locked()"
-                        [max]="chord_count_max" min="1" required [(ngModel)]="count.min" #min_count_control="ngModel">
-                    <mat-error *ngIf="min_count_control.invalid">count &lt;{{chord_count_max}} and &gt;1</mat-error>
-                </mat-form-field>
-                <mat-form-field class="small-input">
-                    <mat-label>Max Count</mat-label>
-                    <input name="chord_count" matNativeControl type="number" [disabled]="any_chords_locked()"
-                        [max]="chord_count_max" min="1" required [(ngModel)]="count.max" #max_count_control="ngModel">
-                    <mat-error *ngIf="max_count_control.invalid">count &lt;{{chord_count_max}} and &gt;1</mat-error>
-                </mat-form-field>
-            </div>
-            <div class="chord-count-slider">
-                <mat-slider class="chord-count-slider-width" min="1" [max]="chord_count_max" step="1" [disabled]="any_chords_locked()"
-                            matTooltip="Set range of number of chords to generate">
-                    <input matSliderStartThumb [(ngModel)]="count.min">
-                    <input matSliderEndThumb [(ngModel)]="count.max">
-            </mat-slider> 
-            </div>
+                <div class="chord-count-input">
+                    <mat-form-field  class="small-input">
+                        <mat-label>Min Count</mat-label>
+                        <input name="chord_count" matNativeControl type="number" [disabled]="any_chords_locked()"
+                            [max]="chord_count_max" min="1" required [(ngModel)]="count.min" #min_count_control="ngModel">
+                        <mat-error *ngIf="min_count_control.invalid">count &lt;{{chord_count_max}} and &gt;1</mat-error>
+                    </mat-form-field>
+                    <mat-form-field class="small-input">
+                        <mat-label>Max Count</mat-label>
+                        <input name="chord_count" matNativeControl type="number" [disabled]="any_chords_locked()"
+                            [max]="chord_count_max" min="1" required [(ngModel)]="count.max" #max_count_control="ngModel">
+                        <mat-error *ngIf="max_count_control.invalid">count &lt;{{chord_count_max}} and &gt;1</mat-error>
+                    </mat-form-field>
+                </div>
             </ng-template>
+
+            <!--   Single Count Mode -->
             <ng-template #singleRangeMode>
                 <div class="chord-count-input">
-                    <mat-form-field>
+                    <mat-form-field class="small-form-field">
                         <mat-label>Chord Count</mat-label>
                         <input name="chord_count" matNativeControl type="number" [disabled]="any_chords_locked()"
                             [max]="chord_count_max" min="1" required [(ngModel)]="count.min" #single_min_count_control="ngModel">
@@ -68,169 +64,195 @@
 </div>
 
 <!-- Action Buttons -->
-<div class="ma2">
-    <button mat-stroked-button color="darker" class="config-action-button" (click)="turn_on_all()" matTooltip="Turn on all selections">All The Feels</button>
-    <button mat-stroked-button color="darker" (click)="set_defaults()" matTooltip="Set selections and sliders to defaults">Reset</button>
+<div class="selection-group-container" >
+    <mat-label  class="mr2 mt2 mhh-mat-label settings-label">Presets</mat-label>
+    <div class="selection-setting-container">
+        <button mat-stroked-button color="darker" class="config-action-button" (click)="turn_on_all()" matTooltip="Turn on all selections">All The Feels</button>
+        <button mat-stroked-button color="darker" class="config-action-button" (click)="set_defaults()" matTooltip="Set selections and sliders to defaults">Reset</button>
+    </div>
 </div>
+
+<mat-divider></mat-divider>
+
 <!-- Chord Type Selection -->
-<div class="ma2 chord-type-container" >
-    <mat-label id="chord-type-label" class="mr2 mt2 mhh-mat-label">Chord Types</mat-label>
-    <div class="chord-type-checkbox-container">
-        <div id="Triads">
-            <mat-checkbox [(ngModel)]="chordTypes['triad'].flag" (change)="ct_checkbox_change()" matTooltip="Allow Triads to be generated">Triads</mat-checkbox>
-            <br>
-            <mat-slider min="1" max="5" step="0.25" [disabled]="!chordTypes['triad'].flag" discrete [displayWith]="mk_ct_slider_func('triad')"
-                    matTooltip="Set the relative weighting for triads">
-                <input matSliderThumb [(ngModel)]="chordTypes['triad'].weight">
-            </mat-slider>
+<div class="selection-group-container" >
+    <mat-label  class="mr2 mt2 mhh-mat-label settings-label">Chord Types</mat-label>
+    <div class="selection-setting-container setting-group">
+        <div id="Triads" class="check-box-container">
+            <label class="check-box-label">Triads</label>
+            <mat-checkbox [(ngModel)]="chordTypes['triad'].flag" (change)="ct_checkbox_change()" matTooltip="Allow Triads to be generated"></mat-checkbox>
+            
+            <app-popup-slider [min]="1" [max]="5" [(value)]="chordTypes['triad'].weight"
+                    [disabled]="!chordTypes['triad'].flag" 
+                    [step]="0.25" toolTip="Set the relative weighting for triads"></app-popup-slider>
+
         </div>
 
-        <div id="Sus2">
-            <mat-checkbox [(ngModel)]="chordTypes['sus2'].flag"  (change)="ct_checkbox_change()" matTooltip="Allow sus2 chords to be generated">Sus2</mat-checkbox>
-            <br>
-            <mat-slider min="1" max="5" step="0.25"  [disabled]="!chordTypes['sus2'].flag" discrete [displayWith]="mk_ct_slider_func('sus2')"
-                    matTooltip="Set the relative weighting for sus2">
-                <input matSliderThumb [(ngModel)]="chordTypes['sus2'].weight">
-            </mat-slider>
+        <div id="Sus2" class="check-box-container">
+            <label class="check-box-label">Sus2</label>
+            <mat-checkbox [(ngModel)]="chordTypes['sus2'].flag"  (change)="ct_checkbox_change()" matTooltip="Allow sus2 chords to be generated"></mat-checkbox>
+            
+            <app-popup-slider [min]="1" [max]="5" [(value)]="chordTypes['sus2'].weight"
+                    [disabled]="!chordTypes['sus2'].flag" 
+                    [step]="0.25" toolTip="Set the relative weighting for sus2"></app-popup-slider>
         </div>
 
-        <div id="Sus4">
-            <mat-checkbox [(ngModel)]="chordTypes['sus4'].flag" (change)="ct_checkbox_change()" matTooltip="Allow sus4 chords to be generated">Sus4</mat-checkbox>
-            <br>
-            <mat-slider min="1" max="5" step="0.25"  [disabled]="!chordTypes['sus4'].flag" discrete [displayWith]="mk_ct_slider_func('sus4')"
-                    matTooltip="Set the relative weighting for sus4">
-                <input matSliderThumb [(ngModel)]="chordTypes['sus4'].weight">
-            </mat-slider>
+        <div id="Sus4" class="check-box-container">
+            <label class="check-box-label">Sus4</label>
+            <mat-checkbox [(ngModel)]="chordTypes['sus4'].flag" (change)="ct_checkbox_change()" matTooltip="Allow sus4 chords to be generated"></mat-checkbox>
+            
+            <app-popup-slider [min]="1" [max]="5" [(value)]="chordTypes['sus4'].weight"
+                    [disabled]="!chordTypes['sus4'].flag" 
+                    [step]="0.25" toolTip="Set the relative weighting for sus4"></app-popup-slider>
         </div>
 
     </div>
 </div> 
+
+<mat-divider></mat-divider>
 
 <!-- Extensions -->
-<div class="ma2 chord-type-container" >
-    <mat-label class="mr2 mt2 mhh-mat-label">Extensions</mat-label>
-    <div class="chord-type-checkbox-container">        
-        <div>
-            <mat-checkbox [(ngModel)]="extensions['7th'].flag" matTooltip="Allow 7th chords to be generated">7ths</mat-checkbox>
+<div class="selection-group-container" >
+    <mat-label class="mr2 mt2 mhh-mat-label settings-label">Extensions</mat-label>
+    <div class="selection-setting-container">        
+        <div class="check-box-container">
+            <label class="check-box-label">7th</label>
+            <mat-checkbox [(ngModel)]="extensions['7th'].flag" labelPosition="before" matTooltip="Allow 7th chords to be generated"></mat-checkbox>
+
+            <app-popup-slider [min]="20" [max]="80" [(value)]="extensions['7th'].weight"
+                    [disabled]="!extensions['7th'].flag" 
+                    [step]="5" [toolTip]="'Set the relative weighting for 7ths'"></app-popup-slider>
+
             <br>
-            <mat-slider min="20" max="80" step="5"  [disabled]="!extensions['7th'].flag" discrete [displayWith]="yesno_slider_ticks"
-                            matTooltip="Set the relative weighting for 7ths">
-                <input matSliderThumb [(ngModel)]="extensions['7th'].weight">
-            </mat-slider>
         </div>        
-        <div>
-            <mat-checkbox [(ngModel)]="extensions['9th'].flag" matTooltip="Allow 9th chords to be generated">9ths</mat-checkbox>
-            <br>
-            <mat-slider min="20" max="80" step="5"  [disabled]="!extensions['9th'].flag" discrete [displayWith]="yesno_slider_ticks" 
-                            matTooltip="Set the relative weighting for 9ths">
-                <input matSliderThumb [(ngModel)]="extensions['9th'].weight">
-            </mat-slider>
+        <div class="check-box-container">
+            <label class="check-box-label">9th</label>
+            <mat-checkbox [(ngModel)]="extensions['9th'].flag" labelPosition="before" matTooltip="Allow 9th chords to be generated"></mat-checkbox>
+
+            <app-popup-slider [min]="20" [max]="80" [(value)]="extensions['9th'].weight"
+                [disabled]="!extensions['9th'].flag" 
+                [step]="5" [toolTip]="'Set the relative weighting for 9ths'"></app-popup-slider>
         </div>
-        <div>
-            <mat-checkbox [(ngModel)]="extensions['11th'].flag" matTooltip="Allow 11th chords to be generated">11ths</mat-checkbox>
-            <br>
-            <mat-slider min="20" max="80" step="5"  [disabled]="!extensions['11th'].flag" discrete [displayWith]="yesno_slider_ticks"
-                            matTooltip="Set the relative weighting for 11ths">
-                <input matSliderThumb [(ngModel)]="extensions['11th'].weight">
-            </mat-slider>
+        <div class="check-box-container">
+            <label class="check-box-label">11th</label>
+            <mat-checkbox [(ngModel)]="extensions['11th'].flag" labelPosition="before" matTooltip="Allow 11th chords to be generated"></mat-checkbox>
+
+            <app-popup-slider [min]="20" [max]="80" [(value)]="extensions['11th'].weight"
+                [disabled]="!extensions['11th'].flag" 
+                [step]="5" [toolTip]="'Set the relative weighting for 11ths'"></app-popup-slider>
         </div>
     </div>
 </div> 
+
+<mat-divider></mat-divider>
 
 <!-- Inversions -->
-<div class="ma2 chord-type-container" >
-    <mat-label class="mr2 mt2 mhh-mat-label">Inversions</mat-label>
-    <div class="chord-type-checkbox-container">        
-        <div>
-            <mat-checkbox [(ngModel)]="inversions['root'].flag" matTooltip="Allow root inversions to be generated">Root</mat-checkbox>
-            <br>
-            <mat-slider min="1" max="5" step="0.5"  [disabled]="!inversions['root'].flag" discrete [displayWith]="mk_inv_slider_func('root')"
-                        matTooltip="Set the relative weighting for root inversions">
-                <input matSliderThumb [(ngModel)]="inversions['root'].weight">
-            </mat-slider>
+<div class="selection-group-container" >
+    <mat-label class="mr2 mt2 mhh-mat-label settings-label">Inversions</mat-label>
+    <div class="selection-setting-container">        
+        <div class="check-box-container">
+            <label class="check-box-label">Root</label>
+            <mat-checkbox [(ngModel)]="inversions['root'].flag" labelPosition="before" matTooltip="Allow root inversions to be generated"></mat-checkbox>
+            <app-popup-slider [min]="1" [max]="5" [(value)]="inversions['root'].weight"
+                [disabled]="!inversions['root'].flag" 
+                [step]="0.25" toolTip="Set the relative weighting for root inversions"></app-popup-slider>
+
         </div>
-        <div>
-            <mat-checkbox [(ngModel)]="inversions['first'].flag" matTooltip="Allow first inversions to be generated">First Inv</mat-checkbox>
-            <br>
-            <mat-slider min="1" max="5" step="0.5"  [disabled]="!inversions['first'].flag" discrete [displayWith]="mk_inv_slider_func('first')"
-                    matTooltip="Set the relative weighting for first inversios">
-                <input matSliderThumb [(ngModel)]="inversions['first'].weight">
-            </mat-slider>
+        <div class="check-box-container">
+            <label class="check-box-label">First</label>
+            <mat-checkbox [(ngModel)]="inversions['first'].flag" labelPosition="before" matTooltip="Allow first inversions to be generated"></mat-checkbox>
+            <app-popup-slider [min]="1" [max]="5" [(value)]="inversions['first'].weight"
+                [disabled]="!inversions['first'].flag" 
+                [step]="0.25" toolTip="Set the relative weighting for first inversions"></app-popup-slider>
         </div>
-        <div>
-            <mat-checkbox [(ngModel)]="inversions['second'].flag" matTooltip="Allow second inversions to be generated">Second Inv</mat-checkbox>
-            <br>
-            <mat-slider min="1" max="5" step="0.5"  [disabled]="!inversions['second'].flag" discrete [displayWith]="mk_inv_slider_func('second')"
-                        matTooltip="Set the relative weighting for second inversios">
-                <input matSliderThumb [(ngModel)]="inversions['second'].weight">
-            </mat-slider>
+        <div class="check-box-container">
+            <label class="check-box-label">Second</label>
+            <mat-checkbox [(ngModel)]="inversions['second'].flag" labelPosition="before" matTooltip="Allow second inversions to be generated"></mat-checkbox>
+            <app-popup-slider [min]="1" [max]="5" [(value)]="inversions['second'].weight"
+                [disabled]="!inversions['second'].flag" 
+                [step]="0.25" toolTip="Set the relative weighting for second inversions"></app-popup-slider>
         </div>
     </div>
 </div> 
 
+<mat-divider></mat-divider>
+
 <!-- Key Selection  -->
-<div class="ma2">
-    <label class="mhh-mat-label">Key</label>
-    <mat-radio-group name="key_source" [value]="options.key_source" (change)="scale_source_change($event)">
-        <mat-radio-button value="Random" matTooltip="Let the computer choose the key">Random</mat-radio-button>
-        <mat-radio-button value="Selected" matTooltip="You pick the key">Selected</mat-radio-button>
-    </mat-radio-group>
+<div class="key-group-container">
+    <label class="mhh-mat-label settings-label skinny-label">Key/Scale</label>
 
-    
-    <div class="mt2 mh4 param-container" *ngIf="options.key_source === 'Selected'">
+    <div class="key-setting">        
+        <div class="key-checkbox">
+            <mat-radio-group name="key_source" [value]="options.key_source" (change)="scale_source_change($event)">
+                <mat-radio-button class="db" value="Random" matTooltip="Let the computer choose the key">Random</mat-radio-button>
+                <mat-radio-button class="db" value="Selected" matTooltip="You pick the key">Selected</mat-radio-button>
+            </mat-radio-group>
+        </div>
 
-        <!-- Sonority -->
-        <mat-form-field>
-            <mat-label>Tonality</mat-label>
-            <mat-select [value]="options.tonality" (selectionChange)="scale_sonority_change($event)">
-                <mat-option value="major">Major</mat-option>
-                <mat-option value="minor">Minor</mat-option>
-                <mat-option value="mixolydian">Mixolydian</mat-option>
-                <mat-option value="dorian">Dorian</mat-option>
-                <mat-option value="lydian">Lydian</mat-option>
-                <mat-option value="phrygian">Phrygian</mat-option>
-            </mat-select>
-        </mat-form-field>
+        
+        <div class="mt2 mh4 param-container" *ngIf="options.key_source === 'Selected'">
 
-        <!-- Key Center -->
-        <mat-form-field>
-            <mat-label>Key Center</mat-label>
-            <mat-select [value]="options.center" (selectionChange)="scale_center_change($event)">
-                <mat-option value="Random">Random</mat-option>
-                <mat-option value={{k}} 
-                    *ngFor="let k of getKeyList()">
-                        {{k}}
-                </mat-option>
-            </mat-select>
-        </mat-form-field>
+            <!-- Key Center -->
+            <mat-form-field class="small-form-field">
+                <mat-label>Key Center</mat-label>
+                <mat-select [value]="options.center" (selectionChange)="scale_center_change($event)">
+                    <mat-option value="Random">Random</mat-option>
+                    <mat-option value={{k}} 
+                        *ngFor="let k of getKeyList()">
+                            {{k}}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <!-- Sonority -->
+            <mat-form-field class="small-form-field">
+                <mat-label>Tonality</mat-label>
+                <mat-select [value]="options.tonality" (selectionChange)="scale_sonority_change($event)">
+                    <mat-option value="{{t}}" *ngFor="let t of chord_type_list">{{ t | capitalize}}</mat-option>
+                </mat-select>
+            </mat-form-field>
+
+        </div>
+
     </div>
 </div>
 
+<mat-divider></mat-divider>
+
 <!-- Modal shift -------------->
-<div class="ma2">
-    <label class="mhh-mat-label">Modal Exchange</label>
-    <mat-radio-group name="modal"  [value]="options.modes_on ? 'true' : 'false'" (change)="mode_activate_change($event)">
-        <mat-radio-button value="false" matTooltip="Stay in your lane">Off</mat-radio-button>
-        <mat-radio-button value="true" matTooltip="Walk on the wild side">On</mat-radio-button>
-    </mat-radio-group>
-    <div *ngIf="options.modes_on">
-        <br>
-        <label>Mode Shift Probability</label>
-        <mat-slider min="10" max="100" step="5" *ngIf="options.modes_on" [disabled]="!options.modes_on" discrete [displayWith]="yesno_slider_ticks" 
-                matTooltip="set probability for mode shift">
-            <input matSliderThumb [(ngModel)]="options.mode_percent">
-        </mat-slider>
-        <div>
-            <label>Modes</label>
-            <mat-checkbox value="{{t}}" [checked]="mode_is_on(t)"   (change)="mode_list_change(t, $event.checked)"  
-                    *ngFor="let t of chord_type_list">{{t | capitalize }}</mat-checkbox>
+<div class="selection-group-container">
+    <label class="mhh-mat-label settings-label skinny-label">Modal Exchange</label>
+
+    <div class="modal-setting">
+        <div class="mode-checkbox">
+            <mat-radio-group name="modal"  [value]="options.modes_on ? 'true' : 'false'" (change)="mode_activate_change($event)">
+                <mat-radio-button class="db" value="false" matTooltip="Stay in your lane">Off</mat-radio-button>
+                <mat-radio-button class="db" value="true" matTooltip="Walk on the wild side">On</mat-radio-button>
+            </mat-radio-group>
         </div>
 
+        <div class="mh4 all-mode-settings" *ngIf="options.modes_on">
+            <div >
+                <label class="mr2 mhh-mat-label">Mode Shift Probability</label>
+                <app-popup-slider [min]="10" [max]="100" [(value)]="options.mode_percent"
+                    [step]="5" toolTip="set probability for mode shift"></app-popup-slider>
+            </div>
 
-        <div>
-            <label>Degrees</label>
-            <mat-checkbox value="{{n}}" [checked]="mode_degree_is_on(n)"  (change)="mode_degree_list_change(n, $event.checked)"    
-                    *ngFor="let n of mode_degree_list()">{{n}}</mat-checkbox>
+            <div class="modal-group-container">
+                <label>Modes</label>
+                <div>
+                    <mat-checkbox value="{{t}}" [checked]="mode_is_on(t)"   (change)="mode_list_change(t, $event.checked)"  
+                            *ngFor="let t of chord_type_list">{{t | capitalize }}</mat-checkbox>
+                </div>
+            </div>
+
+            <div class="modal-group-container">
+                <label>Degrees</label>
+                <div>
+                    <mat-checkbox value="{{n}}" [checked]="mode_degree_is_on(n)"  (change)="mode_degree_list_change(n, $event.checked)"    
+                        *ngFor="let n of mode_degree_list()">{{n}}</mat-checkbox>
+                </div>
+            </div>
         </div>
     </div>
 

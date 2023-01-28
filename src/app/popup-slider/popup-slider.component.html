@@ -1,0 +1,27 @@
+
+<div class="dib rg-popup-slider" #sliderTopLevel>
+    <!-------- TRIGGER ----------------->
+    <div class="ba slider-trigger" [matTooltip]="toolTip" (click)="do_click($event)" cdkOverlayOrigin #trigger="cdkOverlayOrigin">
+        <div class="slider-on" #sliderOn  ></div>
+    </div>
+
+
+    <!-------- SLIDER ----------------->
+    <ng-template
+    cdkConnectedOverlay
+    [cdkConnectedOverlayOrigin]="trigger"
+    [cdkConnectedOverlayOpen]="isOpen"
+    (detach)="isOpen=false"
+    (overlayOutsideClick)="isOpen=false"
+    >
+
+        <div [classList]="class_list()">
+
+            <mat-slider [min]="min" [max]="max" [step]="step">
+                <input matSliderThumb [(value)]="value" (valueChange)="update($event)" (dragEnd)="dragEnd($event)">
+            </mat-slider>
+
+        </div>
+
+    </ng-template>
+</div>

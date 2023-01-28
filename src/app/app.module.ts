@@ -27,6 +27,7 @@ import { MidiConfigFormComponent } from './midi-config-form/midi-config-form.com
 import { SettingsPageComponent } from './settings-page/settings-page.component';
 import { CapitalizePipe } from './capitalize.pipe';
 import { MainPageStore } from './store/main-page-store';
+import { PopupSliderComponent } from './popup-slider/popup-slider.component';
 
 @NgModule({
   declarations: [
@@ -47,7 +48,8 @@ import { MainPageStore } from './store/main-page-store';
     ScaleInfoComponent,
     MidiConfigFormComponent,
     SettingsPageComponent,
-    CapitalizePipe
+    CapitalizePipe,
+    PopupSliderComponent
   ],
   imports: [
     BrowserModule, 

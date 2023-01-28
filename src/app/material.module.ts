@@ -21,8 +21,10 @@ import {MatDialogModule} from '@angular/material/dialog';
 import {MatSliderModule} from '@angular/material/slider';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatTableModule} from '@angular/material/table'
+import {MatDividerModule} from '@angular/material/divider';
 
 import {DragDropModule} from '@angular/cdk/drag-drop';
+import {OverlayModule} from '@angular/cdk/overlay';
 
 @NgModule({
     exports: [
@@ -48,8 +50,10 @@ import {DragDropModule} from '@angular/cdk/drag-drop';
         MatSliderModule,
         MatMenuModule,
         MatTableModule,
+        MatDividerModule,
         
         DragDropModule,
+        OverlayModule,
     ],
     providers: [
         {provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: {appearance: 'outline', floatLabel: 'always'}},
