@@ -1,7 +1,7 @@
-import { ForwardRefHandling } from "@angular/compiler";
 import { Injectable } from "@angular/core";
 import { ComponentStore } from "@ngrx/component-store";
 import { Observable } from "rxjs";
+import { GeneratorOptionProps, GeneratorOptions } from "../generator-options/GeneratorOptions";
 import { defaultMidiConfig, MidiConfig } from "../models/MidiConfig";
 import { CustomChord } from "../utils/custom-chord";
 
@@ -15,13 +15,15 @@ export interface MainPageState {
     default_scale : Scale | null;
     midi : MidiConfig;
     chord_list : NamedNoteList[];
+    gen_opts : GeneratorOptions, 
 }
 
 function defaultState() : MainPageState {
     return { 
         default_scale : null, 
         midi : defaultMidiConfig(),
-        chord_list : [] 
+        chord_list : [],
+        gen_opts : new GeneratorOptions({}), 
     };
 }
 const store_key = 'rg.MainPageStore';
@@ -32,6 +34,7 @@ const thawers : Map<string, (x : Array<any>) => unknown> = new Map<string, (x : 
         [ Chord.classTag, Chord.thaw ],
         [ CustomChord.classTag, CustomChord.thaw ],
         [ Note.classTag, Note.thaw ],
+        [ GeneratorOptions.classTag, GeneratorOptions.thaw ],
     ]);
 
 @Injectable()
@@ -66,6 +69,8 @@ export class MainPageStore extends ComponentStore<MainPageState> {
 
     readonly midi_config$ : Observable<MidiConfig> = this.select(state => state.midi);
 
+    readonly gen_opts$ : Observable<GeneratorOptions> = this.select(state => state.gen_opts);
+
     private readonly all_state$: Observable<MainPageState> = this.select(state => state);
 
     //============== UPDATERS ================================
@@ -89,6 +94,12 @@ export class MainPageStore extends ComponentStore<MainPageState> {
         midi : midi,
     }));
 
+    //------------- GENERATOR OPTIONS --------------------------------------
+    readonly update_gen_opts = this.updater((state, gen_opts : GeneratorOptionProps) => ({
+        ...state,
+        gen_opts : new GeneratorOptions(gen_opts),
+    }));
+    
     //------------- CHORD_LIST ---------------------------------
     readonly replace_chord_list = this.updater((state, newList : NamedNoteList[]) => ({
         ...state,

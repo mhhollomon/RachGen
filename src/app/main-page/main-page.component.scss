@@ -2,6 +2,11 @@
 $medium-width : 700px;
 $desktop-width : 800px;
 
+.top-buttons {
+    display : flex;
+    align-items: center;
+}
+
 /* The first row in the list of chords that contain column actions */
 .chord-action-header-container {
     display : grid;

@@ -6,47 +6,8 @@ import { ScaleService } from '../scale.service';
 import { ChordType, InversionType } from '../utils/music-theory/chord';
 import { ALL_SCALE_TYPES, Scale, ScaleType } from '../utils/music-theory/scale';
 import { range } from '../utils/util-library';
+import { defaultGeneratorOptionProps, GeneratorOptionProps, GeneratorOptions } from './GeneratorOptions';
 
-export interface GeneratorOptions extends RandomChordOptions {
-  count_range_mode : boolean;
-  key_source : string;
-  tonality : string;
-  center : string;
-  modes_on : boolean;
-}
-
-
-export function defaultGeneratorOptions() : GeneratorOptions {
-  return {
-    count_range_mode : false,
-    key_source : 'Random',
-    tonality : 'major',
-    center : 'Random',
-
-    scale : new Scale(), 
-    count : { min : 4, max : 6}, 
-    duplicates : 'none',
-    extensions : { 
-      '7th'  : { flag : true,  weight : 30 }, 
-      '9th'  : { flag : false, weight : 30 }, 
-      '11th' : { flag : false, weight : 30 },
-    },
-    inversions : {
-      'root'   : { flag : true,  weight : 5 },
-      'first'  : { flag : false, weight : 3 },
-      'second' : { flag : false, weight : 2 },
-    },
-    chordTypes : {
-      'triad' : { flag : true,  weight : 3 },
-      'sus2'  : { flag : false, weight : 3 },
-      'sus4'  : { flag : false, weight : 3 },
-    },
-    modes : defaultModeList,
-    mode_percent : 0,  
-    modes_on : false,
-    mode_degrees : defaultModeDegreeList,
-  }
-}
 
 @Component({
   selector: 'app-generator-options',
@@ -56,9 +17,9 @@ export function defaultGeneratorOptions() : GeneratorOptions {
 export class GeneratorOptionsComponent {
 
 
-  @Input() options : GeneratorOptions = defaultGeneratorOptions();
+  @Input() options : GeneratorOptionProps = defaultGeneratorOptionProps();
 
-  @Output()optionsChange = new EventEmitter<GeneratorOptions>;
+  @Output()optionsChange = new EventEmitter<GeneratorOptionProps>;
 
   get scale_disabled() : boolean {
     return false;
@@ -313,7 +274,7 @@ export class GeneratorOptionsComponent {
 
   set_defaults() {
 
-    const def = defaultGeneratorOptions();
+    const def = defaultGeneratorOptionProps();
 
     Object.assign(this.options, def);
 

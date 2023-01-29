@@ -177,13 +177,25 @@ $column-width : 11rem;
     justify-items : center;
     padding-left: 0.5rem;
     padding-right: 0.5rem;
-    border-right : 1px solid gray;
+}
+
+@media only screen and (min-width : 550px ) {
+
+    .check-box-container:nth-child(5n+1) {
+        border-right : 1px solid gray;
+    }
 }
 
 
-.check-box-container:last-child {
-    border-right : none;
+@media only screen and (min-width : 750px ) {
+    .check-box-container {
+        border-right : 1px solid gray;
+    }
+    .check-box-container:last-child {
+        border-right : none;
+    }
 }
+
 
 .check-box-label {
     width: 3rem;

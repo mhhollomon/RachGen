@@ -1,13 +1,17 @@
 
 
 <!--------- Start New List Button ------------->
-<div class="db mv4 br2 ma2">
+<div class="db mv4 br2 ma2 top-buttons">
     <ng-template [ngIf]="chords_exist$ | async" [ngIfElse]="nochords">
         <button  mat-raised-button color="primary" (click)="start_new_list(true)">Start New List</button>
     </ng-template>
     <ng-template #nochords>
         <button  mat-raised-button color="primary" (click)="start_new_list(false)">Start New List</button>
     </ng-template>
+    <span class="flex-spacer"></span>
+    <button class="ml4 ba br2" mat-icon-button (click)="update_gen_options()" class="material-symbols-outlined">
+        <mat-icon>settings_applications</mat-icon>
+    </button>
 </div>
 <!--
     --------------------------- OUTPUT ------------------------------------
@@ -162,13 +166,3 @@
         </div>
     </div>
 </div>
-
-<br>
-<!--- CONTROLS -->
-<mat-expansion-panel [expanded]="generatorOptionsExpanded" (closed)="generatorOptionsPanelChange(false)" (opened)="generatorOptionsPanelChange(true)">
-    <mat-expansion-panel-header>
-        <mat-panel-title>Generator Options</mat-panel-title>
-    </mat-expansion-panel-header>
-
-    <app-generator-options [options]="gen_opts()" (optionsChange)="generate_options_change($event)"></app-generator-options>
-</mat-expansion-panel>

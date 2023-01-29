@@ -1,11 +1,11 @@
 import { AfterViewInit, Component, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import { BehaviorSubject, filter, map, mergeMap, Subject, take, takeUntil } from 'rxjs';
+import { BehaviorSubject, filter, first, map, mergeMap, Subject, take, takeUntil } from 'rxjs';
 import { List } from 'immutable';
 
 import { MatDialog } from '@angular/material/dialog';
 import { MatExpansionPanel } from '@angular/material/expansion';
-import {CdkDragDrop} from '@angular/cdk/drag-drop';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
 
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
 import { ScaleService } from '../scale.service';
@@ -17,9 +17,8 @@ import { Note } from '../utils/music-theory/note';
 import { AudioService } from '../audio.service';
 import { MidiDialogComponent } from '../midi-dialog/midi-dialog.component';
 import { MidiConfig, defaultMidiConfig } from "../models/MidiConfig";
-import { PreferencesService } from '../services/preferences.service';
 import { ChordEditDialogComponent } from '../chord-edit-dialog/chord-edit-dialog.component';
-import { GeneratorOptions, defaultGeneratorOptions } from '../generator-options/generator-options.component';
+import { GeneratorOptionProps, defaultGeneratorOptionProps } from "../generator-options/GeneratorOptions";
 import { NewListDialogComponent } from '../new-list-dialog/new-list-dialog.component';
 import { ConfirmActionDialogComponent } from '../confirm-action-dialog/confirm-action-dialog.component';
 import { CustomChord } from '../utils/custom-chord';
@@ -42,7 +41,7 @@ const weDied$ : Subject<boolean> = new Subject<boolean>();
 })
 export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
 
-  generateOptions : GeneratorOptions = defaultGeneratorOptions();
+  generateOptions : GeneratorOptionProps = defaultGeneratorOptionProps();
 
   default_scale$ = this.mainPageStore.default_scale$;
   chord_list$ = this.mainPageStore.chord_list$;
@@ -84,22 +83,11 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
     private audioService : AudioService,
     public dialog: MatDialog, 
     @Inject(DOCUMENT) private document : Document,
-    private preferences : PreferencesService,
     public mainPageStore : MainPageStore,
 
     ) {
 
       console.log("main-page contructor");
-
-      // Do this in the constructor to make sure it is set before the view initializes.
-      this.generatorOptionsExpanded = this.preferences.read('gen_opts_panel', false);
-
-      this.generateOptions = this.preferences.read('gen_opts_data', this.generateOptions);
-      if (! ('mode_degrees' in this.generateOptions) || (typeof this.generateOptions.mode_degrees === 'number')) {
-        // Saved data is old - ignore it and refresh
-        this.generateOptions  = defaultGeneratorOptions();
-        this.preferences.write('gen_opts_data', this.generateOptions);
-      }
 
   }
 
@@ -116,6 +104,11 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
     // Listen for changes in the default_scale
     this.default_scale$.pipe(takeUntil(weDied$)).subscribe((newScale) => {
           this.default_scale = newScale;
+    });
+
+    // grab the latest options
+    this.mainPageStore.gen_opts$.pipe(first()).subscribe(genopts => {
+      { this.generateOptions = genopts.getProps(); }
     });
 
     this.any_chords_locked$.pipe(takeUntil(weDied$)).subscribe((v) => { this.any_chords_locked = v; })
@@ -158,7 +151,7 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   default_scale_exists() { return this.default_scale != null && this.default_scale instanceof Scale; }
 
-  gen_opts() : GeneratorOptions {
+  gen_opts() : GeneratorOptionProps {
     return Object.assign({}, this.generateOptions);
   }
 
@@ -196,13 +189,8 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  generate_options_change(event : GeneratorOptions) {
+  generate_options_change(event : GeneratorOptionProps) {
     this.generateOptions = Object.assign({}, event);
-  }
-
-  generatorOptionsPanelChange(v : boolean) {
-    this.generatorOptionsExpanded = v;
-    this.preferences.write('gen_opts_panel', v);
   }
 
   stopPropagation(evnt : Event) {
@@ -295,9 +283,25 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   }
 
+  update_gen_options() {
+    const dia = this.dialog.open(NewListDialogComponent, {maxHeight : "95vh", maxWidth : "45rem",
+      data : {
+            gen_opts : { ...this.generateOptions },
+            title : "Update Configuration"
+         } 
+    });
+
+    dia.afterClosed().pipe(filter((o) => !!o)).subscribe((opts) => {
+      this.generate_options_change(opts);
+      this.mainPageStore.update_gen_opts(opts);
+    });
+
+  }
 
   async gen_list(fn? : (data : genListReturn) => void ) {
-    const dia = this.dialog.open(NewListDialogComponent, {maxHeight : "95vh", data : Object.assign({}, this.generateOptions) });
+    const dia = this.dialog.open(NewListDialogComponent, {maxHeight : "99vh", maxWidth : "45rem", 
+      data : {gen_opts : { ...this.generateOptions} }
+    });
 
     dia.afterClosed().pipe(filter((o) => !!o)).subscribe((opts) => {
       this.all_play_active = false;
@@ -319,6 +323,7 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
           this.gen_list((genret) => {
             this.mainPageStore.replace_chord_list(genret.nl);
             this.mainPageStore.change_scale(genret.scale);
+            this.mainPageStore.update_gen_opts(this.generateOptions)
           });
         }
       });
@@ -328,6 +333,7 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
       this.gen_list((genret) => {
         this.mainPageStore.replace_chord_list(genret.nl);
         this.mainPageStore.change_scale(genret.scale);
+        this.mainPageStore.update_gen_opts(this.generateOptions)
       });
     }
   }
@@ -396,7 +402,7 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // ------- RUN THE GENERATOR -------------------------------------
 
-  run_generator_with_nl(opts: GeneratorOptions, 
+  run_generator_with_nl(opts: GeneratorOptionProps, 
       prefn? : (cl : NamedNoteList[]) => void, 
       postfn?  : (glr : genListReturn) => void) {
 
@@ -410,7 +416,7 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
   }
   // ------- GENERATE A RANDOM LIST -------------------------------------
 
-  generate(opts: GeneratorOptions,  start_set? : NamedNoteList[]) : genListReturn {
+  generate(opts: GeneratorOptionProps,  start_set? : NamedNoteList[]) : genListReturn {
 
     if (opts.count_range_mode) {
       if (opts.count.min > this.chord_count_max || opts.count.min < 1) {
@@ -431,8 +437,6 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
       opts.count.max = opts.count.min
 
     }
-
-    this.preferences.write('gen_opts_data', opts);
 
     let scale : Scale;
     if (opts.key_source === "Selected") {

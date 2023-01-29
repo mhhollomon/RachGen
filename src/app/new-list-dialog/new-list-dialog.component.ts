@@ -1,6 +1,11 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { GeneratorOptions } from '../generator-options/generator-options.component';
+import { defaultGeneratorOptionProps, GeneratorOptionProps } from "../generator-options/GeneratorOptions";
+
+export interface NewListDialogData {
+  gen_opts : GeneratorOptionProps,
+  title : string
+}
 
 @Component({
   selector: 'app-new-list-dialog',
@@ -9,8 +14,21 @@ import { GeneratorOptions } from '../generator-options/generator-options.compone
 })
 export class NewListDialogComponent {
 
+  public gen_opts : GeneratorOptionProps = defaultGeneratorOptionProps();
 
-  constructor(@Inject(MAT_DIALOG_DATA) public gen_opts : GeneratorOptions) {
+  public title = "Generate Chords"
+
+  constructor(@Inject(MAT_DIALOG_DATA) public data : Partial<NewListDialogComponent>) {
+
+    if (data.gen_opts) {
+      this.gen_opts = data.gen_opts;
+    }
+
+    if (data.title) {
+      this.title = data.title;
+    }
+
+
   }
   
 }
