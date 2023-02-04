@@ -31,6 +31,7 @@ export function defaultGeneratorOptionProps(): GeneratorOptionProps {
       'root': { flag: true, weight: 5 },
       'first': { flag: false, weight: 3 },
       'second': { flag: false, weight: 2 },
+      'third': { flag: false, weight: 1 },
     },
     chordTypes: {
       'triad': { flag: true, weight: 3 },

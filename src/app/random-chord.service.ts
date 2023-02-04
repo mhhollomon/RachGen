@@ -41,6 +41,7 @@ export interface InversionConfg {
   'root'   : WeightedFlag;
   'first'  : WeightedFlag;
   'second' : WeightedFlag;
+  'third' : WeightedFlag;
 }
 
 export interface ChordTypeConfig {
@@ -86,6 +87,7 @@ export class ChordSequenceBuilder {
       'root'   : { flag : true, weight : 5 },
       'first'  : { flag : false, weight : 3 },
       'second' : { flag : false, weight : 2 },
+      'third'  : { flag : false, weight : 1 },
     },
     chordTypes : {
       'triad' : { flag : true, weight : 3 },
@@ -423,6 +425,7 @@ export class ChordSequenceBuilder {
     // Check on modal interchange
     if (this.options.mode_percent > 0 && this.options.modes.size > 0 && this.options.mode_degrees.includes(rootDegree)) {
       if (yesno100(this.options.mode_percent)) {
+        const modes = this.options.modes.toArray().filter(k => k !== my_scale.type)
         const newScaleType = equalWeightedChooser(this.options.modes.toArray()).choose();
         my_scale = this.scale.setType(newScaleType);
       }
@@ -439,9 +442,6 @@ export class ChordSequenceBuilder {
 
   private mkchord(chord : Chord) : Chord {
 
-    chord.setInversion(this.invertChooser.choose())
-
-
     // The chord quality is a diminished - can't have a sus chord.
     if ((chord.chordType === 'sus2' || chord.chordType === 'sus4') && 
             chord.isDim()) {
@@ -450,21 +450,33 @@ export class ChordSequenceBuilder {
 
     if (this.options.extensions['7th'].flag) {
       if (yesno100(this.options.extensions['7th'].weight)) {
-        chord.setExtension('7th', true);
+        chord = chord.setExtension('7th', true);
       }
     }
     
     if (this.options.extensions['9th'].flag) {
       if (yesno100(this.options.extensions['9th'].weight)) {
-        chord.setExtension('9th', true);
+        chord = chord.setExtension('9th', true);
       }
     }
 
     if (this.options.extensions['11th'].flag) {
       if (yesno100(this.options.extensions['11th'].weight)) {
-        chord.setExtension('11th', true);
+        chord = chord.setExtension('11th', true);
       }
     }
+
+    let notgood = true;
+    while (notgood) {
+      const theInversion = this.invertChooser.choose();
+
+      // If it is a third inversion, there better be a 7th included.
+      if (theInversion !== 'third' || chord.extensions['7th']) {
+        chord = chord.setInversion(theInversion);
+        notgood = false;
+      }
+    }
+
 
 
     return chord;

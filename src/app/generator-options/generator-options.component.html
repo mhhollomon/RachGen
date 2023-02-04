@@ -172,6 +172,13 @@
                 [disabled]="!inversions['second'].flag" 
                 [step]="0.25" toolTip="Set the relative weighting for second inversions"></app-popup-slider>
         </div>
+        <div class="check-box-container">
+            <label class="check-box-label">Third</label>
+            <mat-checkbox [(ngModel)]="inversions['third'].flag" labelPosition="before" matTooltip="Allow third inversions to be generated"></mat-checkbox>
+            <app-popup-slider [min]="1" [max]="5" [(value)]="inversions['third'].weight"
+                [disabled]="!inversions['third'].flag" 
+                [step]="0.25" toolTip="Set the relative weighting for third inversions"></app-popup-slider>
+        </div>
     </div>
 </div> 
 

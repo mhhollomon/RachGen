@@ -122,6 +122,12 @@ export class GeneratorOptionsComponent {
       total_weight += this.options.inversions['second'].weight;
     }
 
+    if (slider === 'third') {
+      total_weight += value;
+    } else if (this.options.inversions['third'].flag) {
+      total_weight += this.options.inversions['third'].weight;
+    }
+
     const weight = Math.floor(100*value/total_weight);
 
     return '' + weight + '%';
@@ -149,6 +155,9 @@ export class GeneratorOptionsComponent {
     }
     if (this.options.inversions['second'].flag) {
       this.options.inversions['second'].weight += 0.0001;
+    }
+    if (this.options.inversions['third'].flag) {
+      this.options.inversions['third'].weight += 0.0001;
     }
   }
 
@@ -267,6 +276,7 @@ export class GeneratorOptionsComponent {
     this.options.inversions['root'].flag = true;
     this.options.inversions['first'].flag = true;
     this.options.inversions['second'].flag = true;
+    this.options.inversions['third'].flag = true;
 
     this.optionsChange.emit(this.options);
     

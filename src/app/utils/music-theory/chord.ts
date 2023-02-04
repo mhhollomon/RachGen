@@ -8,7 +8,7 @@ export type ChordType = 'triad' | 'sus2' | 'sus4';
 
 export type ExtensionType = '7th' | '9th' | '11th';
 
-export type InversionType = 'root' | 'first' | 'second';
+export type InversionType = 'root' | 'first' | 'second' | 'third';
 
 
 export const ExtensionFlags = Record({
@@ -178,6 +178,7 @@ export class Chord  implements ChordProps, NamedNoteList {
       case 'root': return '(R)';
       case 'first': return '(1)';
       case 'second': return '(2)';
+      case 'third' : return '(3)';
     }
   }
 
@@ -227,11 +228,13 @@ export class Chord  implements ChordProps, NamedNoteList {
   name(): string {
 
     const ct = this.chordTones;
+    const error_data = this.toJSON();
 
     function get_tone(index: number): Note {
       const n = ct.get(index);
       if (n == undefined) {
-        throw Error("No tone")
+        console.log(`Trying to get tone ${index} from chord failed`, error_data);
+        throw Error("No tone");
       }
 
       return n;
@@ -398,6 +401,7 @@ export class Chord  implements ChordProps, NamedNoteList {
           break;
         }
         case 'second': { chordalBassTone = 5; break; }
+        case 'third': { chordalBassTone = 7; break; }
       }
 
       name += '/' + get_tone(chordalBassTone).name();
@@ -421,9 +425,8 @@ export class Chord  implements ChordProps, NamedNoteList {
 
   noteList(): List<Note> {
 
-    
-    const ctl = [...this.chordTones.keys()].sort()
-        .map(k => this.chordTones.get(k) || new Note('C'));
+    const key_list = [...this.chordTones.keys()].sort((a, b) => a-b);
+    const ctl = key_list.map(k => this.chordTones.get(k) || new Note('C'));
 
 
     let retval = ctl;
@@ -437,6 +440,7 @@ export class Chord  implements ChordProps, NamedNoteList {
       switch (this.inversion) {
         case 'first': { offset = 1; break; }
         case 'second': { offset = 2; break; }
+        case 'third': { offset = 3; break; }
       }
 
       const root = ctl.slice(offset, offset+1);
