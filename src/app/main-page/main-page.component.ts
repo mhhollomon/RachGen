@@ -319,7 +319,6 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
 
       dia.afterClosed().subscribe((confirm) => {
         if (confirm) {
-          this.generateOptions.key_source = 'Random';
           this.gen_list((genret) => {
             this.mainPageStore.replace_chord_list(genret.nl);
             this.mainPageStore.change_scale(genret.scale);
@@ -329,7 +328,6 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
       });
     } else {
       // this can't go in gen_list since that is also shared by append_to_list
-      this.generateOptions.key_source = 'Random';
       this.gen_list((genret) => {
         this.mainPageStore.replace_chord_list(genret.nl);
         this.mainPageStore.change_scale(genret.scale);
@@ -339,7 +337,6 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   append_to_list() {
-    this.generateOptions.key_source = 'Selected';
     if (this.default_scale) {
       this.generateOptions.center = this.default_scale.center;
       this.generateOptions.tonality = this.default_scale.type;
@@ -439,17 +436,9 @@ export class MainPageComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     let scale : Scale;
-    if (opts.key_source === "Selected") {
-      if (opts.center === 'Random') {
-        scale = this.scaleService.choose(opts.tonality as ScaleType);
-      } else {
-       scale = new Scale({ 
-              center : opts.center, 
-              type : opts.tonality as ScaleType});
-      }
-    } else {
-      scale = this.scaleService.choose();
-    }
+    const newCenter = opts.center === 'Random' ? null : opts.center;
+    const newTonality = opts.tonality === 'Random' ? null : (opts.tonality as ScaleType);
+    scale = this.scaleService.choose(newTonality, newCenter);
 
 
     try {

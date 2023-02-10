@@ -313,7 +313,7 @@ export class ChordSequenceBuilder {
   private anyInversion() : boolean {
     let retval = false;
 
-    // Yea, this is longer than a striaght enumeration, but it is future proof
+    // Yea, this is longer than a straight enumeration, but it is future proof
     Object.keys(this.options.inversions).forEach((k) => retval ||= this.options.inversions[k as InversionType].flag );
 
     return retval;
@@ -322,7 +322,7 @@ export class ChordSequenceBuilder {
   private anyChordType() : boolean {
     let retval = false;
 
-    // Yea, this is longer than a striaght enumeration, but it is future proof
+    // Yea, this is longer than a straight enumeration, but it is future proof
     Object.keys(this.options.chordTypes).forEach((k) => retval ||= this.options.chordTypes[k as ChordType].flag );
 
     return retval;

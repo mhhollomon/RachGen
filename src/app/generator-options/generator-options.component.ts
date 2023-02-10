@@ -25,7 +25,7 @@ export class GeneratorOptionsComponent {
     return false;
   }
 
-  get chord_type_list() { return ALL_SCALE_TYPES; }
+  get chord_type_list() { return ['Random'].concat(ALL_SCALE_TYPES); }
 
 
   get chord_count_max() : number {

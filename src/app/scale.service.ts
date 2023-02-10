@@ -5,7 +5,10 @@ import { Note } from './utils/music-theory/note';
 
 
 const sonorityChoices : Choice<ScaleType>[] = [
-  mkch('major'), mkch('minor')
+  mkch('major', 10), mkch('minor', 10),
+  mkch('dorian', 7), mkch('mixolydian', 7),
+  mkch('lydian', 5), mkch('phrygian', 5),
+  mkch('locrian', 2)
 ]
 
 // Other things depend on this order (e.g. getKeyList)
@@ -30,13 +33,12 @@ export class ScaleService {
 
   private sonorityChooser = new Chooser(sonorityChoices);
 
-  choose(sonority? : ScaleType ) : Scale {
+  choose(sonority : ScaleType | null, center : string | null ) : Scale {
 
-    sonority = sonority ? sonority : this.sonorityChooser.choose();
+    sonority = (sonority != null) ? sonority : this.sonorityChooser.choose();
+    center = (center != null ) ? center : sigNames[sigChooser.choose()];
 
-    const keysig = sigChooser.choose();
-    const keycenter = sigNames[keysig];
-    return new Scale({ center : keycenter, type : sonority });
+    return new Scale({ center : center, type : sonority });
   }
 
   getKeyList(sonority : ScaleType) : string[] {

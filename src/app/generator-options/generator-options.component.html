@@ -189,15 +189,9 @@
     <label class="mhh-mat-label settings-label skinny-label">Key/Scale</label>
 
     <div class="key-setting">        
-        <div class="key-checkbox">
-            <mat-radio-group name="key_source" [value]="options.key_source" (change)="scale_source_change($event)">
-                <mat-radio-button class="db" value="Random" matTooltip="Let the computer choose the key">Random</mat-radio-button>
-                <mat-radio-button class="db" value="Selected" matTooltip="You pick the key">Selected</mat-radio-button>
-            </mat-radio-group>
-        </div>
 
         
-        <div class="mt2 mh4 param-container" *ngIf="options.key_source === 'Selected'">
+        <div class="mt2 param-container">
 
             <!-- Key Center -->
             <mat-form-field class="small-form-field">

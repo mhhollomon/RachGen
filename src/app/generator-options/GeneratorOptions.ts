@@ -16,7 +16,7 @@ export function defaultGeneratorOptionProps(): GeneratorOptionProps {
   return {
     count_range_mode: false,
     key_source: 'Random',
-    tonality: 'major',
+    tonality: 'Random',
     center: 'Random',
 
     scale: new Scale(),
@@ -39,7 +39,7 @@ export function defaultGeneratorOptionProps(): GeneratorOptionProps {
       'sus4': { flag: false, weight: 3 },
     },
     modes: defaultModeList,
-    mode_percent: 0,
+    mode_percent: 30,
     modes_on: false,
     mode_degrees: defaultModeDegreeList,
   };
@@ -79,10 +79,6 @@ export class GeneratorOptions implements GeneratorOptionProps {
 
   setRangeMode(r : boolean) : GeneratorOptions {
     return new GeneratorOptions({ ...this._props, count_range_mode : r })
-  }
-
-  setScaleSource(s : string ) : GeneratorOptions {
-    return new GeneratorOptions({ ...this._props, key_source : s })
   }
 
   setTonality(t : ScaleType) : GeneratorOptions {
