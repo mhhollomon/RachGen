@@ -37,6 +37,9 @@
 
             <div class="mt3">
                 <button mat-raised-button (click)="play_chord()" color="primary" >{{chord.nameUnicode()}}</button>
+                <button class="ml2" mat-raised-button (click)="edit_scale()" color="primary" >
+                    {{chord.romanSymbol()}} of {{chord.scale.nameUnicode()}}
+                </button>
             </div>
             <div>        
                 <mat-checkbox [(ngModel)]="audition"  matTooltip="audition when changing">Audition on Change</mat-checkbox>

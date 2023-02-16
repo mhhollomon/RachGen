@@ -1,6 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { MatButtonToggleChange } from '@angular/material/button-toggle';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatTabChangeEvent } from '@angular/material/tabs';
 import { AudioService } from '../audio.service';
 import { PreferencesService } from '../services/preferences.service';
@@ -8,6 +8,8 @@ import { CustomChord } from '../utils/custom-chord';
 import { Chord, ChordType, InversionType } from '../utils/music-theory/chord';
 import { NamedNoteList, voiceChord } from "../utils/music-theory/NamedNoteList";
 import { audition_pref } from '../services/pref-keys';
+import { ScaleChangeDialogComponent } from '../scale-change-dialog/scale-change-dialog.component';
+import { filter } from 'rxjs';
 
 @Component({
   selector: 'app-chord-edit-dialog',
@@ -27,6 +29,7 @@ export class ChordEditDialogComponent {
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public input_chord : NamedNoteList,
+    public dialog: MatDialog, 
     private audioService : AudioService,
     private preferences : PreferencesService
       ) {
@@ -118,6 +121,13 @@ export class ChordEditDialogComponent {
   
     this.audioService.play_chord(tones, 0.5);
 
+  }
+
+  edit_scale() {
+    this.dialog.open(ScaleChangeDialogComponent, { data : { scale : this.chord.scale, allow_change : true }})
+      .afterClosed().pipe(filter((s) => !!s)).subscribe((s) => {
+        this.chord = this.chord.change_scale(s);
+    });
   }
 
 }

@@ -422,6 +422,10 @@ export class Chord  implements ChordProps, NamedNoteList {
     return n;
   }
 
+  romanSymbol() {
+    return this.scale.romanForDegree(this.degree)
+  }
+
 
   noteList(): List<Note> {
 
