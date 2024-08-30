@@ -70,7 +70,8 @@
               "browserTarget": "rachgen:build:production"
             },
             "development": {
-              "browserTarget": "rachgen:build:development"
+              "browserTarget": "rachgen:build:development",
+              "host" : "172.28.203.156"
             }
           },
           "defaultConfiguration": "development"

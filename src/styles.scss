@@ -63,11 +63,11 @@ table {
 }
 
 .accent-colors {
-    background-color: mat.get-color-from-palette(theme.$dartmouth-green-palette, default);
-    color: mat.get-color-from-palette(theme.$dartmouth-green-palette, default-contrast);
+    background-color: mat.m2-get-color-from-palette(theme.$dartmouth-green-palette, default);
+    color: mat.m2-get-color-from-palette(theme.$dartmouth-green-palette, default-contrast);
 }
 
 .accent-colors:active {
-    background-color: mat.get-color-from-palette(theme.$dartmouth-green-palette, 500);
-    color: mat.get-color-from-palette(theme.$dartmouth-green-palette, default-contrast);
+    background-color: mat.m2-get-color-from-palette(theme.$dartmouth-green-palette, 500);
+    color: mat.m2-get-color-from-palette(theme.$dartmouth-green-palette, default-contrast);
 }
