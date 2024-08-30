@@ -38,12 +38,12 @@
 .activeNavButton {
     font-size : 15pt;
     padding-left : 0.6rem;
-    background-color : mat.get-color-from-palette(theme.$pewter-blue-palette, lighter);
+    background-color : mat.m2-get-color-from-palette(theme.$pewter-blue-palette, lighter);
     @include nav-button-base();
 }
 
 :host-context(.darkMode) .activeNavButton {
-    background-color : mat.get-color-from-palette(theme.$dartmouth-green-palette, darker);
+    background-color : mat.m2-get-color-from-palette(theme.$dartmouth-green-palette, darker);
 }
 
 .bottom-button-container {
