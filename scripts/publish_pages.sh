@@ -12,6 +12,11 @@ BASE_HREF='--base-href /RachGen/'
 # It is assumed that this is called sitting in the root
 # of the source repo.
 
+if [ ! -d ${OUTPUT_REPO_DIR} ]
+then
+    echo "OUTPUT_REPO_DIR does not exit"
+    exit 7
+
 
 echo "####################################################################"
 echo "Building web app"
@@ -31,8 +36,9 @@ echo "####################################################################"
 echo "Copy web files"
 echo "####################################################################"
 
-( cd ${OUTPUT_REPO_DIR};
-    rm -rf assets *
+( 
+cd ${OUTPUT_REPO_DIR} || { echo "ERROR - could not chdir to ${OUTPUT_REPO_DIR}"; exit 4; }
+rm -rf assets *
 )
 
 # The 404 page used for gh-pages isn't really a part of the build.
@@ -41,13 +47,15 @@ echo "####################################################################"
 
 cp src/404.html ${OUTPUT_REPO_DIR}
 
-( cd ${BUILD_DIR};
-    cp -r *  ${OUTPUT_REPO_DIR}
+( 
+cd ${BUILD_DIR} || { echo "ERROR - could not chdir to ${BUILD_DIR}"; exit 4; }
+cp -r *  ${OUTPUT_REPO_DIR}
 )
 
-( cd ${OUTPUT_REPO_DIR} ;
-    git add -A
-    git status
+( 
+cd ${OUTPUT_REPO_DIR} || { echo "ERROR - could not chdir to ${OUTPUT_REPO_DIR}"; exit 4; }
+git add -A
+git status
 )
 
 echo "####################################################################"
