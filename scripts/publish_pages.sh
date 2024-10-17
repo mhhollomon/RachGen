@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 # Directory that has the clone sitting on the branch gh-pages
-OUTPUT_REPO_DIR=${HOME}/src/rh-pages/rach-gen
+OUTPUT_REPO_DIR=${HOME}/src/gh-pages/rach-gen
 
 # Build directory to be used - it will be wiped out if it exists
 BUILD_DIR=build-web-deploy
@@ -14,9 +14,9 @@ BASE_HREF='--base-href /RachGen/'
 
 if [ ! -d ${OUTPUT_REPO_DIR} ]
 then
-    echo "OUTPUT_REPO_DIR does not exit"
+    echo "OUTPUT_REPO_DIR does not exist"
     exit 7
-
+fi
 
 echo "####################################################################"
 echo "Building web app"
@@ -60,6 +60,7 @@ git status
 
 echo "####################################################################"
 echo "Check git status above and commit/push if everything looks okay"
+echo "cd ${OUTPUT_REPO_DIR}"
+echo "git commit"
+echo "git push"
 echo "####################################################################"
-
-
