@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 # Directory that has the clone sitting on the branch gh-pages
-OUTPUT_REPO_DIR=${HOME}/src/rg-pages
+OUTPUT_REPO_DIR=${HOME}/src/rh-pages/rach-gen
 
 # Build directory to be used - it will be wiped out if it exists
 BUILD_DIR=build-web-deploy
